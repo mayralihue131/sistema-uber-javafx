@@ -1,0 +1,4 @@
+#patente;modelo;capacidadPasajeros;TipoVehiculo;CategoriaVehiculo;TipoServicio;...
+AD123BC;Toyota Corolla;4;AUTO;PREMIUM;PASAJEROS;
+AB456DE;Ford Focus;4;AUTO;ESTANDAR;PASAJEROS;ENVIOS;
+AC789FG;Chevrolet Cruze;4;AUTO;CONFORT;PASAJEROS;ENVIOS;

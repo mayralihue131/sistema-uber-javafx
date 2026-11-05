@@ -1,0 +1,9 @@
+target/
+datos/
+.settings/
+.classpath
+.project
+
+/target/
+/datos/mapas/cache-auto/
+/datos/uber-eventos.txt

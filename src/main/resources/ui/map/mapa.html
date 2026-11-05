@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Mapa de Sistema Uber</title>
+
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #152740;
+            font-family: Arial, sans-serif;
+        }
+
+        #mapa {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #dce3e8;
+        }
+
+        #aviso {
+            position: absolute;
+            top: 12px;
+            left: 55px;
+            right: 12px;
+            z-index: 1000;
+            padding: 10px 14px;
+            border-radius: 8px;
+            background: #101d33;
+            color: white;
+            font-size: 13px;
+            pointer-events: none;
+        }
+    </style>
+
+    <!-- Debe estar ANTES de cargar Leaflet. -->
+    <script>
+        window.L_DISABLE_3D = true;
+    </script>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+
+<body>
+    <div id="mapa"></div>
+    <div id="aviso">Cargando Puerto Madryn…</div>
+
+    <script>
+        var aviso = document.getElementById("aviso");
+
+        if (typeof L === "undefined") {
+            aviso.textContent =
+                "No se pudo cargar el mapa. Revisá Internet.";
+        } else {
+            var mapa = L.map("mapa", {
+                zoomAnimation: false,
+                fadeAnimation: false,
+                markerZoomAnimation: false,
+                inertia: false,
+                trackResize: true
+            }).setView([-42.785, -65.070], 13);
+
+            var huboError = false;
+
+            var fondo = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+                    maxZoom: 19,
+                    detectRetina: false,
+                    attribution: "&copy; OpenStreetMap contributors"
+                }
+            );
+
+            fondo.on("loading", function () {
+                huboError = false;
+                aviso.textContent = "Cargando mapa…";
+            });
+
+            fondo.on("tileerror", function () {
+                huboError = true;
+                aviso.textContent =
+                    "No se pudieron cargar algunas imágenes del mapa.";
+            });
+
+            fondo.on("load", function () {
+                if (!huboError) {
+                    aviso.textContent =
+                        "Puerto Madryn · Arrastrá para moverte y usá + o −.";
+                }
+            });
+
+            window.refrescarTamano = function () {
+                mapa.invalidateSize({
+                    animate: false,
+                    pan: false
+                });
+            };
+
+            window.addEventListener(
+                "resize",
+                window.refrescarTamano
+            );
+			var capaRutas = L.layerGroup().addTo(mapa);
+
+			window.limpiarRutas = function () {
+			    capaRutas.clearLayers();
+			};
+
+			window.mostrarRutas = function (hastaOrigen, hastaDestino) {
+			    window.limpiarRutas();
+
+			    var limites = L.latLngBounds([]);
+
+			    // Recorrido del conductor al origen, cuando esté disponible.
+			    if (hastaOrigen && hastaOrigen.length >= 2) {
+			        var rutaConductor = L.polyline(hastaOrigen, {
+			            color: "#2864D4",
+			            weight: 5,
+			            opacity: 0.9,
+			            interactive: false
+			        }).addTo(capaRutas);
+
+			        limites.extend(rutaConductor.getBounds());
+
+			        L.circleMarker(hastaOrigen[0], {
+			            radius: 8,
+			            color: "#ffffff",
+			            weight: 3,
+			            fillColor: "#f59e0b",
+			            fillOpacity: 1,
+			            interactive: false
+			        }).bindTooltip("Conductor").addTo(capaRutas);
+			    }
+
+			    // Recorrido del pasajero al destino.
+			    if (hastaDestino && hastaDestino.length >= 2) {
+			        var rutaViaje = L.polyline(hastaDestino, {
+			            color: "#22c55e",
+			            weight: 5,
+			            opacity: 0.9,
+			            interactive: false
+			        }).addTo(capaRutas);
+
+			        limites.extend(rutaViaje.getBounds());
+			    }
+
+			    if (limites.isValid()) {
+			        mapa.fitBounds(limites, {
+			            paddingTopLeft: [30, 70],
+			            paddingBottomRight: [30, 30],
+			            maxZoom: 16,
+			            animate: false
+			        });
+			    }
+			};
+            fondo.addTo(mapa);
+
+            // Ajustar cuando JavaFX termine de acomodar la pantalla.
+            window.setTimeout(window.refrescarTamano, 200);
+            window.setTimeout(window.refrescarTamano, 800);
+        }
+    </script>
+</body>
+</html>

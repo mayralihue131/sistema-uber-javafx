@@ -1,0 +1,5 @@
+#nombre;tarifaBase;precioKm;precioMinuto;TipoVehiculo;CategoriaVehiculo;TipoServicio;
+Estandar;2000;200;100;AUTO;ESTANDAR;PASAJEROS;
+Confort;2500;250;125;AUTO;CONFORT;PASAJEROS;
+Premium;3000;300;150;AUTO;PREMIUM;PASAJEROS;
+Envios;1500;150;75;AUTO;ESTANDAR;ENVIOS;

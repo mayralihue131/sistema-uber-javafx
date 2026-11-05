@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.web.WebView?>
+
+<BorderPane prefHeight="720" prefWidth="1100" style="-fx-background-color: #0B1424;                    -fx-font-family: 'Segoe UI';" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="movilidad.ui.MapaController">
+
+    <top>
+        <VBox spacing="8" style="-fx-padding: 24 30;                      -fx-background-color: #101D33;">
+
+            <Label style="-fx-text-fill: #79AEFF;                           -fx-font-size: 13px;                           -fx-font-weight: bold;" text="SISTEMA UBER" />
+
+            <Label style="-fx-text-fill: white;                           -fx-font-size: 30px;                           -fx-font-weight: bold;" text="¿A dónde querés ir?" />
+
+            <Label style="-fx-text-fill: #B5C6DF;                           -fx-font-size: 14px;" text="Elegí tu recorrido y consultá las opciones de viaje." />
+        </VBox>
+    </top>
+
+    <center>
+        <HBox spacing="22" style="-fx-padding: 24 30;">
+
+            <!-- FORMULARIO -->
+            <VBox maxWidth="330" minWidth="290" prefWidth="310" spacing="16" style="-fx-background-color: #111F35;                          -fx-background-radius: 18;                          -fx-border-color: #294160;                          -fx-border-radius: 18;                          -fx-padding: 24;">
+
+                <Label style="-fx-text-fill: white;                               -fx-font-size: 20px;                               -fx-font-weight: bold;" text="Tu recorrido" />
+
+                <Label style="-fx-text-fill: #DCE8FA;                               -fx-font-weight: bold;" text="Origen" />
+
+                <TextField fx:id="origenTexto" editable="false" prefHeight="44" promptText="Elegí el origen en el mapa" style="-fx-background-color: #0B1424;                                   -fx-text-fill: white;                                   -fx-prompt-text-fill: #9AAFC9;                                   -fx-background-radius: 9;                                   -fx-border-color: #365176;                                   -fx-border-radius: 9;" />
+
+                <Label style="-fx-text-fill: #DCE8FA;                               -fx-font-weight: bold;" text="Destino" />
+
+                <TextField fx:id="destinoTexto" editable="false" prefHeight="44" promptText="Elegí el destino en el mapa" style="-fx-background-color: #0B1424;                                   -fx-text-fill: white;                                   -fx-prompt-text-fill: #9AAFC9;                                   -fx-background-radius: 9;                                   -fx-border-color: #365176;                                   -fx-border-radius: 9;" />
+
+                <Label style="-fx-text-fill: #DCE8FA;                               -fx-font-weight: bold;" text="Tipo de servicio" />
+
+                <ComboBox fx:id="tipoServicio" maxWidth="Infinity" prefHeight="42" promptText="Pasajeros o envíos" style="-fx-background-color: #DCE8FA;                                  -fx-background-radius: 9;" />
+
+                <Label style="-fx-text-fill: #DCE8FA;                               -fx-font-weight: bold;" text="Categoría" />
+
+                <ComboBox fx:id="categoria" maxWidth="Infinity" prefHeight="42" promptText="Elegí una categoría" style="-fx-background-color: #DCE8FA;                                  -fx-background-radius: 9;" />
+
+                <Region VBox.vgrow="ALWAYS" />
+
+                <Button maxWidth="Infinity" onAction="#cotizarViaje" prefHeight="46" style="-fx-background-color: #2864D4;                                -fx-text-fill: white;                                -fx-font-size: 15px;                                -fx-font-weight: bold;                                -fx-background-radius: 10;" text="Cotizar viaje">
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor></Button>
+
+                <Button maxWidth="Infinity" onAction="#volverMenu" prefHeight="40" style="-fx-background-color: transparent;                                -fx-text-fill: #C5D7F0;                                -fx-border-color: #365176;                                -fx-border-radius: 10;" text="Volver al menú">
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor></Button>
+            </VBox>
+
+            <!-- MAPA Y COTIZACIÓN -->
+            <VBox spacing="16" HBox.hgrow="ALWAYS">
+
+                <StackPane fx:id="contenedorMapa" minHeight="220" style="-fx-background-color: #152740;                                   -fx-background-radius: 18;                                   -fx-border-color: #365176;                                   -fx-border-radius: 18;" VBox.vgrow="ALWAYS">
+               <WebView fx:id="mapaWeb" prefHeight="200.0" prefWidth="200.0" />
+                </StackPane>
+
+                <VBox spacing="12" style="-fx-background-color: #111F35;                              -fx-background-radius: 18;                              -fx-border-color: #294160;                              -fx-border-radius: 18;                              -fx-padding: 20;">
+
+                    <Label style="-fx-text-fill: white;                                   -fx-font-size: 18px;                                   -fx-font-weight: bold;" text="Opciones de viaje" />
+
+                    <Label style="-fx-text-fill: #A9BEDB;" text="Después de cotizar aparecerán el servicio, el precio y el tiempo estimados." wrapText="true" />
+
+                    <ListView fx:id="opciones" prefHeight="100" style="-fx-control-inner-background: #0B1424;                                      -fx-background-color: #0B1424;">
+                        <placeholder>
+                            <Label style="-fx-text-fill: #9AAFC9;" text="Todavía no hay una cotización." />
+                        </placeholder>
+                    </ListView>
+
+                    <Button fx:id="btnSolicitar" disable="true" maxWidth="Infinity" onAction="#solicitarViaje" prefHeight="44" style="-fx-background-color: #2864D4;                                    -fx-text-fill: white;                                    -fx-font-size: 15px;                                    -fx-font-weight: bold;                                    -fx-background-radius: 10;" text="Solicitar viaje">
+                  <cursor>
+                     <Cursor fx:constant="HAND" />
+                  </cursor></Button>
+                </VBox>
+            </VBox>
+
+        </HBox>
+    </center>
+
+</BorderPane>
