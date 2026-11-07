@@ -11,7 +11,13 @@ import movilidad.dao.interfaces.UsuarioDAO;
 import movilidad.modelo.Usuario;
 
 /**
- * Implementación JDBC de {@link UsuarioDAO}.
+ * Implementación JDBC de {@link UsuarioDAO} para la base de datos PostgreSQL de la cátedra.
+ *
+ * <p>Esquema real consultado en el servidor:
+ * <ul>
+ *   <li>Tabla {@code usuario} (email, nombre, telefono, licencia_conducir)</li>
+ *   <li>Tabla {@code conductor_vehiculo} (email, patente)</li>
+ * </ul>
  */
 public class UsuarioDaoBd implements UsuarioDAO {
 
@@ -19,10 +25,11 @@ public class UsuarioDaoBd implements UsuarioDAO {
         List<UsuarioDTO> lista = new ArrayList<>();
 
         String sql = """
-                SELECT u.nombre, u.telefono, u.email,
-                       c.licencia_conducir, c.patente_activo
-                FROM usuarios u
-                LEFT JOIN conductores c ON c.email_usuario = u.email
+                SELECT u.nombre, u.telefono, u.email, u.licencia_conducir, MIN(cv.patente) AS patente_activo
+                FROM usuario u
+                LEFT JOIN conductor_vehiculo cv ON cv.email = u.email
+                GROUP BY u.nombre, u.telefono, u.email, u.licencia_conducir
+                ORDER BY u.nombre
                 """;
 
         Connection con = ConexionBD.obtenerConexion();

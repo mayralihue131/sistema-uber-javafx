@@ -1,6 +1,6 @@
 package movilidad.ui;
 
-import movilidad.dao.CargaParametros;
+import movilidad.dao.txt.CargaParametros;
 
 public final class UILoader {
 

@@ -11,6 +11,13 @@ import java.util.Scanner;
 
 import movilidad.dao.txt.CargaDatos;
 import movilidad.dao.txt.CargaParametros;
+import movilidad.dao.DAOFactory;
+import movilidad.dao.DAOLoader;
+import movilidad.dao.bd.BdDAOFactory;
+import movilidad.dao.bd.UsuarioDaoBd;
+import movilidad.dao.dto.ServicioDTO;
+import movilidad.dao.dto.UsuarioDTO;
+import movilidad.dao.dto.VehiculoDTO;
 import movilidad.logica.MovilidadDigital;
 import movilidad.modelo.*;
 
@@ -72,6 +79,16 @@ public class AplicacionConsultas {
 
     public static void cargarDatos(MovilidadDigital aplicacion)
             throws IOException {
+
+        DAOFactory factory = DAOLoader.getFactory();
+        if (factory instanceof BdDAOFactory bdFactory) {
+            try {
+                cargarDatosDesdeBD(aplicacion, bdFactory);
+                return;
+            } catch (Exception e) {
+                System.err.println("Advertencia: Falló carga desde BD, recurriendo a archivos TXT: " + e.getMessage());
+            }
+        }
 
         List<Vehiculo> vehiculos = new ArrayList<>();
 
@@ -172,7 +189,62 @@ public class AplicacionConsultas {
             aplicacion.agregarServicio(servicio);
         }
 
+    }
 
+    private static void cargarDatosDesdeBD(MovilidadDigital aplicacion, BdDAOFactory factory) throws Exception {
+        List<Vehiculo> vehiculos = new ArrayList<>();
+
+        for (VehiculoDTO dto : factory.getVehiculoDAO().obtenerTodos()) {
+            Vehiculo v = new Vehiculo(
+                    dto.getPatente(),
+                    dto.getModelo(),
+                    dto.getCapacidadPasajeros(),
+                    TipoVehiculo.valueOf(dto.getTipoVehiculo()),
+                    CategoriaVehiculo.valueOf(dto.getCategoriaVehiculo()),
+                    (Ubicacion) null
+            );
+            for (String ts : dto.getTiposServicio()) {
+                v.agregarTipoServicio(TipoServicio.valueOf(ts));
+            }
+            vehiculos.add(v);
+        }
+
+        UsuarioDaoBd usuarioDao = (UsuarioDaoBd) factory.getUsuarioDAO();
+        for (UsuarioDTO dto : usuarioDao.obtenerTodos()) {
+            Usuario u = new Usuario(dto.getNombre(), dto.getTelefono(), dto.getEmail());
+            aplicacion.agregarUsuario(u);
+
+            if (dto.getLicenciaConducir() != null && !dto.getLicenciaConducir().isBlank()) {
+                Vehiculo activo = null;
+                if (dto.getPatenteVehiculoActivo() != null) {
+                    for (Vehiculo v : vehiculos) {
+                        if (v.getPatente().equalsIgnoreCase(dto.getPatenteVehiculoActivo())) {
+                            activo = v;
+                            break;
+                        }
+                    }
+                }
+                if (activo != null) {
+                    aplicacion.registrarConductor(u, dto.getLicenciaConducir(), activo);
+                    aplicacion.definirCategoriaAceptada(u, activo.getCategoriaVehiculo());
+                    aplicacion.cambiarRolActivo(u, RolUsuario.CONDUCTOR);
+                    aplicacion.ponerDisponible(u);
+                }
+            }
+        }
+
+        for (ServicioDTO dto : factory.getServicioDAO().obtenerTodos()) {
+            Servicio s = new Servicio(
+                    dto.getNombre(),
+                    dto.getTarifaBase(),
+                    dto.getPrecioKm(),
+                    dto.getPrecioMinuto(),
+                    CategoriaVehiculo.valueOf(dto.getCategoriaVehiculo()),
+                    TipoVehiculo.valueOf(dto.getTipoVehiculo()),
+                    TipoServicio.valueOf(dto.getTipoServicio())
+            );
+            aplicacion.agregarServicio(s);
+        }
     }
 
     private static List<Servicio> consultarServicios(
