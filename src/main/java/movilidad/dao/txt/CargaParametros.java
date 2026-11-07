@@ -1,4 +1,4 @@
-package movilidad.dao;
+package movilidad.dao.txt;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -48,3 +48,4 @@ public class CargaParametros {
         return archivoServicios;
     }
 }
+

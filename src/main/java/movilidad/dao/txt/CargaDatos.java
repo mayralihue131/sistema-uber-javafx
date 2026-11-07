@@ -1,4 +1,4 @@
-package movilidad.dao;
+package movilidad.dao.txt;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -6,7 +6,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import movilidad.dao.dto.UsuarioDTO;
+import movilidad.dao.dto.VehiculoDTO;
+import movilidad.dao.dto.ServicioDTO;
+
+/**
+ * Fachada de carga de datos para el sistema Uber desde archivos de texto.
+ */
 public class CargaDatos {
+
+    // ── Métodos clásicos (compatibilidad hacia atrás) ─────────────────────────
 
     public static List<List<String>> cargarUsuarios(String fileName)
             throws FileNotFoundException {
@@ -52,4 +61,19 @@ public class CargaDatos {
 
         return datos;
     }
+
+    // ── Métodos DAO tipados ───────────────────────────────────────────────────
+
+    public static List<UsuarioDTO> obtenerUsuariosDTO(String fileName) throws Exception {
+        return new UsuarioDaoTxt(fileName).obtenerTodos();
+    }
+
+    public static List<VehiculoDTO> obtenerVehiculosDTO(String fileName) throws Exception {
+        return new VehiculoDaoTxt(fileName).obtenerTodos();
+    }
+
+    public static List<ServicioDTO> obtenerServiciosDTO(String fileName) throws Exception {
+        return new ServicioDaoTxt(fileName).obtenerTodos();
+    }
 }
+

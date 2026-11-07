@@ -1,7 +1,8 @@
-package movilidad.dao;
+package movilidad.dao.memoria;
 
 import java.util.ArrayList;
 import java.util.List;
+import movilidad.dao.interfaces.ViajeDAO;
 import movilidad.modelo.Viaje;
 
 public class ViajeDAOMemoria implements ViajeDAO {
@@ -22,3 +23,4 @@ public class ViajeDAOMemoria implements ViajeDAO {
         return new ArrayList<>(viajes);
     }
 }
+

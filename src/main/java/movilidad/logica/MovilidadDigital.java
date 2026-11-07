@@ -10,10 +10,9 @@ import java.util.List;
 
 import java.util.UUID;
 
-import movilidad.dao.UsuarioDAO;
-
-import movilidad.dao.UsuarioDAOMemoria;
-
+import movilidad.dao.interfaces.UsuarioDAO;
+import movilidad.dao.memoria.UsuarioDAOMemoria;
+import movilidad.dao.txt.CargaParametros;
 import movilidad.modelo.*;
 
 public class MovilidadDigital {
@@ -621,7 +620,7 @@ public class MovilidadDigital {
 
         double distanciaKm = origen.calcularDistancia(destino);
 
-        double velocidadPromedioKmH = movilidad.dao.CargaParametros.getVelocidadPromedioKmH();
+        double velocidadPromedioKmH = CargaParametros.getVelocidadPromedioKmH();
 
         return (distanciaKm / velocidadPromedioKmH) * 60.0;
 

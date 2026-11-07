@@ -1,4 +1,4 @@
-package movilidad.dao;
+package movilidad.dao.interfaces;
 
 import java.util.List;
 import movilidad.modelo.Viaje;
@@ -9,3 +9,4 @@ public interface ViajeDAO {
 
     List<Viaje> listarTodos();
 }
+
