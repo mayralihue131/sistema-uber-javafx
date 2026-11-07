@@ -1,8 +1,8 @@
 package movilidad.dao.txt;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 import java.util.Properties;
 
 public class CargaParametros {
@@ -15,12 +15,25 @@ public class CargaParametros {
     public static void parametros() throws IOException {
         Properties prop = new Properties();
 
-        try (InputStream input = new FileInputStream("src/main/resources/config.properties")) {
+        try (InputStream input = CargaParametros.class
+                .getResourceAsStream("/config.properties")) {
+
+            if (input == null) {
+                throw new IOException("No se encontró config.properties");
+            }
+
             prop.load(input);
         }
 
-        velocidadPromedioKmH = Double.parseDouble(prop.getProperty("velocidadPromedioKmH", "40"));
-        if (!Double.isFinite(velocidadPromedioKmH) || velocidadPromedioKmH <= 0) throw new IOException("La velocidad promedio debe ser positiva");
+        velocidadPromedioKmH = Double.parseDouble(
+                prop.getProperty("velocidadPromedioKmH", "40"));
+
+        if (!Double.isFinite(velocidadPromedioKmH)
+                || velocidadPromedioKmH <= 0) {
+            throw new IOException(
+                    "La velocidad promedio debe ser positiva");
+        }
+
         archivoUsuarios = prop.getProperty("usuario");
         archivoVehiculos = prop.getProperty("vehiculo");
         archivoServicios = prop.getProperty("servicio");
@@ -34,7 +47,32 @@ public class CargaParametros {
         }
     }
 
-    public static double getVelocidadPromedioKmH() { return velocidadPromedioKmH; }
+    public static String ui() {
+        Properties prop = new Properties();
+
+        try (InputStream input = CargaParametros.class
+                .getResourceAsStream("/application.properties")) {
+
+            if (input == null) {
+                throw new IllegalStateException(
+                        "No se encontró application.properties");
+            }
+
+            prop.load(input);
+
+        } catch (IOException e) {
+            throw new IllegalStateException(
+                    "No se pudo leer application.properties", e);
+        }
+
+        return prop.getProperty("app.ui", "javafx")
+                .trim()
+                .toLowerCase(Locale.ROOT);
+    }
+
+    public static double getVelocidadPromedioKmH() {
+        return velocidadPromedioKmH;
+    }
 
     public static String getArchivoUsuarios() {
         return archivoUsuarios;

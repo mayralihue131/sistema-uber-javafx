@@ -2,6 +2,81 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" prefWidth="1080" prefHeight="780" styleClass="app" stylesheets="@uber.css">
- <top><HBox spacing="16" alignment="CENTER_LEFT" styleClass="topbar"><Label text="SISTEMA UBER" styleClass="brand" wrapText="true"/><Region HBox.hgrow="ALWAYS"/><Label text="" styleClass="user" wrapText="true" fx:id="nombreSesion"/><Button text="Cambiar cuenta" onAction="#cerrarSesion" styleClass="secondary"/></HBox></top>
- <left><VBox spacing="8" prefWidth="196" styleClass="sidebar"><Label text="TU ESPACIO" styleClass="eyebrow" wrapText="true"/><Button text="Inicio" onAction="#abrirMenu" styleClass="nav"/><Button text="Solicitar viaje" onAction="#abrirSolicitud" styleClass="nav"/><Button text="Servicios" onAction="#abrirServicios" styleClass="nav"/><Button text="Mis viajes" onAction="#abrirViajes" styleClass="nav"/><Button text="Panel conductor" onAction="#abrirPanel" styleClass="nav"/><Button text="Mis vehículos" onAction="#abrirRegistroConductor" styleClass="nav"/><Region VBox.vgrow="ALWAYS"/><Label text="Tus viajes quedan guardados al cerrar." styleClass="small" wrapText="true"/></VBox></left>
- <center><ScrollPane fitToWidth="true"><content><VBox spacing="20" styleClass="page"><Label text="Panel del conductor" styleClass="title" wrapText="true"/><Label text="Ponete disponible para recibir solicitudes compatibles." styleClass="muted" wrapText="true"/><VBox spacing="16" styleClass="card"><Label text="" styleClass="section" wrapText="true" fx:id="estadoConductor"/><Label text="" styleClass="muted" wrapText="true" fx:id="ayudaConductor"/><HBox spacing="12" alignment="CENTER_LEFT"><VBox spacing="16" styleClass="field-group" HBox.hgrow="ALWAYS" minWidth="0"><Label text="Vehículo activo" styleClass="field-label" wrapText="true"/><ComboBox fx:id="vehiculoActivo" promptText="Seleccioná tu vehículo" maxWidth="Infinity"/></VBox><VBox spacing="16" styleClass="field-group" HBox.hgrow="ALWAYS" minWidth="0"><Label text="Categoría mínima aceptada" styleClass="field-label" wrapText="true"/><ComboBox fx:id="categoriaMinima" promptText="Seleccioná" maxWidth="Infinity"/></VBox></HBox><HBox spacing="12" alignment="CENTER_LEFT"><Button text="Aplicar vehículo y categoría" onAction="#aplicarVehiculo" styleClass="secondary"/><Button text="Agregar vehículo" onAction="#abrirRegistroConductor" styleClass="secondary"/></HBox><HBox spacing="12" alignment="CENTER_LEFT"><Button text="Ponerme disponible" onAction="#ponerDisponible" styleClass="primary"/><Button text="Salir de servicio" onAction="#fueraServicio" styleClass="secondary"/></HBox></VBox><VBox spacing="16" styleClass="card"><Label text="Tu viaje en curso" styleClass="section" wrapText="true"/><ListView fx:id="viajesConductor" prefHeight="110"><placeholder><Label text="No tenés un viaje en curso." styleClass="muted" wrapText="true"/></placeholder></ListView><Button text="Abrir viaje en curso" onAction="#verViajeConductor" styleClass="primary"/></VBox><VBox spacing="16" styleClass="card"><Label text="Solicitudes compatibles" styleClass="section" wrapText="true"/><ListView fx:id="solicitudes" prefHeight="220"><placeholder><Label text="No hay solicitudes compatibles. Comprobá tu disponibilidad y vehículo." styleClass="muted" wrapText="true"/></placeholder></ListView><HBox spacing="12" alignment="CENTER_LEFT"><Button text="Actualizar" onAction="#actualizarPanel" styleClass="secondary"/><Button text="Aceptar solicitud seleccionada" onAction="#aceptarSolicitud" styleClass="primary"/></HBox></VBox></VBox></content></ScrollPane></center><bottom><Label text="" styleClass="feedback" wrapText="true" fx:id="mensaje" maxWidth="Infinity"/></bottom></BorderPane>
+    <top>
+        <HBox spacing="16" alignment="CENTER_LEFT" styleClass="topbar">
+            <Label text="%vista.sistema.uber" styleClass="brand" wrapText="true"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="" styleClass="user" wrapText="true" fx:id="nombreSesion"/>
+            <Button text="%vista.cambiar.cuenta" onAction="#cerrarSesion" styleClass="secondary"/>
+        </HBox>
+    </top>
+    <left>
+        <VBox spacing="8" prefWidth="196" styleClass="sidebar">
+            <Label text="%vista.tu.espacio" styleClass="eyebrow" wrapText="true"/>
+            <Button text="%vista.inicio" onAction="#abrirMenu" styleClass="nav"/>
+            <Button text="%vista.solicitar.viaje" onAction="#abrirSolicitud" styleClass="nav"/>
+            <Button text="%vista.servicios" onAction="#abrirServicios" styleClass="nav"/>
+            <Button text="%vista.mis.viajes" onAction="#abrirViajes" styleClass="nav"/>
+            <Button text="%vista.panel.conductor" onAction="#abrirPanel" styleClass="nav"/>
+            <Button text="%vista.mis.vehiculos" onAction="#abrirRegistroConductor" styleClass="nav"/>
+            <Region VBox.vgrow="ALWAYS"/>
+            <Label text="%vista.tus.viajes.quedan.guardados.al.cerrar" styleClass="small" wrapText="true"/>
+        </VBox>
+    </left>
+    <center>
+        <ScrollPane fitToWidth="true">
+            <content>
+                <VBox spacing="20" styleClass="page">
+                    <Label text="%vista.panel.del.conductor" styleClass="title" wrapText="true"/>
+                    <Label text="%vista.ponete.disponible.para.recibir.solicitudes.compatibles" styleClass="muted" wrapText="true"/>
+                    <VBox spacing="16" styleClass="card">
+                        <Label text="" styleClass="section" wrapText="true" fx:id="estadoConductor"/>
+                        <Label text="" styleClass="muted" wrapText="true" fx:id="ayudaConductor"/>
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <VBox spacing="16" styleClass="field-group" HBox.hgrow="ALWAYS" minWidth="0">
+                                <Label text="%vista.vehiculo.activo" styleClass="field-label" wrapText="true"/>
+                                <ComboBox fx:id="vehiculoActivo" promptText="%vista.selecciona.tu.vehiculo" maxWidth="Infinity"/>
+                            </VBox>
+                            <VBox spacing="16" styleClass="field-group" HBox.hgrow="ALWAYS" minWidth="0">
+                                <Label text="%vista.categoria.minima.aceptada" styleClass="field-label" wrapText="true"/>
+                                <ComboBox fx:id="categoriaMinima" promptText="%vista.selecciona" maxWidth="Infinity"/>
+                            </VBox>
+                        </HBox>
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <Button text="%vista.aplicar.vehiculo.y.categoria" onAction="#aplicarVehiculo" styleClass="secondary"/>
+                            <Button text="%vista.agregar.vehiculo" onAction="#abrirRegistroConductor" styleClass="secondary"/>
+                        </HBox>
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <Button text="%vista.ponerme.disponible" onAction="#ponerDisponible" styleClass="primary"/>
+                            <Button text="%vista.salir.de.servicio" onAction="#fueraServicio" styleClass="secondary"/>
+                        </HBox>
+                    </VBox>
+                    <VBox spacing="16" styleClass="card">
+                        <Label text="%vista.tu.viaje.en.curso" styleClass="section" wrapText="true"/>
+                        <ListView fx:id="viajesConductor" prefHeight="110">
+                            <placeholder>
+                                <Label text="%vista.no.tenes.un.viaje.en.curso" styleClass="muted" wrapText="true"/>
+                            </placeholder>
+                        </ListView>
+                        <Button text="%vista.abrir.viaje.en.curso" onAction="#verViajeConductor" styleClass="primary"/>
+                    </VBox>
+                    <VBox spacing="16" styleClass="card">
+                        <Label text="%vista.solicitudes.compatibles" styleClass="section" wrapText="true"/>
+                        <ListView fx:id="solicitudes" prefHeight="220">
+                            <placeholder>
+                                <Label text="%vista.no.hay.solicitudes.compatibles.comproba.tu.disponibilidad" styleClass="muted" wrapText="true"/>
+                            </placeholder>
+                        </ListView>
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <Button text="%vista.actualizar" onAction="#actualizarPanel" styleClass="secondary"/>
+                            <Button text="%vista.aceptar.solicitud.seleccionada" onAction="#aceptarSolicitud" styleClass="primary"/>
+                        </HBox>
+                    </VBox>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+    <bottom>
+        <Label text="" styleClass="feedback" wrapText="true" fx:id="mensaje" maxWidth="Infinity"/>
+    </bottom>
+</BorderPane>

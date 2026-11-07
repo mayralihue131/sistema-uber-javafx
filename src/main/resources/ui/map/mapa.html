@@ -55,22 +55,57 @@
 
 <body>
     <div id="mapa"></div>
-    <div id="aviso">Cargando Puerto Madryn…</div>
+    <div id="aviso"></div>
 
     <script>
+        var ingles = window.location.hash === "#en";
+        document.documentElement.lang = ingles ? "en" : "es";
+        document.title = ingles ? "Uber System map" : "Mapa de Sistema Uber";
+        var mensajesMapa = ingles
+            ? {
+    "inicio": "Loading Puerto Madryn…",
+    "sinMapa": "Could not load the map. Check your internet connection.",
+    "cargando": "Loading map…",
+    "sinImagenes": "Some map tiles could not load.",
+    "ayuda": "Puerto Madryn · Drag to pan and use + or − to zoom.",
+    "conductor": "Driver",
+    "elegirOrigen": "Click to choose the pickup point.",
+    "fuera": "Choose a point within Puerto Madryn.",
+    "elegirDestino": "Pickup selected. Now choose the destination.",
+    "cotizar": "Route selected. Click Get a quote."
+}
+            : {
+    "inicio": "Cargando Puerto Madryn…",
+    "sinMapa": "No se pudo cargar el mapa. Revisá Internet.",
+    "cargando": "Cargando mapa…",
+    "sinImagenes": "No se pudieron cargar algunas imágenes del mapa.",
+    "ayuda": "Puerto Madryn · Arrastrá para moverte y usá + o −.",
+    "conductor": "Conductor",
+    "elegirOrigen": "Hacé clic para elegir el origen.",
+    "fuera": "Elegí un punto dentro de Puerto Madryn.",
+    "elegirDestino": "Origen elegido. Ahora elegí el destino.",
+    "cotizar": "Recorrido elegido. Tocá Cotizar viaje."
+};
         var aviso = document.getElementById("aviso");
+        aviso.textContent = mensajesMapa.inicio;
 
         if (typeof L === "undefined") {
             aviso.textContent =
-                "No se pudo cargar el mapa. Revisá Internet.";
+                mensajesMapa.sinMapa;
         } else {
             var mapa = L.map("mapa", {
+                zoomControl: false,
                 zoomAnimation: false,
                 fadeAnimation: false,
                 markerZoomAnimation: false,
                 inertia: false,
                 trackResize: true
             }).setView([-42.785, -65.070], 13);
+
+            L.control.zoom({
+                zoomInTitle: ingles ? "Zoom in" : "Acercar",
+                zoomOutTitle: ingles ? "Zoom out" : "Alejar"
+            }).addTo(mapa);
 
             var huboError = false;
 
@@ -85,19 +120,19 @@
 
             fondo.on("loading", function () {
                 huboError = false;
-                aviso.textContent = "Cargando mapa…";
+                aviso.textContent = mensajesMapa.cargando;
             });
 
             fondo.on("tileerror", function () {
                 huboError = true;
                 aviso.textContent =
-                    "No se pudieron cargar algunas imágenes del mapa.";
+                    mensajesMapa.sinImagenes;
             });
 
             fondo.on("load", function () {
                 if (!huboError) {
                     aviso.textContent =
-                        "Puerto Madryn · Arrastrá para moverte y usá + o −.";
+                        mensajesMapa.ayuda;
                 }
             });
 
@@ -141,7 +176,7 @@
 			            fillColor: "#f59e0b",
 			            fillOpacity: 1,
 			            interactive: false
-			        }).bindTooltip("Conductor").addTo(capaRutas);
+			        }).bindTooltip(mensajesMapa.conductor).addTo(capaRutas);
 			    }
 
 			    // Recorrido del pasajero al destino.

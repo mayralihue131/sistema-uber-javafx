@@ -1,6 +1,10 @@
 package movilidad.aplicacion;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.ResourceBundle;
 import java.net.URL;
 import java.nio.file.Path;
 
@@ -9,6 +13,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextField;
+import javafx.util.StringConverter;
+import movilidad.modelo.Servicio;
 import javafx.stage.Stage;
 
 import movilidad.rutas.FabricaGraphHopper;
@@ -30,8 +39,14 @@ public class AplicacionUberFX extends Application {
     private PlanificadorRutas planificadorRutas;
     private ServicioRutasViaje servicioRutas;
     private boolean cerrada;
+    private ResourceBundle mensajes;
+    private Locale idioma;
+    private ButtonType botonSi;
+    private ButtonType botonNo;
 
-    private final movilidad.rutas.UbicacionesConductores ubicacionesConductores = new movilidad.rutas.UbicacionesConductores();
+    private final movilidad.rutas.UbicacionesConductores
+    ubicacionesConductores =
+        new movilidad.rutas.UbicacionesConductores();
 
     public static void main(String[] args) {
         launch(args);
@@ -40,9 +55,10 @@ public class AplicacionUberFX extends Application {
     @Override
     public void start(Stage stage) {
         ventana = stage;
-        ventana.setTitle("Sistema Uber");
 
         try {
+            cargarIdioma();
+            ventana.setTitle(texto("app.titulo"));
             sesion = new SesionUber(
                     Path.of(System.getProperty(
                             "uber.datos",
@@ -56,8 +72,12 @@ public class AplicacionUberFX extends Application {
 
         } catch (Exception e) {
             Alert alerta = new Alert(
-                    Alert.AlertType.ERROR,
-                    "No se pudo abrir el proyecto: " + e.getMessage());
+                Alert.AlertType.ERROR,
+                (mensajes == null
+                    ? "No se pudo abrir el proyecto: " + e.getMessage()
+                    : texto("error.inicio") + " " + mensajeError(e)),
+                mensajes == null ? ButtonType.OK : botonAceptar()
+            );
 
             alerta.showAndWait();
         }
@@ -91,6 +111,10 @@ public class AplicacionUberFX extends Application {
     }
 
     public void mostrar(String archivo) throws IOException {
+        mostrar(archivo, "");
+    }
+
+    private void mostrar(String archivo, String correoEscrito) throws IOException {
         URL recurso = getClass().getResource("/" + archivo);
 
         if (recurso == null) {
@@ -98,7 +122,7 @@ public class AplicacionUberFX extends Application {
                     "No se encontró la pantalla: " + archivo);
         }
 
-        FXMLLoader loader = new FXMLLoader(recurso);
+        FXMLLoader loader = new FXMLLoader(recurso, mensajes);
 
         if (archivo.equals("SolicitarViajeMapa.fxml")) {
             Parent root = loader.load();
@@ -116,11 +140,169 @@ public class AplicacionUberFX extends Application {
 
         Parent root = loader.load();
 
+        if ("Inicio.fxml".equals(archivo)) {
+            @SuppressWarnings("unchecked")
+            ComboBox<String> selector =
+                    (ComboBox<String>) loader.getNamespace().get("selectorIdioma");
+            TextField correo = (TextField) loader.getNamespace().get("campoCorreo");
+            correo.setText(correoEscrito);
+            configurarSelector(selector, correo);
+        }
+
         detenerControlador();
         cambiarPantalla(root);
 
         controlador = nuevo;
         nuevo.preparar(root);
+    }
+
+    private void cargarIdioma() throws IOException {
+        Properties configuracion = new Properties();
+        try (InputStream entrada = getClass().getResourceAsStream("/application.properties")) {
+            if (entrada == null) {
+                throw new IOException("No se encontró application.properties");
+            }
+            configuracion.load(entrada);
+        }
+
+        String codigo = configuracion.getProperty("app.language", "es")
+                .strip().toLowerCase(Locale.ROOT);
+        if (!"es".equals(codigo) && !"en".equals(codigo)) {
+            throw new IllegalArgumentException("app.language debe ser es o en");
+        }
+        aplicarIdioma(codigo);
+    }
+
+    private void aplicarIdioma(String codigo) {
+        Locale nuevoIdioma = Locale.forLanguageTag("en".equals(codigo) ? "en-US" : "es-AR");
+        ResourceBundle nuevosMensajes = ResourceBundle.getBundle(
+                "mensajes", nuevoIdioma,
+                ResourceBundle.Control.getNoFallbackControl(
+                        ResourceBundle.Control.FORMAT_PROPERTIES));
+        mensajes = nuevosMensajes;
+        idioma = nuevoIdioma;
+        botonSi = new ButtonType(texto("dialog.si"), ButtonType.YES.getButtonData());
+        botonNo = new ButtonType(texto("dialog.no"), ButtonType.NO.getButtonData());
+    }
+
+    private void configurarSelector(ComboBox<String> selector, TextField correo) {
+        selector.getItems().setAll("Español", "English");
+        selector.getSelectionModel().select(esIngles() ? 1 : 0);
+        selector.setOnAction(evento -> {
+            int indice = selector.getSelectionModel().getSelectedIndex();
+            if (indice < 0) {
+                return;
+            }
+
+            String codigo = indice == 1 ? "en" : "es";
+            String anterior = idioma.getLanguage();
+            if (codigo.equals(anterior)) {
+                return;
+            }
+
+            String correoEscrito = correo.getText();
+            try {
+                aplicarIdioma(codigo);
+                mostrar("Inicio.fxml", correoEscrito);
+                ventana.setTitle(texto("app.titulo"));
+            } catch (IOException | RuntimeException e) {
+                aplicarIdioma(anterior);
+                selector.getSelectionModel().select(esIngles() ? 1 : 0);
+                new Alert(Alert.AlertType.ERROR,
+                        texto("error.idioma") + " " + mensajeError(e),
+                        botonAceptar()).showAndWait();
+            }
+        });
+    }
+
+    public Locale locale() {
+        return idioma;
+    }
+
+    private boolean esIngles() {
+        return "en".equals(idioma.getLanguage());
+    }
+
+    public String texto(String clave) {
+        return mensajes.getString(clave);
+    }
+
+    public String nombreServicio(Servicio servicio) {
+        String nombre = servicio.getNombre();
+        String clave = "servicio." + nombre.toLowerCase(Locale.ROOT);
+        return esIngles() && mensajes.containsKey(clave) ? texto(clave) : nombre;
+    }
+
+    public String etiqueta(Enum<?> valor) {
+        if (valor == null) {
+            return "";
+        }
+        return esIngles() ? texto("valor." + valor.name()) : valor.toString();
+    }
+
+    @SafeVarargs
+    public final void traducirOpciones(ComboBox<? extends Enum<?>>... opciones) {
+        for (ComboBox<? extends Enum<?>> opcion : opciones) {
+            if (opcion != null) {
+                traducirOpcion(opcion);
+            }
+        }
+    }
+
+    private <T extends Enum<?>> void traducirOpcion(ComboBox<T> opcion) {
+        opcion.setConverter(new StringConverter<T>() {
+            @Override
+            public String toString(T valor) {
+                return etiqueta(valor);
+            }
+
+            @Override
+            public T fromString(String texto) {
+                return opcion.getItems().stream()
+                        .filter(valor -> etiqueta(valor).equals(texto))
+                        .findFirst().orElse(null);
+            }
+        });
+    }
+
+    public ButtonType botonSi() {
+        return botonSi;
+    }
+
+    public ButtonType botonNo() {
+        return botonNo;
+    }
+
+    public ButtonType botonAceptar() {
+        return new ButtonType(texto("dialog.aceptar"), ButtonType.OK.getButtonData());
+    }
+
+    public String mensajeError(Throwable error) {
+        String mensaje = error.getMessage();
+        if (!esIngles()) {
+            return mensaje == null ? error.getClass().getSimpleName() : mensaje;
+        }
+
+        ResourceBundle base = ResourceBundle.getBundle("mensajes", Locale.ROOT,
+                ResourceBundle.Control.getNoFallbackControl(
+                        ResourceBundle.Control.FORMAT_PROPERTIES));
+        for (String clave : base.keySet()) {
+            if (clave.startsWith("error.") && base.getString(clave).equals(mensaje)) {
+                return texto(clave);
+            }
+        }
+
+        StackTraceElement[] origen = error.getStackTrace();
+        if (mensaje != null && origen.length > 0) {
+            String clase = origen[0].getClassName();
+            if (clase.equals(UberController.class.getName())
+                    || clase.startsWith(MapaController.class.getName())) {
+                return mensaje;
+            }
+        }
+        System.getLogger(getClass().getName()).log(
+                System.Logger.Level.WARNING, "Error de la aplicación", error);
+        return texto("error.accion");
     }
 
     private void cambiarPantalla(Parent root) {

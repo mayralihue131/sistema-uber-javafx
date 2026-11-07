@@ -2,6 +2,80 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" prefWidth="1080" prefHeight="780" styleClass="app" stylesheets="@uber.css">
- <top><HBox spacing="16" alignment="CENTER_LEFT" styleClass="topbar"><Label text="SISTEMA UBER" styleClass="brand" wrapText="true"/><Region HBox.hgrow="ALWAYS"/><Label text="" styleClass="user" wrapText="true" fx:id="nombreSesion"/><Button text="Cambiar cuenta" onAction="#cerrarSesion" styleClass="secondary"/></HBox></top>
- <left><VBox spacing="8" prefWidth="196" styleClass="sidebar"><Label text="TU ESPACIO" styleClass="eyebrow" wrapText="true"/><Button text="Inicio" onAction="#abrirMenu" styleClass="nav"/><Button text="Solicitar viaje" onAction="#abrirSolicitud" styleClass="nav"/><Button text="Servicios" onAction="#abrirServicios" styleClass="nav"/><Button text="Mis viajes" onAction="#abrirViajes" styleClass="nav"/><Button text="Panel conductor" onAction="#abrirPanel" styleClass="nav"/><Button text="Mis vehículos" onAction="#abrirRegistroConductor" styleClass="nav"/><Region VBox.vgrow="ALWAYS"/><Label text="Tus viajes quedan guardados al cerrar." styleClass="small" wrapText="true"/></VBox></left>
- <center><ScrollPane fitToWidth="true"><content><VBox spacing="20" styleClass="page"><Label text="Detalle del viaje" styleClass="title" wrapText="true"/><Label text="Seguí el estado de tu solicitud y las acciones disponibles." styleClass="muted" wrapText="true"/><VBox spacing="16" styleClass="card"><Label text="" styleClass="badge" wrapText="true" fx:id="estadoViaje"/><Label text="" styleClass="section" wrapText="true" fx:id="tituloEstado"/><Label text="" styleClass="muted" wrapText="true" fx:id="explicacionEstado"/><Label text="" styleClass="small" wrapText="true" fx:id="idViaje"/><ProgressBar fx:id="progreso" maxWidth="Infinity"/><Label text="Solicitud → Aceptación → Inicio → Finalización" styleClass="small" wrapText="true"/></VBox><VBox spacing="16" styleClass="card"><Label text="Recorrido y servicio" styleClass="section" wrapText="true"/><Label text="" styleClass="route" wrapText="true" fx:id="rutaViaje"/><Label text="" styleClass="muted" wrapText="true" fx:id="datosServicio"/><Label text="" styleClass="price" wrapText="true" fx:id="precioViaje"/><Label text="" styleClass="muted" wrapText="true" fx:id="datosParticipantes"/><HBox spacing="12" alignment="CENTER_LEFT"><Button text="Iniciar traslado" onAction="#iniciarViaje" styleClass="primary" fx:id="btnIniciar"/><Button text="Finalizar viaje" onAction="#finalizarViaje" styleClass="primary" fx:id="btnFinalizar"/><Button text="Actualizar estado" onAction="#actualizarDetalle" styleClass="secondary"/></HBox></VBox><VBox fx:id="bloqueCancelar" spacing="16" styleClass="card"><Label text="Cancelar solicitud o viaje" styleClass="section" wrapText="true"/><Label text="Antes de la aceptación es gratis. Después se calcula un cargo para el cliente con los kilómetros informados y el tiempo transcurrido." styleClass="small" wrapText="true"/><TextField fx:id="motivoCancelacion" promptText="Escribí el motivo de cancelación" maxWidth="Infinity"/><TextField fx:id="kmRecorridos" promptText="Kilómetros recorridos hasta cancelar (ej.: 0)" maxWidth="Infinity"/><Button text="Revisar cargo y cancelar" onAction="#cancelarViaje" styleClass="danger" fx:id="btnCancelar"/></VBox><VBox fx:id="bloqueCalificar" spacing="16" styleClass="card"><Label text="Tu calificación" styleClass="section" wrapText="true"/><Label text="Tu evaluación no se muestra a la otra persona. Podés actualizarla al finalizar." styleClass="small" wrapText="true"/><ComboBox fx:id="calificacion" promptText="Elegí una calificación" maxWidth="Infinity"/><Button text="Guardar mi calificación" onAction="#calificar" styleClass="primary" fx:id="btnCalificar"/><Label text="" styleClass="muted" wrapText="true" fx:id="miCalificacion"/></VBox><VBox spacing="16" styleClass="card"><Label text="Historial del viaje" styleClass="section" wrapText="true"/><ListView fx:id="historial" prefHeight="180"><placeholder><Label text="Sin movimientos." styleClass="muted" wrapText="true"/></placeholder></ListView></VBox></VBox></content></ScrollPane></center><bottom><Label text="" styleClass="feedback" wrapText="true" fx:id="mensaje" maxWidth="Infinity"/></bottom></BorderPane>
+    <top>
+        <HBox spacing="16" alignment="CENTER_LEFT" styleClass="topbar">
+            <Label text="%vista.sistema.uber" styleClass="brand" wrapText="true"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="" styleClass="user" wrapText="true" fx:id="nombreSesion"/>
+            <Button text="%vista.cambiar.cuenta" onAction="#cerrarSesion" styleClass="secondary"/>
+        </HBox>
+    </top>
+    <left>
+        <VBox spacing="8" prefWidth="196" styleClass="sidebar">
+            <Label text="%vista.tu.espacio" styleClass="eyebrow" wrapText="true"/>
+            <Button text="%vista.inicio" onAction="#abrirMenu" styleClass="nav"/>
+            <Button text="%vista.solicitar.viaje" onAction="#abrirSolicitud" styleClass="nav"/>
+            <Button text="%vista.servicios" onAction="#abrirServicios" styleClass="nav"/>
+            <Button text="%vista.mis.viajes" onAction="#abrirViajes" styleClass="nav"/>
+            <Button text="%vista.panel.conductor" onAction="#abrirPanel" styleClass="nav"/>
+            <Button text="%vista.mis.vehiculos" onAction="#abrirRegistroConductor" styleClass="nav"/>
+            <Region VBox.vgrow="ALWAYS"/>
+            <Label text="%vista.tus.viajes.quedan.guardados.al.cerrar" styleClass="small" wrapText="true"/>
+        </VBox>
+    </left>
+    <center>
+        <ScrollPane fitToWidth="true">
+            <content>
+                <VBox spacing="20" styleClass="page">
+                    <Label text="%vista.detalle.del.viaje" styleClass="title" wrapText="true"/>
+                    <Label text="%vista.segui.el.estado.de.tu.solicitud.y" styleClass="muted" wrapText="true"/>
+                    <VBox spacing="16" styleClass="card">
+                        <Label text="" styleClass="badge" wrapText="true" fx:id="estadoViaje"/>
+                        <Label text="" styleClass="section" wrapText="true" fx:id="tituloEstado"/>
+                        <Label text="" styleClass="muted" wrapText="true" fx:id="explicacionEstado"/>
+                        <Label text="" styleClass="small" wrapText="true" fx:id="idViaje"/>
+                        <ProgressBar fx:id="progreso" maxWidth="Infinity"/>
+                        <Label text="%vista.solicitud.aceptacion.inicio.finalizacion" styleClass="small" wrapText="true"/>
+                    </VBox>
+                    <VBox spacing="16" styleClass="card">
+                        <Label text="%vista.recorrido.y.servicio" styleClass="section" wrapText="true"/>
+                        <Label text="" styleClass="route" wrapText="true" fx:id="rutaViaje"/>
+                        <Label text="" styleClass="muted" wrapText="true" fx:id="datosServicio"/>
+                        <Label text="" styleClass="price" wrapText="true" fx:id="precioViaje"/>
+                        <Label text="" styleClass="muted" wrapText="true" fx:id="datosParticipantes"/>
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <Button text="%vista.iniciar.traslado" onAction="#iniciarViaje" styleClass="primary" fx:id="btnIniciar"/>
+                            <Button text="%vista.finalizar.viaje" onAction="#finalizarViaje" styleClass="primary" fx:id="btnFinalizar"/>
+                            <Button text="%vista.actualizar.estado" onAction="#actualizarDetalle" styleClass="secondary"/>
+                        </HBox>
+                    </VBox>
+                    <VBox fx:id="bloqueCancelar" spacing="16" styleClass="card">
+                        <Label text="%vista.cancelar.solicitud.o.viaje" styleClass="section" wrapText="true"/>
+                        <Label text="%vista.antes.de.la.aceptacion.es.gratis.despues" styleClass="small" wrapText="true"/>
+                        <TextField fx:id="motivoCancelacion" promptText="%vista.escribi.el.motivo.de.cancelacion" maxWidth="Infinity"/>
+                        <TextField fx:id="kmRecorridos" promptText="%vista.kilometros.recorridos.hasta.cancelar.ej.0" maxWidth="Infinity"/>
+                        <Button text="%vista.revisar.cargo.y.cancelar" onAction="#cancelarViaje" styleClass="danger" fx:id="btnCancelar"/>
+                    </VBox>
+                    <VBox fx:id="bloqueCalificar" spacing="16" styleClass="card">
+                        <Label text="%vista.tu.calificacion" styleClass="section" wrapText="true"/>
+                        <Label text="%vista.tu.evaluacion.no.se.muestra.a.la" styleClass="small" wrapText="true"/>
+                        <ComboBox fx:id="calificacion" promptText="%vista.elegi.una.calificacion" maxWidth="Infinity"/>
+                        <Button text="%vista.guardar.mi.calificacion" onAction="#calificar" styleClass="primary" fx:id="btnCalificar"/>
+                        <Label text="" styleClass="muted" wrapText="true" fx:id="miCalificacion"/>
+                    </VBox>
+                    <VBox spacing="16" styleClass="card">
+                        <Label text="%vista.historial.del.viaje" styleClass="section" wrapText="true"/>
+                        <ListView fx:id="historial" prefHeight="180">
+                            <placeholder>
+                                <Label text="%vista.sin.movimientos" styleClass="muted" wrapText="true"/>
+                            </placeholder>
+                        </ListView>
+                    </VBox>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+    <bottom>
+        <Label text="" styleClass="feedback" wrapText="true" fx:id="mensaje" maxWidth="Infinity"/>
+    </bottom>
+</BorderPane>
