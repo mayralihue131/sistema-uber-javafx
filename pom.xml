@@ -46,6 +46,13 @@
             <version>5.11.4</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- Driver PostgreSQL para la implementación BD del DAO -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.3</version>
+        </dependency>
     </dependencies>
 
     <build>

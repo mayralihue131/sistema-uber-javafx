@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
 
-import movilidad.dao.CargaDatos;
-import movilidad.dao.CargaParametros;
+import movilidad.dao.txt.CargaDatos;
+import movilidad.dao.txt.CargaParametros;
 import movilidad.logica.MovilidadDigital;
 import movilidad.modelo.*;
 

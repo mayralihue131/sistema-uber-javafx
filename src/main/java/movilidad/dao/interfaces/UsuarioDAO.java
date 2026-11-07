@@ -1,4 +1,4 @@
-package movilidad.dao;
+package movilidad.dao.interfaces;
 
 import java.util.List;
 import movilidad.modelo.Usuario;
@@ -11,3 +11,4 @@ public interface UsuarioDAO {
 
     List<Usuario> listarTodos();
 }
+

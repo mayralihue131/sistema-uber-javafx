@@ -6,7 +6,7 @@ import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.util.*;
 import movilidad.aplicacion.AplicacionConsultas;
-import movilidad.dao.CargaParametros;
+import movilidad.dao.txt.CargaParametros;
 import movilidad.logica.MovilidadDigital;
 import movilidad.modelo.*;
 

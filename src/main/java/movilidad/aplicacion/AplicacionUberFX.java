@@ -43,11 +43,11 @@ public class AplicacionUberFX extends Application {
     private Locale idioma;
     private ButtonType botonSi;
     private ButtonType botonNo;
-    
+
     private final movilidad.rutas.UbicacionesConductores
     ubicacionesConductores =
         new movilidad.rutas.UbicacionesConductores();
-    	
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -60,11 +60,9 @@ public class AplicacionUberFX extends Application {
             cargarIdioma();
             ventana.setTitle(texto("app.titulo"));
             sesion = new SesionUber(
-                Path.of(System.getProperty(
-                    "uber.datos",
-                    "datos/uber-eventos.txt"
-                ))
-            );
+                    Path.of(System.getProperty(
+                            "uber.datos",
+                            "datos/uber-eventos.txt")));
 
             mostrar("Inicio.fxml");
 
@@ -88,18 +86,15 @@ public class AplicacionUberFX extends Application {
     public synchronized PlanificadorRutas getPlanificadorRutas() {
         if (cerrada) {
             throw new IllegalStateException(
-                "La aplicación ya está cerrada."
-            );
+                    "La aplicación ya está cerrada.");
         }
 
         if (planificadorRutas == null) {
             planificadorRutas = new PlanificadorGraphHopper(
-                FabricaGraphHopper.crear()
-            );
+                    FabricaGraphHopper.crear());
 
             servicioRutas = new ServicioRutasViaje(
-                planificadorRutas
-            );
+                    planificadorRutas);
         }
 
         return planificadorRutas;
@@ -109,9 +104,10 @@ public class AplicacionUberFX extends Application {
         getPlanificadorRutas();
         return servicioRutas;
     }
+
     public movilidad.rutas.UbicacionesConductores getUbicacionesConductores() {
 
-    	return ubicacionesConductores;
+        return ubicacionesConductores;
     }
 
     public void mostrar(String archivo) throws IOException {
@@ -123,8 +119,7 @@ public class AplicacionUberFX extends Application {
 
         if (recurso == null) {
             throw new IOException(
-                "No se encontró la pantalla: " + archivo
-            );
+                    "No se encontró la pantalla: " + archivo);
         }
 
         FXMLLoader loader = new FXMLLoader(recurso, mensajes);
