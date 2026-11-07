@@ -2,6 +2,76 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" prefWidth="1080" prefHeight="780" styleClass="app" stylesheets="@uber.css">
- <top><HBox spacing="16" alignment="CENTER_LEFT" styleClass="topbar"><Label text="SISTEMA UBER" styleClass="brand" wrapText="true"/><Region HBox.hgrow="ALWAYS"/><Label text="" styleClass="user" wrapText="true" fx:id="nombreSesion"/><Button text="Cambiar cuenta" onAction="#cerrarSesion" styleClass="secondary"/></HBox></top>
- <left><VBox spacing="8" prefWidth="196" styleClass="sidebar"><Label text="TU ESPACIO" styleClass="eyebrow" wrapText="true"/><Button text="Inicio" onAction="#abrirMenu" styleClass="nav"/><Button text="Solicitar viaje" onAction="#abrirSolicitud" styleClass="nav"/><Button text="Servicios" onAction="#abrirServicios" styleClass="nav"/><Button text="Mis viajes" onAction="#abrirViajes" styleClass="nav"/><Button text="Panel conductor" onAction="#abrirPanel" styleClass="nav"/><Button text="Mis vehículos" onAction="#abrirRegistroConductor" styleClass="nav"/><Region VBox.vgrow="ALWAYS"/><Label text="Tus viajes quedan guardados al cerrar." styleClass="small" wrapText="true"/></VBox></left>
- <center><ScrollPane fitToWidth="true"><content><VBox spacing="20" styleClass="page"><Label text="Tus vehículos" styleClass="title" wrapText="true"/><Label text="Habilitate como conductor o agregá otro vehículo a tu cuenta." styleClass="muted" wrapText="true"/><VBox spacing="16" styleClass="card"><Label text="" styleClass="section" wrapText="true" fx:id="tituloVehiculo"/><VBox spacing="16" styleClass="field-group" HBox.hgrow="ALWAYS" minWidth="0"><Label text="Licencia de conducir" styleClass="field-label" wrapText="true"/><TextField fx:id="licencia" promptText="Número de licencia" maxWidth="Infinity"/></VBox><HBox spacing="12" alignment="CENTER_LEFT"><VBox spacing="16" styleClass="field-group" HBox.hgrow="ALWAYS" minWidth="0"><Label text="Patente" styleClass="field-label" wrapText="true"/><TextField fx:id="patente" promptText="Ej.: AF123CD" maxWidth="Infinity"/></VBox><VBox spacing="16" styleClass="field-group" HBox.hgrow="ALWAYS" minWidth="0"><Label text="Modelo" styleClass="field-label" wrapText="true"/><TextField fx:id="modelo" promptText="Ej.: Toyota Corolla" maxWidth="Infinity"/></VBox></HBox><HBox spacing="12" alignment="CENTER_LEFT"><VBox spacing="16" styleClass="field-group" HBox.hgrow="ALWAYS" minWidth="0"><Label text="Capacidad de pasajeros" styleClass="field-label" wrapText="true"/><TextField fx:id="capacidad" promptText="Ej.: 4" maxWidth="Infinity"/></VBox><VBox spacing="16" styleClass="field-group" HBox.hgrow="ALWAYS" minWidth="0"><Label text="Tipo de vehículo" styleClass="field-label" wrapText="true"/><ComboBox fx:id="tipoVehiculo" promptText="AUTO / MOTO" maxWidth="Infinity"/></VBox><VBox spacing="16" styleClass="field-group" HBox.hgrow="ALWAYS" minWidth="0"><Label text="Categoría" styleClass="field-label" wrapText="true"/><ComboBox fx:id="categoriaVehiculo" promptText="Categoría" maxWidth="Infinity"/></VBox></HBox><Label text="Servicios que ofrece" styleClass="field-label" wrapText="true"/><HBox spacing="12" alignment="CENTER_LEFT"><CheckBox fx:id="pasajeros" text="Pasajeros"/><CheckBox fx:id="envios" text="Envíos"/></HBox><Button text="Guardar vehículo" onAction="#registrarVehiculo" styleClass="primary"/><Label text="Seleccioná el vehículo activo desde el panel. Sus servicios deben coincidir con las solicitudes que querés recibir." styleClass="small" wrapText="true"/></VBox></VBox></content></ScrollPane></center><bottom><Label text="" styleClass="feedback" wrapText="true" fx:id="mensaje" maxWidth="Infinity"/></bottom></BorderPane>
+    <top>
+        <HBox spacing="16" alignment="CENTER_LEFT" styleClass="topbar">
+            <Label text="%vista.sistema.uber" styleClass="brand" wrapText="true"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="" styleClass="user" wrapText="true" fx:id="nombreSesion"/>
+            <Button text="%vista.cambiar.cuenta" onAction="#cerrarSesion" styleClass="secondary"/>
+        </HBox>
+    </top>
+    <left>
+        <VBox spacing="8" prefWidth="196" styleClass="sidebar">
+            <Label text="%vista.tu.espacio" styleClass="eyebrow" wrapText="true"/>
+            <Button text="%vista.inicio" onAction="#abrirMenu" styleClass="nav"/>
+            <Button text="%vista.solicitar.viaje" onAction="#abrirSolicitud" styleClass="nav"/>
+            <Button text="%vista.servicios" onAction="#abrirServicios" styleClass="nav"/>
+            <Button text="%vista.mis.viajes" onAction="#abrirViajes" styleClass="nav"/>
+            <Button text="%vista.panel.conductor" onAction="#abrirPanel" styleClass="nav"/>
+            <Button text="%vista.mis.vehiculos" onAction="#abrirRegistroConductor" styleClass="nav"/>
+            <Region VBox.vgrow="ALWAYS"/>
+            <Label text="%vista.tus.viajes.quedan.guardados.al.cerrar" styleClass="small" wrapText="true"/>
+        </VBox>
+    </left>
+    <center>
+        <ScrollPane fitToWidth="true">
+            <content>
+                <VBox spacing="20" styleClass="page">
+                    <Label text="%vista.tus.vehiculos" styleClass="title" wrapText="true"/>
+                    <Label text="%vista.habilitate.como.conductor.o.agrega.otro.vehiculo" styleClass="muted" wrapText="true"/>
+                    <VBox spacing="16" styleClass="card">
+                        <Label text="" styleClass="section" wrapText="true" fx:id="tituloVehiculo"/>
+                        <VBox spacing="16" styleClass="field-group" HBox.hgrow="ALWAYS" minWidth="0">
+                            <Label text="%vista.licencia.de.conducir" styleClass="field-label" wrapText="true"/>
+                            <TextField fx:id="licencia" promptText="%vista.numero.de.licencia" maxWidth="Infinity"/>
+                        </VBox>
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <VBox spacing="16" styleClass="field-group" HBox.hgrow="ALWAYS" minWidth="0">
+                                <Label text="%vista.patente" styleClass="field-label" wrapText="true"/>
+                                <TextField fx:id="patente" promptText="%vista.ej.af123cd" maxWidth="Infinity"/>
+                            </VBox>
+                            <VBox spacing="16" styleClass="field-group" HBox.hgrow="ALWAYS" minWidth="0">
+                                <Label text="%vista.modelo" styleClass="field-label" wrapText="true"/>
+                                <TextField fx:id="modelo" promptText="%vista.ej.toyota.corolla" maxWidth="Infinity"/>
+                            </VBox>
+                        </HBox>
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <VBox spacing="16" styleClass="field-group" HBox.hgrow="ALWAYS" minWidth="0">
+                                <Label text="%vista.capacidad.de.pasajeros" styleClass="field-label" wrapText="true"/>
+                                <TextField fx:id="capacidad" promptText="%vista.ej.4" maxWidth="Infinity"/>
+                            </VBox>
+                            <VBox spacing="16" styleClass="field-group" HBox.hgrow="ALWAYS" minWidth="0">
+                                <Label text="%vista.tipo.de.vehiculo" styleClass="field-label" wrapText="true"/>
+                                <ComboBox fx:id="tipoVehiculo" promptText="%vista.auto.moto" maxWidth="Infinity"/>
+                            </VBox>
+                            <VBox spacing="16" styleClass="field-group" HBox.hgrow="ALWAYS" minWidth="0">
+                                <Label text="%vista.categoria" styleClass="field-label" wrapText="true"/>
+                                <ComboBox fx:id="categoriaVehiculo" promptText="%vista.categoria" maxWidth="Infinity"/>
+                            </VBox>
+                        </HBox>
+                        <Label text="%vista.servicios.que.ofrece" styleClass="field-label" wrapText="true"/>
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <CheckBox fx:id="pasajeros" text="%vista.pasajeros"/>
+                            <CheckBox fx:id="envios" text="%vista.envios"/>
+                        </HBox>
+                        <Button text="%vista.guardar.vehiculo" onAction="#registrarVehiculo" styleClass="primary"/>
+                        <Label text="%vista.selecciona.el.vehiculo.activo.desde.el.panel" styleClass="small" wrapText="true"/>
+                    </VBox>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+    <bottom>
+        <Label text="" styleClass="feedback" wrapText="true" fx:id="mensaje" maxWidth="Infinity"/>
+    </bottom>
+</BorderPane>

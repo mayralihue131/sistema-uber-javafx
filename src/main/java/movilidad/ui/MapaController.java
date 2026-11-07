@@ -126,27 +126,30 @@ public class MapaController {
                         dibujarRutaSeleccionada();
                     } catch (Exception e) {
                         avisar(
-                            "No se pudieron conectar los clics: "
-                                + e.getMessage()
+                            t("mapa.no.se.pudieron.conectar.los.clics")
+                                + aplicacion.mensajeError(e)
                         );
                     }
                 }
             }
         );
 
-        URL archivo = getClass().getResource("/ui/map/mapa.html");
-
-        if (archivo == null) {
-            throw new IllegalStateException(
-                "No se encontró ui/map/mapa.html"
-            );
-        }
-
-        motor.load(archivo.toExternalForm());
     }
 
     public void setAplicacion(AplicacionUberFX aplicacion) {
         this.aplicacion = aplicacion;
+        aplicacion.traducirOpciones(tipoServicio, categoria);
+
+        URL archivo = getClass().getResource("/ui/map/mapa.html");
+        if (archivo == null) {
+            throw new IllegalStateException(t("mapa.no.se.encontro.ui.map.mapa.html"));
+        }
+        mapaWeb.getEngine().load(archivo.toExternalForm()
+                + "#" + aplicacion.locale().getLanguage());
+    }
+
+    private String t(String clave) {
+        return aplicacion.texto(clave);
     }
 
     private void conectarClics(WebEngine motor) {
@@ -160,7 +163,7 @@ public class MapaController {
                 var eligiendoOrigen = true;
 
                 aviso.textContent =
-                    "Hacé clic para elegir el origen.";
+                    mensajesMapa.elegirOrigen;
 
                 mapa.on("click", function (evento) {
                     var lat = evento.latlng.lat;
@@ -169,7 +172,7 @@ public class MapaController {
                     if (lat < -42.832 || lat > -42.704 ||
                         lon < -65.126 || lon > -65.005) {
                         aviso.textContent =
-                            "Elegí un punto dentro de Puerto Madryn.";
+                            mensajesMapa.fuera;
                         return;
                     }
 
@@ -204,7 +207,7 @@ public class MapaController {
                         eligiendoOrigen = false;
 
                         aviso.textContent =
-                            "Origen elegido. Ahora elegí el destino.";
+                            mensajesMapa.elegirDestino;
                     } else {
                         puntoDestino = L.circleMarker([lat, lon], {
                             radius: 9,
@@ -223,7 +226,7 @@ public class MapaController {
                         eligiendoOrigen = true;
 
                         aviso.textContent =
-                            "Recorrido elegido. Tocá Cotizar viaje.";
+                            mensajesMapa.cotizar;
                     }
                 });
             }
@@ -287,7 +290,7 @@ public class MapaController {
 
         if (texto == null || texto.isBlank()) {
             throw new IllegalArgumentException(
-                "Primero elegí origen y destino en el mapa."
+                t("mapa.primero.elegi.origen.y.destino.en.el")
             );
         }
 
@@ -295,7 +298,7 @@ public class MapaController {
 
         if (partes.length != 2) {
             throw new IllegalArgumentException(
-                "Primero elegí origen y destino en el mapa."
+                t("mapa.primero.elegi.origen.y.destino.en.el")
             );
         }
 
@@ -304,7 +307,7 @@ public class MapaController {
 
         if (!puntoValido(lat, lon)) {
             throw new IllegalArgumentException(
-                "Elegí puntos dentro de Puerto Madryn."
+                t("mapa.elegi.puntos.dentro.de.puerto.madryn")
             );
         }
 
@@ -341,14 +344,14 @@ public class MapaController {
 
             if (km <= 0) {
                 throw new IllegalArgumentException(
-                    "Elegí un origen y un destino diferentes."
+                    t("mapa.elegi.un.origen.y.un.destino.diferentes")
                 );
             }
 
             if (tipoServicio.getValue() == null
                     || categoria.getValue() == null) {
                 throw new IllegalArgumentException(
-                    "Elegí tipo de servicio y categoría."
+                    t("mapa.elegi.tipo.de.servicio.y.categoria")
                 );
             }
 
@@ -382,11 +385,10 @@ public class MapaController {
                     );
 
                     setText(String.format(
-                        Locale.forLanguageTag("es-AR"),
-                        "%s · %s · %.2f km · %.1f min "
-                            + "· $%,.2f estimados",
-                        servicio.getNombre(),
-                        servicio.getTipoVehiculo(),
+                        aplicacion.locale(),
+                        t("mapa.s.s.2f.km.1f.min.2f"),
+                        aplicacion.nombreServicio(servicio),
+                        aplicacion.etiqueta(servicio.getTipoVehiculo()),
                         km,
                         minutos,
                         precio
@@ -406,15 +408,14 @@ public class MapaController {
 
             if (servicios.isEmpty()) {
                 avisar(
-                    "No hay servicios para esa combinación. "
-                        + "Probá otra categoría."
+                    t("mapa.no.hay.servicios.para.esa.combinacion.proba")
                 );
             } else {
                 opciones.getSelectionModel().selectFirst();
             }
 
         } catch (Exception e) {
-            avisar(e.getMessage());
+            avisar(aplicacion.mensajeError(e));
         }
     }
 
@@ -460,7 +461,7 @@ public class MapaController {
 
             if (cliente == null) {
                 throw new IllegalStateException(
-                    "No se encontró el usuario de la sesión."
+                    t("mapa.no.se.encontro.el.usuario.de.la")
                 );
             }
 
@@ -483,8 +484,7 @@ public class MapaController {
                     .toList();
 
             mostrarAvisoMapa(
-                "Calculando rutas… La primera preparación "
-                    + "del mapa puede tardar."
+                t("mapa.calculando.rutas.la.primera.preparacion.del.mapa")
             );
 
             Task<ResultadoRutas> tarea = new Task<>() {
@@ -503,8 +503,7 @@ public class MapaController {
                             origen, tipoVehiculo
                         ).orElseThrow(() ->
                             new IllegalArgumentException(
-                                "El origen está lejos de una calle "
-                                    + "habilitada. Elegí otro punto."
+                                t("mapa.el.origen.esta.lejos.de.una.calle")
                             )
                         );
 
@@ -513,8 +512,7 @@ public class MapaController {
                             destino, tipoVehiculo
                         ).orElseThrow(() ->
                             new IllegalArgumentException(
-                                "El destino está lejos de una calle "
-                                    + "habilitada. Elegí otro punto."
+                                t("mapa.el.destino.esta.lejos.de.una.calle")
                             )
                         );
 
@@ -628,26 +626,20 @@ public class MapaController {
 
                     if (resultado.conductor() == null) {
                         mostrarAvisoMapa(
-                            "Ruta del viaje calculada. "
-                                + "Sin conductor compatible con "
-                                + "ruta disponible para la "
-                                + "vista previa."
+                            t("mapa.ruta.del.viaje.calculada.sin.conductor.compatible")
                         );
                     } else {
                         mostrarAvisoMapa(
-                            "Vista previa: "
+                            t("mapa.vista.previa")
                                 + resultado.conductor()
-                                + " · Ubicación simulada. "
-                                + "Azul: hasta el origen. "
-                                + "Verde: hasta el destino. "
-                                + "Aceptación pendiente."
+                                + t("mapa.leyenda.vista.previa")
                         );
                     }
 
                 } catch (Exception e) {
                     avisar(
-                        "No se pudieron dibujar las rutas: "
-                            + e.getMessage()
+                        t("mapa.no.se.pudieron.dibujar.las.rutas")
+                            + aplicacion.mensajeError(e)
                     );
                 }
             });
@@ -658,13 +650,12 @@ public class MapaController {
                 }
 
                 mostrarAvisoMapa(
-                    "No se pudieron calcular las rutas."
+                    t("mapa.no.se.pudieron.calcular.las.rutas")
                 );
 
                 avisar(
-                    "La cotización está disponible, pero no se "
-                        + "pudieron mostrar las rutas: "
-                        + tarea.getException().getMessage()
+                    t("mapa.la.cotizacion.esta.disponible.pero.no.se")
+                        + aplicacion.mensajeError(tarea.getException())
                 );
             });
 
@@ -676,8 +667,8 @@ public class MapaController {
 
         } catch (Exception e) {
             avisar(
-                "No se pudo preparar la vista previa: "
-                    + e.getMessage()
+                t("mapa.no.se.pudo.preparar.la.vista.previa")
+                    + aplicacion.mensajeError(e)
             );
         }
     }
@@ -724,7 +715,7 @@ public class MapaController {
                     || origenCotizado == null
                     || destinoCotizado == null) {
                 throw new IllegalArgumentException(
-                    "Primero cotizá y seleccioná un servicio."
+                    t("mapa.primero.cotiza.y.selecciona.un.servicio")
                 );
             }
 
@@ -748,7 +739,7 @@ public class MapaController {
             cerrarPantalla();
 
         } catch (Exception e) {
-            avisar(e.getMessage());
+            avisar(aplicacion.mensajeError(e));
         }
     }
 
@@ -761,19 +752,20 @@ public class MapaController {
             cerrarPantalla();
 
         } catch (Exception e) {
-            avisar(e.getMessage());
+            avisar(aplicacion.mensajeError(e));
         }
     }
 
     private void avisar(String texto) {
         Alert alerta = new Alert(Alert.AlertType.INFORMATION);
 
-        alerta.setTitle("Sistema Uber");
+        alerta.setTitle(t("app.titulo"));
+        alerta.getButtonTypes().setAll(aplicacion.botonAceptar());
         alerta.setHeaderText(null);
 
         alerta.setContentText(
             texto == null
-                ? "No se pudo completar la acción."
+                ? t("mapa.no.se.pudo.completar.la.accion")
                 : texto
         );
 

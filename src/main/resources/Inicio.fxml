@@ -1,4 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" prefWidth="1080" prefHeight="780" styleClass="app" stylesheets="@uber.css"><ScrollPane fitToWidth="true" styleClass="auth-scroll"><content><VBox alignment="CENTER" spacing="24" styleClass="auth-wrap"><Label text="SISTEMA UBER" styleClass="brand" wrapText="true"/><VBox spacing="16" styleClass="auth-card"><Label text="Tu próximo viaje empieza acá" styleClass="title" wrapText="true"/><Label text="Ingresá con tu correo para continuar." styleClass="muted" wrapText="true"/><VBox spacing="16" styleClass="field-group" HBox.hgrow="ALWAYS" minWidth="0"><Label text="Correo electrónico" styleClass="field-label" wrapText="true"/><TextField fx:id="campoCorreo" promptText="nombre@ejemplo.com" maxWidth="Infinity"/></VBox><Button text="Continuar" onAction="#ingresar" styleClass="primary"/><Button text="Crear una cuenta" onAction="#abrirRegistroUsuario" styleClass="secondary"/><Label text="Para probar: paula.vazquez@email.com (cliente) o juan.perez@email.com (conductor)." styleClass="small" wrapText="true"/><Label text="" styleClass="feedback" wrapText="true" fx:id="mensaje"/></VBox><Label text="Proyecto académico · Acceso por correo registrado, sin contraseña" styleClass="small" wrapText="true"/></VBox></content></ScrollPane></StackPane>
+
+<StackPane xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           prefWidth="1080"
+           prefHeight="780"
+           styleClass="app"
+           stylesheets="@uber.css">
+
+    <ScrollPane fitToWidth="true" styleClass="auth-scroll">
+        <content>
+            <VBox alignment="CENTER" spacing="24" styleClass="auth-wrap">
+                <Label text="%vista.sistema.uber"
+                       styleClass="brand"
+                       wrapText="true"/>
+
+                <VBox spacing="16" styleClass="auth-card">
+                    <VBox spacing="8">
+                        <Label text="%inicio.idioma" styleClass="field-label"/>
+                        <ComboBox fx:id="selectorIdioma"
+                                  accessibleText="%inicio.idioma"
+                                  maxWidth="Infinity"/>
+                    </VBox>
+
+                    <Label text="%vista.tu.proximo.viaje.empieza.aca"
+                           styleClass="title"
+                           wrapText="true"/>
+
+                    <Label text="%vista.ingresa.con.tu.correo.para.continuar"
+                           styleClass="muted"
+                           wrapText="true"/>
+
+                    <VBox spacing="16"
+                          styleClass="field-group"
+                          HBox.hgrow="ALWAYS"
+                          minWidth="0">
+                        <Label text="%vista.correo.electronico"
+                               styleClass="field-label"
+                               wrapText="true"/>
+                        <TextField fx:id="campoCorreo"
+                                   promptText="%vista.nombre.ejemplo.com"
+                                   maxWidth="Infinity"/>
+                    </VBox>
+
+                    <Button text="%vista.continuar"
+                            onAction="#ingresar"
+                            styleClass="primary"/>
+
+                    <Button text="%vista.crear.una.cuenta"
+                            onAction="#abrirRegistroUsuario"
+                            styleClass="secondary"/>
+
+                    <Label fx:id="mensaje"
+                           text=""
+                           styleClass="feedback"
+                           wrapText="true"/>
+                </VBox>
+
+                <Label text="%vista.proyecto.academico.acceso.por.correo.registrado.sin"
+                       styleClass="small"
+                       wrapText="true"/>
+            </VBox>
+        </content>
+    </ScrollPane>
+
+</StackPane>
