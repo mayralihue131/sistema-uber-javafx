@@ -17,14 +17,11 @@ import movilidad.modelo.*;
 
 public class MovilidadDigital {
 
-	private UsuarioDAO usuarioDAO;
-
+    private UsuarioDAO usuarioDAO;
     private List<Viaje> viajes;
-
     private List<Servicio> servicios;
 
     public MovilidadDigital() {
-
         this(new UsuarioDAOMemoria());
 
     }
@@ -32,56 +29,39 @@ public class MovilidadDigital {
     public MovilidadDigital(UsuarioDAO usuarioDAO) {
 
         this.usuarioDAO = usuarioDAO;
-
         this.viajes = new ArrayList<>();
-
         this.servicios = new ArrayList<>();
 
     }
 
     public List<Viaje> getViajes() {
-
         return new ArrayList<>(viajes);
 
     }
+
     public List<Usuario> getUsuarios() {
-
         return usuarioDAO.listarTodos();
-
     }
 
     public List<Servicio> getServicios() {
-
         return new ArrayList<>(servicios);
-
     }
 
     public void agregarUsuario(Usuario usuario) {
-
         if (usuario == null) {
-
             throw new IllegalArgumentException(
-
                     "El usuario no puede ser null");
-
         }
 
         if (usuario.getEmail() == null
-
                 || usuario.getEmail().isBlank()) {
-
             throw new IllegalArgumentException(
-
                     "El email no puede estar vacío");
-
         }
 
         if (usuarioDAO.buscarPorEmail(usuario.getEmail()) != null) {
-
             throw new IllegalArgumentException(
-
                     "Ya existe un usuario con ese email");
-
         }
 
         usuarioDAO.guardar(usuario);
@@ -93,43 +73,31 @@ public class MovilidadDigital {
     public Usuario buscarUsuarioPorMail(String mail) {
 
         if (mail == null || mail.isBlank()) {
-
             return null;
-
         }
 
         return usuarioDAO.buscarPorEmail(mail);
 
     }
 
-    
-
     // Habilitar al usuario como conductor con su primer vehículo.
 
     public void registrarConductor(Usuario usuario, String licencia, Vehiculo vehiculo) {
 
         if (usuario == null) {
-
             throw new IllegalArgumentException("El usuario no puede ser null");
-
         }
 
         if (usuario.getEmail() == null || usuario.getEmail().isBlank()) {
-
             throw new IllegalArgumentException("El email no puede estar vacío");
-
         }
 
         if (licencia == null || licencia.isBlank()) {
-
             throw new IllegalArgumentException("La licencia no puede estar vacía");
-
         }
 
         if (vehiculo == null) {
-
             throw new IllegalArgumentException("El vehiculo no puede ser null");
-
         }
 
         for (Usuario usuarioRegistrado : usuarioDAO.listarTodos()) {
@@ -626,11 +594,12 @@ public class MovilidadDigital {
 
     }
 
-    //hasta aca 
+    // hasta aca
 
     // Crear la solicitud y asociarla al cliente.
 
-    public Viaje solicitarViaje(Usuario cliente, Servicio servicio, Ubicacion origen, Ubicacion destino, LocalDateTime fechaHora) {
+    public Viaje solicitarViaje(Usuario cliente, Servicio servicio, Ubicacion origen, Ubicacion destino,
+            LocalDateTime fechaHora) {
 
         if (cliente == null || servicio == null || origen == null || destino == null || fechaHora == null) {
 
@@ -670,7 +639,7 @@ public class MovilidadDigital {
 
             Conductor conductor = usuario.getConductor();
 
-            if (conductor == null 
+            if (conductor == null
 
                     || conductor.getEstadoConductor() != EstadoConductor.DISPONIBLE
 
@@ -681,8 +650,10 @@ public class MovilidadDigital {
                     || conductor.getVehiculoActivo().getTipoVehiculo() != viaje.getServicio().getTipoVehiculo()
                     || conductor.getCategoriaVehiculoActivo() == null
                     || conductor.getVehiculoActivo().getCategoriaVehiculo() == null
-                    || viaje.getServicio().getCategoriaVehiculo().getCodigo() < conductor.getCategoriaVehiculoActivo().getCodigo()
-                    || viaje.getServicio().getCategoriaVehiculo().getCodigo() > conductor.getVehiculoActivo().getCategoriaVehiculo().getCodigo()
+                    || viaje.getServicio().getCategoriaVehiculo().getCodigo() < conductor.getCategoriaVehiculoActivo()
+                            .getCodigo()
+                    || viaje.getServicio().getCategoriaVehiculo().getCodigo() > conductor.getVehiculoActivo()
+                            .getCategoriaVehiculo().getCodigo()
 
                     || usuario.equals(viaje.getCliente())) {
 
@@ -712,7 +683,8 @@ public class MovilidadDigital {
 
         for (Viaje viaje : viajes) {
 
-            if (viaje.estadoActual() == EstadoViaje.SOLICITADO && buscarConductoresDisponibles(viaje).contains(conductor)) {
+            if (viaje.estadoActual() == EstadoViaje.SOLICITADO
+                    && buscarConductoresDisponibles(viaje).contains(conductor)) {
 
                 solicitudes.add(viaje);
 
@@ -810,11 +782,13 @@ public class MovilidadDigital {
 
     // Calcular el cargo según quién cancela y el estado del viaje.
 
-    public double calcularCostoCancelacion(UUID idViaje, Usuario usuario, LocalDateTime fechaHora, double kilometrosRecorridos) {
+    public double calcularCostoCancelacion(UUID idViaje, Usuario usuario, LocalDateTime fechaHora,
+            double kilometrosRecorridos) {
 
         Viaje viaje = viajeRequerido(idViaje);
 
-        if (usuario == null || fechaHora == null || !Double.isFinite(kilometrosRecorridos) || kilometrosRecorridos < 0) {
+        if (usuario == null || fechaHora == null || !Double.isFinite(kilometrosRecorridos)
+                || kilometrosRecorridos < 0) {
 
             throw new IllegalArgumentException("Los datos de cancelación no son válidos");
 
@@ -847,7 +821,8 @@ public class MovilidadDigital {
         LocalDateTime aceptacion = viaje.getRegistrosViaje().stream()
                 .filter(r -> r.getEstadoViaje() == EstadoViaje.ACEPTADO)
                 .findFirst().orElseThrow().getFechaHora();
-        if (fechaHora.isBefore(aceptacion)) throw new IllegalArgumentException("La fecha no puede ser anterior a la aceptación");
+        if (fechaHora.isBefore(aceptacion))
+            throw new IllegalArgumentException("La fecha no puede ser anterior a la aceptación");
         double minutos = Duration.between(aceptacion, fechaHora).toMillis() / 60000.0;
 
         return viaje.getServicio().calcularCosto(kilometrosRecorridos, minutos);
@@ -856,18 +831,15 @@ public class MovilidadDigital {
 
     // Cancelar, registrar el motivo y devolver el importe a cobrar.
 
-    public double cancelarViaje(UUID idViaje, Usuario usuario, LocalDateTime fechaHora, String motivo, double kilometrosRecorridos) {
+    public double cancelarViaje(UUID idViaje, Usuario usuario, LocalDateTime fechaHora, String motivo,
+            double kilometrosRecorridos) {
 
         Viaje viaje = viajeRequerido(idViaje);
-
         double costo = calcularCostoCancelacion(idViaje, usuario, fechaHora, kilometrosRecorridos);
-
         viaje.cancelar(fechaHora, usuario, motivo);
 
         if (viaje.getConductor() != null) {
-
             viaje.getConductor().getConductor().setEstadoConductor(EstadoConductor.DISPONIBLE);
-
         }
 
         return costo;
@@ -1034,9 +1006,9 @@ public class MovilidadDigital {
 
     }
 
-    private void validarCalificacion(Viaje viaje, Usuario evaluador, Usuario evaluado, CalificacionViaje calificacion) {
+    private void validarCalificacion(Viaje viaje, Usuario usuario, Usuario participanteEsperado, CalificacionViaje calificacion) {
 
-        if (evaluador == null || !evaluador.equals(evaluado)) {
+        if (usuario == null || !usuario.equals(participanteEsperado)) {
 
             throw new IllegalArgumentException("El usuario no corresponde al viaje");
 
