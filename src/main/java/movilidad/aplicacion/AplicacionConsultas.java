@@ -327,31 +327,8 @@ public class AplicacionConsultas {
                 cliente, servicio, origen, destino,
                 LocalDateTime.now());
 
-        List<Usuario> compatibles =
+        List<Usuario> conductores =
                 aplicacion.buscarConductoresDisponibles(viaje);
-
-        List<Usuario> conductores = new ArrayList<>();
-
-        // Comprobar también el tipo de vehículo y el rango de categorías.
-        for (Usuario usuario : compatibles) {
-            Conductor conductor = usuario.getConductor();
-            Vehiculo vehiculo = conductor.getVehiculoActivo();
-
-            CategoriaVehiculo minima =
-                    conductor.getCategoriaVehiculoActivo();
-
-            CategoriaVehiculo solicitada =
-                    servicio.getCategoriaVehiculo();
-
-            if (vehiculo.getTipoVehiculo() == servicio.getTipoVehiculo()
-                    && minima != null
-                    && vehiculo.getCategoriaVehiculo() != null
-                    && solicitada.getCodigo() >= minima.getCodigo()
-                    && solicitada.getCodigo()
-                        <= vehiculo.getCategoriaVehiculo().getCodigo()) {
-                conductores.add(usuario);
-            }
-        }
 
         System.out.println("\nCONDUCTORES DISPONIBLES");
 
