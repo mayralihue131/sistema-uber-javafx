@@ -2,29 +2,31 @@ package movilidad.aplicacion;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
-import java.net.URL;
-import java.nio.file.Path;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import movilidad.modelo.Servicio;
-import javafx.stage.Stage;
-
 import movilidad.rutas.FabricaGraphHopper;
 import movilidad.rutas.PlanificadorGraphHopper;
 import movilidad.rutas.PlanificadorRutas;
 import movilidad.rutas.ServicioRutasViaje;
-
 import movilidad.ui.MapaController;
 import movilidad.ui.SesionUber;
 import movilidad.ui.UberController;
@@ -35,6 +37,7 @@ public class AplicacionUberFX extends Application {
 
     private Stage ventana;
     private UberController controlador;
+    private BorderPane pantallaPrincipal;
 
     private PlanificadorRutas planificadorRutas;
     private ServicioRutasViaje servicioRutas;
@@ -65,9 +68,9 @@ public class AplicacionUberFX extends Application {
                             "datos/uber-eventos.txt")));
 
             mostrar("Inicio.fxml");
-
-            ventana.setMinWidth(930);
-            ventana.setMinHeight(680);
+            ventana.setMinWidth(650);
+            ventana.setMinHeight(550);
+       
             ventana.show();
 
         } catch (Exception e) {
@@ -78,7 +81,7 @@ public class AplicacionUberFX extends Application {
                     : texto("error.inicio") + " " + mensajeError(e)),
                 mensajes == null ? ButtonType.OK : botonAceptar()
             );
-
+            
             alerta.showAndWait();
         }
     }
@@ -131,7 +134,7 @@ public class AplicacionUberFX extends Application {
             mapa.setAplicacion(this);
 
             detenerControlador();
-            cambiarPantalla(root);
+            cambiarPantalla(archivo, root);
             return;
         }
 
@@ -150,7 +153,7 @@ public class AplicacionUberFX extends Application {
         }
 
         detenerControlador();
-        cambiarPantalla(root);
+        cambiarPantalla(archivo, root);
 
         controlador = nuevo;
         nuevo.preparar(root);
@@ -305,12 +308,64 @@ public class AplicacionUberFX extends Application {
         return texto("error.accion");
     }
 
-    private void cambiarPantalla(Parent root) {
-        if (ventana.getScene() == null) {
-            ventana.setScene(new Scene(root));
+    private void cambiarPantalla(String archivo, Parent root) {
+        boolean esIngreso = "Inicio.fxml".equals(archivo)
+                || "RegistroUsuario.fxml".equals(archivo);
+
+        Parent vista = root;
+
+        if (esIngreso) {
+            pantallaPrincipal = null;
         } else {
-            ventana.getScene().setRoot(root);
+            if (pantallaPrincipal == null) {
+                pantallaPrincipal = crearPantallaPrincipal();
+            }
+            pantallaPrincipal.setCenter(root);
+            vista = pantallaPrincipal;
         }
+
+        if (ventana.getScene() == null) {
+            ventana.setScene(new Scene(vista, 650, 650));
+        } else if (ventana.getScene().getRoot() != vista) {
+            ventana.getScene().setRoot(vista);
+        }
+    }
+
+    private BorderPane crearPantallaPrincipal() {
+        MenuButton menu = new MenuButton(texto("vista.tu.espacio"));
+
+        MenuItem solicitar = new MenuItem(texto("vista.solicitar.viaje"));
+        solicitar.setOnAction(evento -> {
+            if (controlador != null) {
+                controlador.abrirSolicitud();
+            }
+        });
+
+        menu.getItems().addAll(
+                opcionMenu("vista.inicio", "MenuPrincipal.fxml"),
+                solicitar,
+                opcionMenu("vista.servicios", "ConsultarServicios.fxml"),
+                opcionMenu("vista.mis.viajes", "MisViajes.fxml"),
+                opcionMenu("vista.panel.conductor", "PanelConductor.fxml")
+        );
+
+        BorderPane panel = new BorderPane();
+        panel.setTop(menu);
+        BorderPane.setMargin(menu, new Insets(10));
+        return panel;
+    }
+
+    private MenuItem opcionMenu(String clave, String archivo) {
+        MenuItem opcion = new MenuItem(texto(clave));
+        opcion.setOnAction(evento -> {
+            try {
+                mostrar(archivo);
+            } catch (IOException | RuntimeException e) {
+                new Alert(Alert.AlertType.ERROR, mensajeError(e), botonAceptar())
+                        .showAndWait();
+            }
+        });
+        return opcion;
     }
 
     private void detenerControlador() {

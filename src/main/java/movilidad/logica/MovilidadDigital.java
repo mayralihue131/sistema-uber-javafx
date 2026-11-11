@@ -79,6 +79,12 @@ public class MovilidadDigital {
         return usuarioDAO.buscarPorEmail(mail);
 
     }
+    
+    public Usuario crearUsuario(String nombre, String telefono, String email) {
+        Usuario usuario = new Usuario(nombre, telefono, email);
+        agregarUsuario(usuario);
+        return usuario;
+    }
 
     // Habilitar al usuario como conductor con su primer vehículo.
 
@@ -1022,10 +1028,6 @@ public class MovilidadDigital {
 
     }
 
-    private boolean categoriaCompatible(CategoriaVehiculo disponible, CategoriaVehiculo solicitada) {
-
-        return disponible != null && solicitada != null && disponible.getCodigo() >= solicitada.getCodigo();
-
-    }
+   
 
 }

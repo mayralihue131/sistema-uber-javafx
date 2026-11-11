@@ -16,9 +16,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
-
-import netscape.javascript.JSObject;
-
 import movilidad.aplicacion.AplicacionUberFX;
 import movilidad.modelo.CategoriaVehiculo;
 import movilidad.modelo.Servicio;
@@ -27,6 +24,7 @@ import movilidad.modelo.Ubicacion;
 import movilidad.modelo.Viaje;
 import movilidad.rutas.PuntoRuta;
 import movilidad.rutas.RutaCalculada;
+import netscape.javascript.JSObject;
 
 public class MapaController {
 
@@ -394,10 +392,7 @@ public class MapaController {
                         precio
                     ));
 
-                    setStyle(
-                        "-fx-text-fill: white;"
-                            + "-fx-padding: 14;"
-                    );
+                    setStyle("-fx-padding: 14;");
                 }
             });
 

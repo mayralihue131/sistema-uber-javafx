@@ -1,69 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.VBox?>
 
-<StackPane xmlns="http://javafx.com/javafx/21"
-           xmlns:fx="http://javafx.com/fxml/1"
-           prefWidth="1080"
-           prefHeight="780"
-           styleClass="app"
-           stylesheets="@uber.css">
+<ScrollPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            prefWidth="650"
+            prefHeight="650"
+            fitToWidth="true">
 
-    <ScrollPane fitToWidth="true" styleClass="auth-scroll">
-        <content>
-            <VBox alignment="CENTER" spacing="24" styleClass="auth-wrap">
-                <Label text="%vista.sistema.uber"
-                       styleClass="brand"
-                       wrapText="true"/>
+    <content>
+        <VBox alignment="TOP_CENTER" spacing="16">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
 
-                <VBox spacing="16" styleClass="auth-card">
-                    <VBox spacing="8">
-                        <Label text="%inicio.idioma" styleClass="field-label"/>
-                        <ComboBox fx:id="selectorIdioma"
-                                  accessibleText="%inicio.idioma"
-                                  maxWidth="Infinity"/>
-                    </VBox>
+            <Label text="%vista.sistema.uber"
+                   style="-fx-text-fill: #1565c0; -fx-font-size: 24px; -fx-font-weight: bold;"
+                   wrapText="true"/>
 
-                    <Label text="%vista.tu.proximo.viaje.empieza.aca"
-                           styleClass="title"
-                           wrapText="true"/>
+            <VBox spacing="8" maxWidth="360">
+                <Label text="%inicio.idioma"/>
+                <ComboBox fx:id="selectorIdioma"
+                          accessibleText="%inicio.idioma"
+                          maxWidth="Infinity"/>
 
-                    <Label text="%vista.ingresa.con.tu.correo.para.continuar"
-                           styleClass="muted"
-                           wrapText="true"/>
+                <Label text="%vista.correo.electronico"/>
+                <TextField fx:id="campoCorreo"
+                           promptText="%vista.nombre.ejemplo.com"
+                           maxWidth="Infinity"/>
 
-                    <VBox spacing="16"
-                          styleClass="field-group"
-                          HBox.hgrow="ALWAYS"
-                          minWidth="0">
-                        <Label text="%vista.correo.electronico"
-                               styleClass="field-label"
-                               wrapText="true"/>
-                        <TextField fx:id="campoCorreo"
-                                   promptText="%vista.nombre.ejemplo.com"
-                                   maxWidth="Infinity"/>
-                    </VBox>
+                <Button text="%vista.continuar"
+                        onAction="#ingresar"/>
 
-                    <Button text="%vista.continuar"
-                            onAction="#ingresar"
-                            styleClass="primary"/>
+                <Button text="%vista.crear.una.cuenta"
+                        onAction="#abrirRegistroUsuario"/>
 
-                    <Button text="%vista.crear.una.cuenta"
-                            onAction="#abrirRegistroUsuario"
-                            styleClass="secondary"/>
-
-                    <Label fx:id="mensaje"
-                           text=""
-                           styleClass="feedback"
-                           wrapText="true"/>
-                </VBox>
-
-                <Label text="%vista.proyecto.academico.acceso.por.correo.registrado.sin"
-                       styleClass="small"
-                       wrapText="true"/>
+                <Label fx:id="mensaje" wrapText="true"/>
             </VBox>
-        </content>
-    </ScrollPane>
 
-</StackPane>
+            <Label text="%vista.proyecto.academico.acceso.por.correo.registrado.sin"
+                   wrapText="true"/>
+        </VBox>
+    </content>
+</ScrollPane>

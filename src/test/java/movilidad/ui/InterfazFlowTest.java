@@ -163,7 +163,7 @@ class InterfazFlowTest {
                     clic(stage, "Continuar");
 
                     // Abrir la pantalla nueva del mapa.
-                    clic(stage, "Solicitar un viaje");
+                    clic(stage, "Solicitar viaje");
 
                     // Se cargan coordenadas directamente para
                     // probar el formulario sin depender de clics
@@ -199,6 +199,7 @@ class InterfazFlowTest {
                     );
 
                     // Cambiar a la conductora.
+                    app.mostrar("MenuPrincipal.fxml");
                     clic(stage, "Cambiar cuenta");
                     texto(
                         stage,
@@ -206,7 +207,7 @@ class InterfazFlowTest {
                         "ana.martinez@email.com"
                     );
                     clic(stage, "Continuar");
-                    clic(stage, "Ir al panel");
+                    clic(stage, "Panel conductor");
 
                     ListView<Viaje> solicitudes =
                         nodo(stage, "solicitudes");
@@ -258,6 +259,7 @@ class InterfazFlowTest {
                     clic(stage, "Guardar mi calificación");
 
                     // El cliente abre su viaje y califica.
+                    app.mostrar("MenuPrincipal.fxml");
                     clic(stage, "Cambiar cuenta");
                     texto(
                         stage,
@@ -265,7 +267,7 @@ class InterfazFlowTest {
                         "paula.vazquez@email.com"
                     );
                     clic(stage, "Continuar");
-                    clic(stage, "Ver mis viajes");
+                    clic(stage, "Mis viajes");
 
                     ListView<Viaje> viajes =
                         nodo(stage, "listaViajes");
@@ -346,10 +348,8 @@ class InterfazFlowTest {
                     );
 
                     // Habilitar conductor y agregar vehículo.
-                    clic(
-                        stage,
-                        "Habilitarme / agregar vehículo"
-                    );
+                    clic(stage, "Panel conductor");
+                    clic(stage, "Agregar vehículo");
 
                     texto(stage, "licencia", "B1");
                     texto(stage, "patente", "UI123AB");

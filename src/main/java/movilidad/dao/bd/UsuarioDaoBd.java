@@ -49,6 +49,21 @@ public class UsuarioDaoBd implements UsuarioDAO {
         return lista;
     }
 
+    public void insertarEnBd(Usuario usuario) throws java.sql.SQLException {
+        String sql = """
+                INSERT INTO usuario (email, nombre, telefono)
+                VALUES (?, ?, ?)
+                """;
+
+        Connection conexion = ConexionBD.obtenerConexion();
+        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+            sentencia.setString(1, usuario.getEmail());
+            sentencia.setString(2, usuario.getNombre());
+            sentencia.setString(3, usuario.getTelefono());
+            sentencia.executeUpdate();
+        }
+    }
+
     private final List<Usuario> usuariosMemoria = new ArrayList<>();
 
     @Override

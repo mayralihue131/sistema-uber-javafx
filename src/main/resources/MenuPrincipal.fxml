@@ -1,70 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" prefWidth="1080" prefHeight="780" styleClass="app" stylesheets="@uber.css">
-    <top>
-        <HBox spacing="16" alignment="CENTER_LEFT" styleClass="topbar">
-            <Label text="%vista.sistema.uber" styleClass="brand" wrapText="true"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <Label text="" styleClass="user" wrapText="true" fx:id="nombreSesion"/>
-            <Button text="%vista.cambiar.cuenta" onAction="#cerrarSesion" styleClass="secondary"/>
-        </HBox>
-    </top>
-    <left>
-        <VBox spacing="8" prefWidth="196" styleClass="sidebar">
-            <Label text="%vista.tu.espacio" styleClass="eyebrow" wrapText="true"/>
-            <Button text="%vista.inicio" onAction="#abrirMenu" styleClass="nav"/>
-            <Button text="%vista.solicitar.viaje" onAction="#abrirSolicitud" styleClass="nav"/>
-            <Button text="%vista.servicios" onAction="#abrirServicios" styleClass="nav"/>
-            <Button text="%vista.mis.viajes" onAction="#abrirViajes" styleClass="nav"/>
-            <Button text="%vista.panel.conductor" onAction="#abrirPanel" styleClass="nav"/>
-            <Button text="%vista.mis.vehiculos" onAction="#abrirRegistroConductor" styleClass="nav"/>
-            <Region VBox.vgrow="ALWAYS"/>
-            <Label text="%vista.tus.viajes.quedan.guardados.al.cerrar" styleClass="small" wrapText="true"/>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            prefWidth="650"
+            prefHeight="650"
+            fitToWidth="true">
+
+    <content>
+        <VBox spacing="12">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+
+            <Label text="%vista.sistema.uber"
+                   style="-fx-text-fill: #1565c0; -fx-font-size: 24px; -fx-font-weight: bold;"/>
+
+            <Label fx:id="nombreSesion" wrapText="true"/>
+            <Label fx:id="saludo" wrapText="true"/>
+
+            <FlowPane hgap="8" vgap="8">
+                <Button text="%vista.solicitar.viaje" onAction="#abrirSolicitud"/>
+                <Button text="%vista.servicios" onAction="#abrirServicios"/>
+                <Button text="%vista.mis.viajes" onAction="#abrirViajes"/>
+                <Button text="%vista.panel.conductor" onAction="#abrirPanel"/>
+                <Button text="%vista.cambiar.cuenta" onAction="#cerrarSesion"/>
+            </FlowPane>
+
+            <FlowPane hgap="8" vgap="6">
+                <Label text="%vista.viajes.como.cliente"/>
+                <Label fx:id="cantidadViajes"/>
+            </FlowPane>
+
+            <FlowPane hgap="8" vgap="6">
+                <Label text="%vista.viajes.activos"/>
+                <Label fx:id="cantidadActivos"/>
+            </FlowPane>
+
+            <Label fx:id="resumenActivo" wrapText="true"/>
+            <Label fx:id="explicacionActivo" wrapText="true"/>
+
+            <Button fx:id="btnVerActivo"
+                    text="%vista.ver.mi.viaje.activo"
+                    onAction="#verActivo"/>
+
+            <Label fx:id="mensaje" wrapText="true"/>
         </VBox>
-    </left>
-    <center>
-        <ScrollPane fitToWidth="true">
-            <content>
-                <VBox spacing="20" styleClass="page">
-                    <Label text="%vista.a.donde.vamos.hoy" styleClass="title" wrapText="true"/>
-                    <Label text="%vista.elegi.como.queres.usar.sistema.uber" styleClass="muted" wrapText="true"/>
-                    <VBox spacing="16" styleClass="hero">
-                        <Label text="" styleClass="hero-title" wrapText="true" fx:id="saludo"/>
-                        <Label text="%vista.pedi.un.viaje.elegi.tu.servicio.y" styleClass="muted" wrapText="true"/>
-                        <HBox spacing="12" alignment="CENTER_LEFT">
-                            <Button text="%vista.solicitar.un.viaje" onAction="#abrirSolicitud" styleClass="primary"/>
-                            <Button text="%vista.ver.mis.viajes" onAction="#abrirViajes" styleClass="secondary"/>
-                        </HBox>
-                    </VBox>
-                    <HBox spacing="12" alignment="CENTER_LEFT">
-                        <VBox spacing="16" styleClass="card">
-                            <Label text="" styleClass="stat" wrapText="true" fx:id="cantidadViajes"/>
-                            <Label text="%vista.viajes.como.cliente" styleClass="muted" wrapText="true"/>
-                        </VBox>
-                        <VBox spacing="16" styleClass="card">
-                            <Label text="" styleClass="stat" wrapText="true" fx:id="cantidadActivos"/>
-                            <Label text="%vista.viajes.activos" styleClass="muted" wrapText="true"/>
-                        </VBox>
-                    </HBox>
-                    <VBox spacing="16" styleClass="card">
-                        <Label text="" styleClass="section" wrapText="true" fx:id="resumenActivo"/>
-                        <Label text="" styleClass="muted" wrapText="true" fx:id="explicacionActivo"/>
-                        <Button text="%vista.ver.mi.viaje.activo" onAction="#verActivo" styleClass="primary" fx:id="btnVerActivo"/>
-                    </VBox>
-                    <VBox spacing="16" styleClass="card">
-                        <Label text="%vista.tambien.podes.conducir" styleClass="section" wrapText="true"/>
-                        <Label text="%vista.registra.tu.vehiculo.o.entra.al.panel" styleClass="muted" wrapText="true"/>
-                        <HBox spacing="12" alignment="CENTER_LEFT">
-                            <Button text="%vista.ir.al.panel" onAction="#abrirPanel" styleClass="secondary"/>
-                            <Button text="%vista.habilitarme.agregar.vehiculo" onAction="#abrirRegistroConductor" styleClass="secondary"/>
-                        </HBox>
-                    </VBox>
-                </VBox>
-            </content>
-        </ScrollPane>
-    </center>
-    <bottom>
-        <Label text="" styleClass="feedback" wrapText="true" fx:id="mensaje" maxWidth="Infinity"/>
-    </bottom>
-</BorderPane>
+    </content>
+</ScrollPane>

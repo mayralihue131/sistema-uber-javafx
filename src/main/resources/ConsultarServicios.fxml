@@ -1,57 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" prefWidth="1080" prefHeight="780" styleClass="app" stylesheets="@uber.css">
-    <top>
-        <HBox spacing="16" alignment="CENTER_LEFT" styleClass="topbar">
-            <Label text="%vista.sistema.uber" styleClass="brand" wrapText="true"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <Label text="" styleClass="user" wrapText="true" fx:id="nombreSesion"/>
-            <Button text="%vista.cambiar.cuenta" onAction="#cerrarSesion" styleClass="secondary"/>
-        </HBox>
-    </top>
-    <left>
-        <VBox spacing="8" prefWidth="196" styleClass="sidebar">
-            <Label text="%vista.tu.espacio" styleClass="eyebrow" wrapText="true"/>
-            <Button text="%vista.inicio" onAction="#abrirMenu" styleClass="nav"/>
-            <Button text="%vista.solicitar.viaje" onAction="#abrirSolicitud" styleClass="nav"/>
-            <Button text="%vista.servicios" onAction="#abrirServicios" styleClass="nav"/>
-            <Button text="%vista.mis.viajes" onAction="#abrirViajes" styleClass="nav"/>
-            <Button text="%vista.panel.conductor" onAction="#abrirPanel" styleClass="nav"/>
-            <Button text="%vista.mis.vehiculos" onAction="#abrirRegistroConductor" styleClass="nav"/>
-            <Region VBox.vgrow="ALWAYS"/>
-            <Label text="%vista.tus.viajes.quedan.guardados.al.cerrar" styleClass="small" wrapText="true"/>
-        </VBox>
-    </left>
-    <center>
-        <ScrollPane fitToWidth="true">
-            <content>
-                <VBox spacing="20" styleClass="page">
-                    <Label text="%vista.servicios.disponibles" styleClass="title" wrapText="true"/>
-                    <Label text="%vista.consulta.las.tarifas.cargadas.en.tus.archivos" styleClass="muted" wrapText="true"/>
-                    <VBox spacing="16" styleClass="card">
-                        <HBox spacing="12" alignment="CENTER_LEFT">
-                            <VBox spacing="16" styleClass="field-group" HBox.hgrow="ALWAYS" minWidth="0">
-                                <Label text="%vista.tipo" styleClass="field-label" wrapText="true"/>
-                                <ComboBox fx:id="tipoServicio" promptText="%vista.tipo.de.servicio" maxWidth="Infinity"/>
-                            </VBox>
-                            <VBox spacing="16" styleClass="field-group" HBox.hgrow="ALWAYS" minWidth="0">
-                                <Label text="%vista.categoria" styleClass="field-label" wrapText="true"/>
-                                <ComboBox fx:id="categoria" promptText="%vista.categoria" maxWidth="Infinity"/>
-                            </VBox>
-                        </HBox>
-                        <Button text="%vista.consultar.servicios" onAction="#buscarServicios" styleClass="primary"/>
-                        <ListView fx:id="listaServicios" prefHeight="350">
-                            <placeholder>
-                                <Label text="%vista.elegi.los.filtros.y.consulta" styleClass="muted" wrapText="true"/>
-                            </placeholder>
-                        </ListView>
-                    </VBox>
-                </VBox>
-            </content>
-        </ScrollPane>
-    </center>
-    <bottom>
-        <Label text="" styleClass="feedback" wrapText="true" fx:id="mensaje" maxWidth="Infinity"/>
-    </bottom>
-</BorderPane>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      prefWidth="650"
+      prefHeight="650"
+      spacing="10">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="%vista.servicios.disponibles"
+           style="-fx-text-fill: #1565c0; -fx-font-size: 24px; -fx-font-weight: bold;"
+           wrapText="true"/>
+
+    <Label text="%vista.tipo.de.servicio"/>
+    <ComboBox fx:id="tipoServicio" maxWidth="Infinity"/>
+
+    <Label text="%vista.categoria"/>
+    <ComboBox fx:id="categoria" maxWidth="Infinity"/>
+
+    <Button text="%vista.consultar.servicios" onAction="#buscarServicios"/>
+
+    <ListView fx:id="listaServicios" VBox.vgrow="ALWAYS">
+        <placeholder>
+            <Label text="%vista.elegi.los.filtros.y.consulta" wrapText="true"/>
+        </placeholder>
+    </ListView>
+
+    <Label fx:id="mensaje" wrapText="true"/>
+
+    <Button text="%vista.volver.al.menu" onAction="#abrirMenu"/>
+</VBox>

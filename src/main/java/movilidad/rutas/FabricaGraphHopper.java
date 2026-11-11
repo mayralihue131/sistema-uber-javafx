@@ -31,22 +31,27 @@ public final class FabricaGraphHopper {
             motor.setOSMFile(archivo.toString());
 
             motor.setGraphHopperLocation(
-                "datos/mapas/cache-auto"
+                "datos/mapas/cache-auto-moto"
             );
 
             motor.setEncodedValuesString(
-                "car_access, car_average_speed"
+                "car_access, car_average_speed, track_type, road_access, road_class, surface"
             );
 
-            Profile perfil = new Profile("car")
+            Profile auto = new Profile("car")
                 .setCustomModel(
                     GHUtility.loadCustomModelFromJar("car.json")
                 );
 
-            motor.setProfiles(perfil);
+            Profile moto = new Profile("motorcycle")
+                .setCustomModel(
+                    GHUtility.loadCustomModelFromJar("motorcycle.json")
+                );
+
+            motor.setProfiles(auto, moto);
 
             motor.getCHPreparationHandler()
-                .setCHProfiles(new CHProfile("car"));
+                .setCHProfiles(new CHProfile("car"), new CHProfile("motorcycle"));
 
             motor.importOrLoad();
 

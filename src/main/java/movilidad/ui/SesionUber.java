@@ -6,6 +6,9 @@ import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.util.*;
 import movilidad.aplicacion.AplicacionConsultas;
+import movilidad.dao.DAOLoader;
+import movilidad.dao.bd.BdDAOFactory;
+import movilidad.dao.bd.UsuarioDaoBd;
 import movilidad.dao.txt.CargaParametros;
 import movilidad.logica.MovilidadDigital;
 import movilidad.modelo.*;
@@ -39,11 +42,37 @@ public final class SesionUber {
     public Usuario usuario() { return sistema.buscarUsuarioPorMail(correo); }
     public Viaje viaje() { return sistema.buscarViajePorId(viajeSeleccionado); }
     public Path archivo() { return archivo; }
+    
     public void ingresar(String email) {
-        Usuario u = sistema.getUsuarios().stream().filter(x -> x.getEmail().equalsIgnoreCase(email.trim())).findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Ese correo no está registrado. Creá una cuenta o usá paula.vazquez@email.com."));
+        Usuario u = sistema.getUsuarios().stream()
+            .filter(usuario -> usuario.getEmail().equalsIgnoreCase(email.trim()))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException(
+                "Ese correo no está registrado. Creá una cuenta."
+            ));
+
         correo = u.getEmail();
     }
+    public void registrarUsuario(String nombre, String telefono, String email)
+            throws IOException, java.sql.SQLException {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("El email no puede estar vacío.");
+        }
+        if (sistema.getUsuarios().stream()
+                .anyMatch(usuario -> usuario.getEmail().equalsIgnoreCase(email))) {
+            throw new IllegalArgumentException("Ese correo ya está registrado.");
+        }
+
+        if (DAOLoader.getFactory() instanceof BdDAOFactory fabrica) {
+            Usuario usuario = new Usuario(nombre, telefono, email);
+            UsuarioDaoBd dao = (UsuarioDaoBd) fabrica.getUsuarioDAO();
+            dao.insertarEnBd(usuario);
+            sistema.agregarUsuario(usuario);
+        } else {
+            ejecutar("USUARIO", nombre, telefono, email);
+        }
+    }
+
     public void ejecutar(String accion, String... args) throws IOException {
         String[] evento = new String[args.length+2];
         evento[0] = accion; evento[1] = LocalDateTime.now().toString();

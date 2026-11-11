@@ -4,3 +4,4 @@ Carlos Rodriguez;+5492804000002;carlos.rodriguez@email.com;
 Juan Perez;+5492804000003;juan.perez@email.com;B1;AD123BC;
 Ana Martinez;+5492804000004;ana.martinez@email.com;B1;AB456DE;
 Diego Sanchez;+5492804000005;diego.sanchez@email.com;B1;AC789FG;
+Martin Soto;+5492804000099;martin.moto@email.com;A1.2;A001ABC;

@@ -27,7 +27,7 @@ public final class PlanificadorGraphHopper
             PuntoRuta destino,
             TipoVehiculo tipoVehiculo) {
 
-        comprobarTipo(tipoVehiculo);
+        String nombrePerfil = perfilPara(tipoVehiculo);
         Objects.requireNonNull(origen);
         Objects.requireNonNull(destino);
 
@@ -38,7 +38,7 @@ public final class PlanificadorGraphHopper
             destino.longitud()
         );
 
-        pedido.setProfile("car");
+        pedido.setProfile(nombrePerfil);
         pedido.setLocale(Locale.forLanguageTag("es-AR"));
 
         var respuesta = motor.route(pedido);
@@ -73,15 +73,15 @@ public final class PlanificadorGraphHopper
             PuntoRuta punto,
             TipoVehiculo tipoVehiculo) {
 
-        comprobarTipo(tipoVehiculo);
+        String nombrePerfil = perfilPara(tipoVehiculo);
         Objects.requireNonNull(punto);
 
-        var perfil = motor.getProfile("car");
+        var perfil = motor.getProfile(nombrePerfil);
 
         var filtro = new DefaultSnapFilter(
             motor.createWeighting(perfil, new PMap()),
             motor.getEncodingManager()
-                .getBooleanEncodedValue("car_subnetwork")
+                .getBooleanEncodedValue(nombrePerfil + "_subnetwork")
         );
 
         var ajuste = motor.getLocationIndex().findClosest(
@@ -103,12 +103,11 @@ public final class PlanificadorGraphHopper
         ));
     }
 
-    private void comprobarTipo(TipoVehiculo tipoVehiculo) {
-        if (tipoVehiculo != TipoVehiculo.AUTO) {
-            throw new IllegalArgumentException(
-                "Por ahora, las rutas están configuradas para AUTO."
-            );
-        }
+    private String perfilPara(TipoVehiculo tipoVehiculo) {
+        return switch (tipoVehiculo) {
+            case AUTO -> "car";
+            case MOTO -> "motorcycle";
+        };
     }
 
     @Override
