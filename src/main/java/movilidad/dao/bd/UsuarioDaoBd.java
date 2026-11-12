@@ -3,6 +3,7 @@ package movilidad.dao.bd;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,26 +50,34 @@ public class UsuarioDaoBd implements UsuarioDAO {
         return lista;
     }
 
-    public void insertarEnBd(Usuario usuario) throws java.sql.SQLException {
+    private final List<Usuario> usuariosMemoria = new ArrayList<>();
+
+    @Override
+    public void guardar(Usuario usuario) {
+        if (usuario == null) {
+            throw new IllegalArgumentException("El usuario no puede ser null.");
+        }
+
         String sql = """
                 INSERT INTO usuario (email, nombre, telefono)
                 VALUES (?, ?, ?)
                 """;
 
-        Connection conexion = ConexionBD.obtenerConexion();
-        try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
-            sentencia.setString(1, usuario.getEmail());
-            sentencia.setString(2, usuario.getNombre());
-            sentencia.setString(3, usuario.getTelefono());
-            sentencia.executeUpdate();
+        try {
+            Connection conexion = ConexionBD.obtenerConexion();
+            try (PreparedStatement sentencia = conexion.prepareStatement(sql)) {
+                sentencia.setString(1, usuario.getEmail());
+                sentencia.setString(2, usuario.getNombre());
+                sentencia.setString(3, usuario.getTelefono());
+                sentencia.executeUpdate();
+            }
+            usuariosMemoria.add(usuario);
+        } catch (SQLException e) {
+            if ("23505".equals(e.getSQLState())) {
+                throw new IllegalArgumentException("Ese correo ya está registrado.", e);
+            }
+            throw new IllegalStateException("No se pudo registrar el usuario en la base de datos.", e);
         }
-    }
-
-    private final List<Usuario> usuariosMemoria = new ArrayList<>();
-
-    @Override
-    public void guardar(Usuario usuario) {
-        usuariosMemoria.add(usuario);
     }
 
     @Override

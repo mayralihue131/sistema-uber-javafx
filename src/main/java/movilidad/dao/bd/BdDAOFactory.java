@@ -24,4 +24,9 @@ public class BdDAOFactory implements DAOFactory {
     public ServicioDAO getServicioDAO() {
         return new ServicioDaoBd();
     }
+
+    @Override
+    public boolean persisteUsuariosEnOrigen() {
+        return true;
+    }
 }

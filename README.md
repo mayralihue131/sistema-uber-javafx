@@ -26,14 +26,51 @@ de datos y el mapa OSM.
 
 El acceso se realiza mediante correo registrado, sin contraseña.
 
-- Cliente: paula.vazquez@email.com
-- Conductora: ana.martinez@email.com
-- Conductor: juan.perez@email.com
-
-Ana tiene un Ford Focus de categoría ESTANDAR.
-Juan tiene un Toyota Corolla de categoría PREMIUM.
+- Cliente: `paula.vazquez@email.com`
+- Cliente: `carlos.rodriguez@email.com`
+- Conductora: `ana.martinez@email.com` (Ford Focus — `AUTO`, categoría `ESTANDAR`, Pasajeros y Envíos)
+- Conductor: `juan.perez@email.com` (Toyota Corolla — `AUTO`, categoría `PREMIUM`, Pasajeros)
+- Conductor: `diego.sanchez@email.com` (Chevrolet Cruze — `AUTO`, categoría `CONFORT`, Pasajeros y Envíos)
+- Conductor: `martin.moto@email.com` (Honda Wave 110 — `MOTO`, categoría `ESTANDAR`, Pasajeros)
 
 La disponibilidad actual depende de los cambios guardados.
+
+*(Nota: Si el origen de datos está configurado en `BD`, las cuentas disponibles serán las registradas en la tabla `usuario` de PostgreSQL más cualquier usuario nuevo que registres desde la pantalla **Crear una cuenta**).*
+
+## Configuración del sistema
+
+Los archivos de configuración se encuentran en `src/main/resources/`:
+
+### 1. Interfaz e Idioma (`application.properties`)
+```properties
+app.ui=javafx
+app.language=es
+app.country=AR
+```
+- `app.ui`: `javafx` (interfaz gráfica) o `cli` (consola).
+- `app.language`: idioma inicial (`es` para Español o `en` para Inglés). Además, desde la pantalla de **Inicio** podés cambiar el idioma en tiempo real con el selector **Idioma**.
+
+### 2. Origen de datos y parámetros (`config.properties`)
+```properties
+origen.datos=BD
+velocidadPromedioKmH=40
+```
+- `origen.datos`: define dónde obtiene y guarda la información la aplicación:
+  - `BD`: se conecta a la base de datos PostgreSQL configurada en `jdbc.properties`.
+  - `TXT`: carga los datos iniciales desde `usuarios_test.txt`, `vehiculos_test.txt` y `servicios_test.txt`.
+  - `MEMORIA`: utiliza colecciones en memoria RAM sin lectura externa (ideal para pruebas).
+
+### 3. Conexión a Base de Datos (`jdbc.properties`)
+```properties
+driver=org.postgresql.Driver
+url=jdbc:postgresql://pgs.fi.mdn.unp.edu.ar:30000/bd1
+schema=movilidad_digital
+usr=estudiante
+pwd=bd1estudiante
+```
+- `url`: servidor, puerto y nombre de la base de datos PostgreSQL.
+- `schema`: esquema donde residen las tablas del sistema (`movilidad_digital`).
+- `usr` y `pwd`: credenciales de acceso a PostgreSQL.
 
 ## Solicitar y completar un viaje
 
@@ -66,7 +103,7 @@ datos/mapas/puerto_madryn_ampliado.osm
 La primera preparación del mapa puede tardar. GraphHopper guarda
 una caché en:
 
-datos/mapas/cache-auto
+datos/mapas/cache-auto-moto
 
 La vista previa muestra:
 
@@ -82,7 +119,8 @@ El conductor mostrado en la vista previa no queda asignado
 automáticamente. La aceptación se realiza desde el panel del
 conductor.
 
-Actualmente, el cálculo de rutas está implementado para AUTO.
+El cálculo de rutas por calles está implementado tanto para **AUTO**
+como para **MOTO**.
 
 ## Cotización
 
@@ -117,22 +155,58 @@ Las calificaciones pueden actualizarse en viajes finalizados.
 
 Los viajes cancelados no muestran la opción de calificar.
 
-## Persistencia
+## Ejemplos de resultados según opciones del usuario
 
-Los archivos TXT de recursos contienen los datos iniciales.
+### 1. Cotización de un mismo recorrido (5 km · 7,5 min a 40 km/h)
+Fórmula: `Tarifa Base + (km × Precio/km) + (min × Precio/min)`.
 
-Los cambios se guardan en:
+| Tipo / Categoría elegida | Servicio mostrado | Tarifa Base | Precio/km | Precio/min | Total estimado |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| `PASAJEROS` + `ESTANDAR` | **Mototaxi** (`MOTO`) | \$1.000 | \$100 | \$50 | **\$1.875,00** |
+| `PASAJEROS` + `ESTANDAR` | **Estandar** (`AUTO`) | \$2.000 | \$200 | \$100 | **\$3.750,00** |
+| `PASAJEROS` + `CONFORT` | **Confort** (`AUTO`) | \$2.500 | \$250 | \$125 | **\$4.687,50** |
+| `PASAJEROS` + `PREMIUM` | **Premium** (`AUTO`) | \$3.000 | \$300 | \$150 | **\$5.625,00** |
+| `ENVIOS` + `ESTANDAR` | **Envios** (`AUTO`) | \$1.500 | \$150 | \$75 | **\$2.812,50** |
+| `ENVIOS` + `PREMIUM` | *(Sin resultados)* | — | — | — | **Mensaje de aviso** |
 
-datos/uber-eventos.txt
+### 2. Solicitudes visibles para el conductor según su categoría mínima
+Se exige: `Categoría Mínima Aceptada <= Categoría del Servicio <= Categoría del Vehículo Activo`.
 
-Esto permite conservar usuarios registrados, vehículos,
-disponibilidad, estados de viajes, cancelaciones y calificaciones
-al cerrar y volver a abrir la aplicación.
+- **Juan Pérez (`AUTO` `PREMIUM`) con mínima `ESTANDAR`:** recibe solicitudes `ESTANDAR`, `CONFORT` y `PREMIUM` de pasajeros.
+- **Juan Pérez con mínima `PREMIUM`:** solo ve solicitudes `PREMIUM`; las demás dejan de mostrarse.
+- **Ana Martínez (`AUTO` `ESTANDAR`):** recibe `ESTANDAR` (pasajeros) y `ENVIOS`. Si intenta fijar mínima `CONFORT`, el sistema lo impide.
+- **Martín Soto (`MOTO` `ESTANDAR`):** solo ve solicitudes de `Mototaxi` (`MOTO`).
 
-No borrar ni editar manualmente ese archivo durante el uso normal.
+### 3. Cancelación según momento y usuario (ejemplo servicio Estandar)
+- **Cliente cancela antes de ser aceptado (`SOLICITADO`):** cargo = **\$0,00**.
+- **Cliente cancela después de aceptar (`ACEPTADO`)** con 2 km y 3 min transcurridos: cargo = **\$2.700,00** (`2000 + 2×200 + 3×100`).
+- **Conductor cancela (`ACEPTADO` o `INICIADO`):** cargo al cliente = **\$0,00** y el conductor regresa a `DISPONIBLE`.
 
-La aplicación está pensada para ejecutarse en un solo proceso,
-alternando las cuentas desde Cambiar cuenta.
+## Persistencia y Base de Datos
+
+El sistema utiliza el patrón **DAO** configurado mediante `origen.datos` en `src/main/resources/config.properties`:
+
+### Modo Base de Datos (`origen.datos=BD`)
+- Se conecta al servidor **PostgreSQL** especificado en `src/main/resources/jdbc.properties` (esquema `movilidad_digital` en `pgs.fi.mdn.unp.edu.ar:30000/bd1`) manteniendo una conexión persistente durante la sesión.
+- **Carga inicial desde PostgreSQL:**
+  - Tabla `usuario` junto con `conductor_vehiculo` (usuarios, licencias de conducir y patente del vehículo activo).
+  - Tabla `vehiculo` (patente, modelo, capacidad, tipo, categoría y máscara de bits `tipo_servicios`: `1` = Pasajeros, `2` = Envíos, `3` = Ambos).
+  - Tabla `servicio` (tarifas base, por kilómetro y por minuto).
+- **Alta de nuevos usuarios:** Al registrarse desde la pantalla **Crear una cuenta**, el usuario se inserta directamente en la tabla `usuario` (`INSERT INTO usuario (email, nombre, telefono)`) y queda disponible en la base de datos. Si el correo ya existe en la tabla, el sistema informa el error sin duplicar registros.
+- **Tolerancia a fallos (Fallback automático):** Si al iniciar en modo `BD` no hay conexión de red o el servidor PostgreSQL no responde, la aplicación advierte por consola y carga automáticamente los archivos `.txt` locales para no interrumpir la ejecución.
+
+### Modo Archivos de Texto (`origen.datos=TXT`) y Log Local
+- Carga los datos iniciales desde los archivos `.txt` en `src/main/resources/` (`usuarios_test.txt`, `vehiculos_test.txt`, `servicios_test.txt`).
+- Las acciones operativas durante la sesión (altas en modo TXT, vehículos agregados, cambios de estado, solicitudes, viajes, cancelaciones y calificaciones) se guardan en:
+
+  `datos/uber-eventos.txt`
+
+  Esto permite conservar el historial y los cambios al cerrar y volver a abrir la aplicación. No borrar ni editar manualmente ese archivo durante el uso normal.
+
+### Modo Memoria (`origen.datos=MEMORIA`)
+- Mantiene los datos únicamente en memoria RAM durante la ejecución actual (utilizado principalmente por las pruebas unitarias automatizadas).
+
+La aplicación está pensada para ejecutarse en un solo proceso, alternando las cuentas desde **Cambiar cuenta**.
 
 ## Conexión a Internet
 

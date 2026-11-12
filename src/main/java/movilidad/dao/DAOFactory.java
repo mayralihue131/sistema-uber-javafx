@@ -14,4 +14,12 @@ public interface DAOFactory {
     VehiculoDAO getVehiculoDAO();
 
     ServicioDAO getServicioDAO();
+
+    /**
+     * Indica si esta fábrica persiste directamente las altas de usuarios en su origen
+     * (por ejemplo, base de datos relacional) sin requerir el log local de eventos.
+     */
+    default boolean persisteUsuariosEnOrigen() {
+        return false;
+    }
 }

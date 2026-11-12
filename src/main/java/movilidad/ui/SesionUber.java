@@ -6,9 +6,8 @@ import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.util.*;
 import movilidad.aplicacion.AplicacionConsultas;
+import movilidad.dao.DAOFactory;
 import movilidad.dao.DAOLoader;
-import movilidad.dao.bd.BdDAOFactory;
-import movilidad.dao.bd.UsuarioDaoBd;
 import movilidad.dao.txt.CargaParametros;
 import movilidad.logica.MovilidadDigital;
 import movilidad.modelo.*;
@@ -54,22 +53,26 @@ public final class SesionUber {
         correo = u.getEmail();
     }
     public void registrarUsuario(String nombre, String telefono, String email)
-            throws IOException, java.sql.SQLException {
+            throws IOException {
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("El email no puede estar vacío.");
         }
+        String emailLimpio = email.trim();
         if (sistema.getUsuarios().stream()
-                .anyMatch(usuario -> usuario.getEmail().equalsIgnoreCase(email))) {
+                .anyMatch(usuario -> usuario.getEmail().equalsIgnoreCase(emailLimpio))) {
             throw new IllegalArgumentException("Ese correo ya está registrado.");
         }
 
-        if (DAOLoader.getFactory() instanceof BdDAOFactory fabrica) {
-            Usuario usuario = new Usuario(nombre, telefono, email);
-            UsuarioDaoBd dao = (UsuarioDaoBd) fabrica.getUsuarioDAO();
-            dao.insertarEnBd(usuario);
+        String nombreLimpio = nombre == null ? "" : nombre.trim();
+        String telefonoLimpio = telefono == null ? "" : telefono.trim();
+
+        DAOFactory fabrica = DAOLoader.getFactory();
+        if (fabrica.persisteUsuariosEnOrigen()) {
+            Usuario usuario = new Usuario(nombreLimpio, telefonoLimpio, emailLimpio);
+            fabrica.getUsuarioDAO().guardar(usuario);
             sistema.agregarUsuario(usuario);
         } else {
-            ejecutar("USUARIO", nombre, telefono, email);
+            ejecutar("USUARIO", nombreLimpio, telefonoLimpio, emailLimpio);
         }
     }
 
