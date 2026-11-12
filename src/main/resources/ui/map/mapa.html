@@ -69,6 +69,8 @@
     "sinImagenes": "Some map tiles could not load.",
     "ayuda": "Puerto Madryn · Drag to pan and use + or − to zoom.",
     "conductor": "Driver",
+    "origen": "Pickup",
+    "destino": "Destination",
     "elegirOrigen": "Click to choose the pickup point.",
     "fuera": "Choose a point within Puerto Madryn.",
     "elegirDestino": "Pickup selected. Now choose the destination.",
@@ -81,6 +83,8 @@
     "sinImagenes": "No se pudieron cargar algunas imágenes del mapa.",
     "ayuda": "Puerto Madryn · Arrastrá para moverte y usá + o −.",
     "conductor": "Conductor",
+    "origen": "Origen",
+    "destino": "Destino",
     "elegirOrigen": "Hacé clic para elegir el origen.",
     "fuera": "Elegí un punto dentro de Puerto Madryn.",
     "elegirDestino": "Origen elegido. Ahora elegí el destino.",
@@ -148,12 +152,23 @@
                 window.refrescarTamano
             );
 			var capaRutas = L.layerGroup().addTo(mapa);
+			var animacionVehiculo = null;
 
 			window.limpiarRutas = function () {
+			    if (animacionVehiculo) {
+			        clearInterval(animacionVehiculo);
+			        animacionVehiculo = null;
+			    }
 			    capaRutas.clearLayers();
 			};
 
-			window.mostrarRutas = function (hastaOrigen, hastaDestino) {
+			window.fijarAviso = function (texto) {
+			    if (aviso && texto) {
+			        aviso.textContent = texto;
+			    }
+			};
+
+			window.mostrarRutas = function (hastaOrigen, hastaDestino, estado) {
 			    window.limpiarRutas();
 
 			    var limites = L.latLngBounds([]);
@@ -169,7 +184,7 @@
 
 			        limites.extend(rutaConductor.getBounds());
 
-			        L.circleMarker(hastaOrigen[0], {
+			        var marcadorConductor = L.circleMarker(hastaOrigen[0], {
 			            radius: 8,
 			            color: "#ffffff",
 			            weight: 3,
@@ -177,6 +192,30 @@
 			            fillOpacity: 1,
 			            interactive: false
 			        }).bindTooltip(mensajesMapa.conductor).addTo(capaRutas);
+
+			        if (estado === "ACEPTADO") {
+			            var indiceCond = 0;
+			            var totalPasosCond = 20;
+			            var pasoCond = Math.max(1, Math.ceil(hastaOrigen.length / totalPasosCond));
+			            animacionVehiculo = setInterval(function () {
+			                indiceCond += pasoCond;
+			                if (indiceCond >= hastaOrigen.length - 1) {
+			                    indiceCond = hastaOrigen.length - 1;
+			                    marcadorConductor.setLatLng(hastaOrigen[indiceCond]);
+			                    clearInterval(animacionVehiculo);
+			                    animacionVehiculo = null;
+			                    if (window.javaBridge && window.javaBridge.onConductorLlegadoAlOrigen) {
+			                        window.javaBridge.onConductorLlegadoAlOrigen();
+			                    }
+			                } else {
+			                    marcadorConductor.setLatLng(hastaOrigen[indiceCond]);
+			                }
+			            }, 250);
+			        }
+			    } else if (estado === "ACEPTADO") {
+			        if (window.javaBridge && window.javaBridge.onConductorLlegadoAlOrigen) {
+			            window.javaBridge.onConductorLlegadoAlOrigen();
+			        }
 			    }
 
 			    // Recorrido del pasajero al destino.
@@ -189,6 +228,68 @@
 			        }).addTo(capaRutas);
 
 			        limites.extend(rutaViaje.getBounds());
+
+			        // Marcador de origen (pickup)
+			        L.circleMarker(hastaDestino[0], {
+			            radius: 7,
+			            color: "#ffffff",
+			            weight: 2,
+			            fillColor: "#3b82f6",
+			            fillOpacity: 1,
+			            interactive: false
+			        }).bindTooltip(mensajesMapa.origen || "Origen").addTo(capaRutas);
+
+			        // Marcador de destino
+			        L.circleMarker(hastaDestino[hastaDestino.length - 1], {
+			            radius: 7,
+			            color: "#ffffff",
+			            weight: 2,
+			            fillColor: "#ef4444",
+			            fillOpacity: 1,
+			            interactive: false
+			        }).bindTooltip(mensajesMapa.destino || "Destino").addTo(capaRutas);
+
+			        // Si el viaje ya está finalizado, mostramos el vehículo en el destino
+			        if (estado === "FINALIZADO") {
+			            L.circleMarker(hastaDestino[hastaDestino.length - 1], {
+			                radius: 8,
+			                color: "#ffffff",
+			                weight: 3,
+			                fillColor: "#f59e0b",
+			                fillOpacity: 1,
+			                interactive: false
+			            }).bindTooltip(mensajesMapa.conductor).addTo(capaRutas);
+			        }
+
+			        // Animación del vehículo en traslado cuando el viaje está iniciado
+			        if (estado === "INICIADO") {
+			            var indiceViaje = 0;
+			            var totalPasos = 25;
+			            var pasoViaje = Math.max(1, Math.ceil(hastaDestino.length / totalPasos));
+			            var marcadorViaje = L.circleMarker(hastaDestino[0], {
+			                radius: 8,
+			                color: "#ffffff",
+			                weight: 3,
+			                fillColor: "#f59e0b",
+			                fillOpacity: 1,
+			                interactive: false
+			            }).bindTooltip(mensajesMapa.conductor).addTo(capaRutas);
+
+			            animacionVehiculo = setInterval(function () {
+			                indiceViaje += pasoViaje;
+			                if (indiceViaje >= hastaDestino.length - 1) {
+			                    indiceViaje = hastaDestino.length - 1;
+			                    marcadorViaje.setLatLng(hastaDestino[indiceViaje]);
+			                    clearInterval(animacionVehiculo);
+			                    animacionVehiculo = null;
+			                    if (window.javaBridge && window.javaBridge.onViajeLlegadoAlDestino) {
+			                        window.javaBridge.onViajeLlegadoAlDestino();
+			                    }
+			                } else {
+			                    marcadorViaje.setLatLng(hastaDestino[indiceViaje]);
+			                }
+			            }, 350);
+			        }
 			    }
 
 			    if (limites.isValid()) {

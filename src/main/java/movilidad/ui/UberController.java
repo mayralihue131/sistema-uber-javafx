@@ -8,14 +8,21 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
+import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.scene.web.WebView;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 import movilidad.aplicacion.AplicacionUberFX;
 import movilidad.modelo.*;
+import movilidad.rutas.PuntoRuta;
+import movilidad.rutas.RutaCalculada;
+import netscape.javascript.JSObject;
 
 public final class UberController {
     // Referencias de la pantalla y estado temporal de la solicitud.
@@ -166,6 +173,47 @@ public final class UberController {
     private TextField motivoCancelacion;
     @FXML
     private TextField kmRecorridos;
+    @FXML
+    private WebView mapaWeb;
+    private boolean mapaDetalleListo = false;
+    private UUID ultimoViajeMapa = null;
+    private EstadoViaje ultimoEstadoMapa = null;
+    private Task<?> tareaRutasDetalle = null;
+    private boolean conductorEnOrigen = false;
+
+    public final class PuenteDetalle {
+        public void onViajeLlegadoAlDestino() {
+            Platform.runLater(() -> finalizarViajeAutomatico());
+        }
+
+        public void onConductorLlegadoAlOrigen() {
+            Platform.runLater(() -> {
+                conductorEnOrigen = true;
+                if (btnIniciar != null) {
+                    btnIniciar.setDisable(false);
+                    btnIniciar.setText(t("vista.iniciar.traslado"));
+                }
+                Viaje v = s().viaje();
+                if (v != null && v.estadoActual() == EstadoViaje.ACEPTADO) {
+                    if (mensaje != null) {
+                        mensaje.setText(app.locale().getLanguage().equals("en")
+                                ? "Driver arrived at pickup. Ready to start ride."
+                                : "El conductor llegó al origen. Ya podés iniciar el traslado.");
+                    }
+                    try {
+                        String aviso = app.locale().getLanguage().equals("en")
+                                ? "Driver at pickup · Ready to start"
+                                : "Conductor en el origen · Listo para iniciar";
+                        mapaWeb.getEngine().executeScript(
+                                "if (window.fijarAviso) window.fijarAviso(" + formatearTextoJs(aviso) + ");"
+                        );
+                    } catch (Exception ignored) {
+                    }
+                }
+            });
+        }
+    }
+    private final PuenteDetalle puenteDetalle = new PuenteDetalle();
 
     // Creación del controlador y utilidades de navegación.
     public UberController(AplicacionUberFX app, String pantalla) {
@@ -184,6 +232,9 @@ public final class UberController {
 
     public void detener() {
         if (reloj != null) reloj.stop();
+        if (tareaRutasDetalle != null && tareaRutasDetalle.isRunning()) {
+            tareaRutasDetalle.cancel();
+        }
     }
 
     private void intentar(Accion accion) {
@@ -235,6 +286,7 @@ public final class UberController {
             case "DetalleViaje.fxml" -> {
                 calificacion.getItems().setAll(Arrays.stream(CalificacionViaje.values()).filter(c -> c != CalificacionViaje.NO_CALIFICADO).toList());
                 kmRecorridos.setText("0");
+                iniciarMapaDetalle();
                 actualizarDetalle();
             }
             default -> {
@@ -727,6 +779,14 @@ public final class UberController {
         precioViaje.setText(String.format(app.locale(), t("control.2f.precio.estimado"), servicio.calcularCosto(km, min)));
         datosParticipantes.setText(t("control.cliente") + v.getCliente().getNombre() + t("control.nconductor") + (v.getConductor() == null ? t("control.pendiente.de.aceptacion") : v.getConductor().getNombre() + " · " + v.getVehiculo().getModelo() + " · " + v.getVehiculo().getPatente()));
         visible(btnIniciar, conductor && e == EstadoViaje.ACEPTADO);
+        if (conductor && e == EstadoViaje.ACEPTADO) {
+            btnIniciar.setDisable(!conductorEnOrigen);
+            if (!conductorEnOrigen) {
+                btnIniciar.setText(t("control.conductor.en.camino.al.origen"));
+            } else {
+                btnIniciar.setText(t("vista.iniciar.traslado"));
+            }
+        }
         visible(btnFinalizar, conductor && e == EstadoViaje.INICIADO);
         visible(bloqueCancelar, e == EstadoViaje.SOLICITADO || e == EstadoViaje.ACEPTADO || e == EstadoViaje.INICIADO);
         kmRecorridos.setDisable(e == EstadoViaje.SOLICITADO || conductor);
@@ -735,6 +795,151 @@ public final class UberController {
         miCalificacion.setText(propia == null || propia == CalificacionViaje.NO_CALIFICADO ? t("control.todavia.no.calificaste") : t("control.tu.evaluacion.guardada") + (app.locale().getLanguage().equals("en") ? app.etiqueta(propia) : propia.name().replace('_', ' ')));
         List<String> registros = v.getRegistrosViaje().stream().map(r -> fecha(r.getFechaHora()) + " · " + estadoTexto(r.getEstadoViaje())).toList();
         if (!historial.getItems().equals(registros)) historial.getItems().setAll(registros);
+        actualizarMapaDetalle();
+    }
+
+    private void iniciarMapaDetalle() {
+        if (mapaWeb == null) return;
+        java.net.URL archivo = getClass().getResource("/ui/map/mapa.html");
+        if (archivo == null) return;
+
+        mapaWeb.getEngine().getLoadWorker().stateProperty().addListener((obs, anterior, actual) -> {
+            if (actual == Worker.State.SUCCEEDED) {
+                try {
+                    JSObject ventana = (JSObject) mapaWeb.getEngine().executeScript("window");
+                    ventana.setMember("javaBridge", puenteDetalle);
+                } catch (Exception ignored) {
+                }
+                mapaDetalleListo = true;
+                actualizarMapaDetalle();
+            }
+        });
+
+        mapaWeb.getEngine().load(archivo.toExternalForm() + "#" + app.locale().getLanguage());
+    }
+
+    private void finalizarViajeAutomatico() {
+        intentar(() -> {
+            Viaje v = s().viaje();
+            if (v != null && v.estadoActual() == EstadoViaje.INICIADO && v.getConductor() != null) {
+                s().ejecutar("FINALIZAR", v.getConductor().getEmail(), v.getId().toString());
+                pintarDetalle();
+                if (mensaje != null) {
+                    mensaje.setText(t("control.viaje.finalizado"));
+                }
+            }
+        });
+    }
+
+    private void actualizarMapaDetalle() {
+        if (!mapaDetalleListo || mapaWeb == null || mapaWeb.getScene() == null) {
+            return;
+        }
+        Viaje v = s().viaje();
+        if (v == null) {
+            return;
+        }
+
+        UUID id = v.getId();
+        EstadoViaje estado = v.estadoActual();
+
+        if (id.equals(ultimoViajeMapa) && estado == ultimoEstadoMapa) {
+            return;
+        }
+        ultimoViajeMapa = id;
+        ultimoEstadoMapa = estado;
+
+        if (tareaRutasDetalle != null && tareaRutasDetalle.isRunning()) {
+            tareaRutasDetalle.cancel();
+        }
+
+        Ubicacion orig = v.getOrigen();
+        Ubicacion dest = v.getDestino();
+        Usuario cond = v.getConductor();
+        TipoVehiculo tipoVehiculo = (v.getVehiculo() != null && v.getVehiculo().getTipoVehiculo() != null)
+                ? v.getVehiculo().getTipoVehiculo()
+                : TipoVehiculo.AUTO;
+
+        String aviso = switch (estado) {
+            case SOLICITADO -> t("control.esperando.conductor");
+            case ACEPTADO -> (cond != null ? cond.getNombre() + " · " : "") + t("control.conductor.en.camino.al.origen");
+            case INICIADO -> (cond != null ? cond.getNombre() + " · " : "") + t("control.viaje.en.curso");
+            case FINALIZADO -> t("control.viaje.finalizado");
+            case CANCELADO -> t("control.viaje.cancelado");
+            case RECHAZADO -> t("control.solicitud.vencida");
+        };
+
+        Task<String[]> tarea = new Task<>() {
+            @Override
+            protected String[] call() throws Exception {
+                var planificador = app.getPlanificadorRutas();
+                var pOrigen = planificador.ajustarACalle(
+                        new PuntoRuta(orig.getLatitud(), orig.getLongitud()),
+                        tipoVehiculo
+                ).orElse(new PuntoRuta(orig.getLatitud(), orig.getLongitud()));
+
+                var pDestino = planificador.ajustarACalle(
+                        new PuntoRuta(dest.getLatitud(), dest.getLongitud()),
+                        tipoVehiculo
+                ).orElse(new PuntoRuta(dest.getLatitud(), dest.getLongitud()));
+
+                var rutaViaje = planificador.calcular(pOrigen, pDestino, tipoVehiculo);
+
+                RutaCalculada rutaConductor = null;
+                if (estado == EstadoViaje.ACEPTADO && cond != null) {
+                    try {
+                        var ubicaciones = app.getUbicacionesConductores();
+                        var posCond = ubicaciones.obtener(cond.getEmail(), tipoVehiculo, planificador);
+                        rutaConductor = planificador.calcular(posCond, pOrigen, tipoVehiculo);
+                    } catch (Exception ignored) {
+                    }
+                }
+
+                if (isCancelled()) return null;
+
+                String jsConductor = convertirPuntosRuta(rutaConductor);
+                String jsViaje = convertirPuntosRuta(rutaViaje);
+                return new String[]{jsConductor, jsViaje};
+            }
+        };
+
+        tarea.setOnSucceeded(ev -> {
+            String[] res = tarea.getValue();
+            if (res != null && mapaWeb != null && mapaWeb.getEngine() != null) {
+                try {
+                    String script = "window.mostrarRutas(" + res[0] + ", " + res[1] + ", '" + estado.name() + "');";
+                    mapaWeb.getEngine().executeScript(script);
+                    if (aviso != null) {
+                        mapaWeb.getEngine().executeScript(
+                            "if (window.fijarAviso) window.fijarAviso(" + formatearTextoJs(aviso) + ");"
+                        );
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+        });
+
+        tareaRutasDetalle = tarea;
+        Thread hilo = new Thread(tarea, "calculo-rutas-detalle");
+        hilo.setDaemon(true);
+        hilo.start();
+    }
+
+    private String convertirPuntosRuta(RutaCalculada ruta) {
+        if (ruta == null || ruta.puntos() == null || ruta.puntos().isEmpty()) {
+            return "[]";
+        }
+        StringBuilder sb = new StringBuilder("[");
+        for (var p : ruta.puntos()) {
+            if (sb.length() > 1) sb.append(",");
+            sb.append("[").append(p.latitud()).append(",").append(p.longitud()).append("]");
+        }
+        return sb.append("]").toString();
+    }
+
+    private String formatearTextoJs(String texto) {
+        if (texto == null) return "''";
+        return "'" + texto.replace("\\", "\\\\").replace("'", "\\'").replace("\n", " ") + "'";
     }
 
     private void visible(javafx.scene.Node n, boolean v) {
@@ -752,6 +957,15 @@ public final class UberController {
 
     @FXML
     private void iniciarViaje() {
+        Viaje v = s().viaje();
+        if (v != null && v.estadoActual() == EstadoViaje.ACEPTADO && !conductorEnOrigen) {
+            if (mensaje != null) {
+                mensaje.setText(app.locale().getLanguage().equals("en")
+                        ? "The driver is still on the way to the pickup location."
+                        : "El conductor todavía está en camino al punto de origen.");
+            }
+            return;
+        }
         accionViaje("INICIAR");
     }
 

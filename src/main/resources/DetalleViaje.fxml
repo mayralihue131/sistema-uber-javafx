@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.web.WebView?>
 
 <BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1">
@@ -29,6 +30,11 @@
                     <Label fx:id="idViaje" visible="false" managed="false"/>
                     <ProgressBar fx:id="progreso" visible="false" managed="false"/>
                     <Label fx:id="rutaViaje" visible="false" managed="false"/>
+
+                    <StackPane prefHeight="260" minHeight="200"
+                               style="-fx-border-color: #cbd5e1; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-overflow: hidden;">
+                        <WebView fx:id="mapaWeb" prefHeight="260" minHeight="200"/>
+                    </StackPane>
 
                     <FlowPane hgap="8" vgap="8">
                         <Button fx:id="btnIniciar"
