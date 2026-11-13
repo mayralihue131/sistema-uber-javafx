@@ -30,6 +30,10 @@ public class MemoriaDAOFactory implements DAOFactory {
             public List<VehiculoDTO> obtenerTodos() {
                 return new ArrayList<>();
             }
+
+            @Override
+            public void guardar(VehiculoDTO vehiculo, String emailConductor, String licenciaConducir) {
+            }
         };
     }
 

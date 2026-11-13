@@ -29,4 +29,9 @@ public class BdDAOFactory implements DAOFactory {
     public boolean persisteUsuariosEnOrigen() {
         return true;
     }
+
+    @Override
+    public boolean persisteVehiculosEnOrigen() {
+        return true;
+    }
 }

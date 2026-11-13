@@ -604,6 +604,8 @@ public final class UberController {
             String mod = requerido(modelo, t("control.modelo"));
             double cap = numero(capacidad, t("control.capacidad"), 1, 50);
             if (cap != (int)cap) throw new IllegalArgumentException(t("control.la.capacidad.debe.ser.un.numero.entero"));
+            if (tipoVehiculo.getValue() == null) throw new IllegalArgumentException(t("control.elegi.un.tipo.de.vehiculo"));
+            if (categoriaVehiculo.getValue() == null) throw new IllegalArgumentException(t("control.elegi.una.categoria"));
             if (!pasajeros.isSelected() && !envios.isSelected()) throw new IllegalArgumentException(t("control.elegi.al.menos.un.tipo.de.servicio"));
             String tipos = pasajeros.isSelected() ? (envios.isSelected() ? "PASAJEROS,ENVIOS" : "PASAJEROS") : "ENVIOS";
             s().ejecutar("VEHICULO", s().correo, lic, pat, mod, "" + (int)cap, tipoVehiculo.getValue().name(), categoriaVehiculo.getValue().name(), tipos);

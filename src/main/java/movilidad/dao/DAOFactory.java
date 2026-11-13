@@ -22,4 +22,8 @@ public interface DAOFactory {
     default boolean persisteUsuariosEnOrigen() {
         return false;
     }
+
+    default boolean persisteVehiculosEnOrigen() {
+        return persisteUsuariosEnOrigen();
+    }
 }

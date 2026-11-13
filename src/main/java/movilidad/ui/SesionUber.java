@@ -8,6 +8,7 @@ import java.util.*;
 import movilidad.aplicacion.AplicacionConsultas;
 import movilidad.dao.DAOFactory;
 import movilidad.dao.DAOLoader;
+import movilidad.dao.dto.VehiculoDTO;
 import movilidad.dao.txt.CargaParametros;
 import movilidad.logica.MovilidadDigital;
 import movilidad.modelo.*;
@@ -66,14 +67,7 @@ public final class SesionUber {
         String nombreLimpio = nombre == null ? "" : nombre.trim();
         String telefonoLimpio = telefono == null ? "" : telefono.trim();
 
-        DAOFactory fabrica = DAOLoader.getFactory();
-        if (fabrica.persisteUsuariosEnOrigen()) {
-            Usuario usuario = new Usuario(nombreLimpio, telefonoLimpio, emailLimpio);
-            fabrica.getUsuarioDAO().guardar(usuario);
-            sistema.agregarUsuario(usuario);
-        } else {
-            ejecutar("USUARIO", nombreLimpio, telefonoLimpio, emailLimpio);
-        }
+        ejecutar("USUARIO", nombreLimpio, telefonoLimpio, emailLimpio);
     }
 
     public void ejecutar(String accion, String... args) throws IOException {
@@ -96,6 +90,30 @@ public final class SesionUber {
             catch (AtomicMoveNotSupportedException e) { Files.move(temporal,archivo,StandardCopyOption.REPLACE_EXISTING); }
         } finally { Files.deleteIfExists(temporal); }
         eventos.add(evento); sistema = candidato;
+
+        DAOFactory fabrica = DAOLoader.getFactory();
+        if ("USUARIO".equals(accion) && fabrica.persisteUsuariosEnOrigen()) {
+            try {
+                fabrica.getUsuarioDAO().guardar(new Usuario(args[0], args[1], args[2]));
+            } catch (Exception ex) {
+                System.err.println("Advertencia al persistir usuario en BD: " + ex.getMessage());
+            }
+        } else if ("VEHICULO".equals(accion) && fabrica.persisteVehiculosEnOrigen()) {
+            try {
+                String email = args[0];
+                String lic = args[1];
+                String pat = args[2];
+                String mod = args[3];
+                int cap = Integer.parseInt(args[4]);
+                String tipoV = args[5];
+                String catV = args[6];
+                List<String> tiposServ = Arrays.asList(args[7].split(","));
+                VehiculoDTO dto = new VehiculoDTO(pat, mod, cap, tipoV, catV, tiposServ);
+                fabrica.getVehiculoDAO().guardar(dto, email, lic);
+            } catch (Exception ex) {
+                System.err.println("Advertencia al persistir vehículo en BD: " + ex.getMessage());
+            }
+        }
     }
     private MovilidadDigital reconstruir(List<String[]> lista) throws IOException {
         MovilidadDigital m = new MovilidadDigital();

@@ -49,4 +49,18 @@ public class VehiculoDaoTxt implements VehiculoDAO {
         }
         return lista;
     }
+
+    @Override
+    public void guardar(VehiculoDTO vehiculo, String emailConductor, String licenciaConducir) {
+        if (vehiculo == null) return;
+        try (java.io.FileWriter fw = new java.io.FileWriter(rutaArchivo, true);
+             java.io.PrintWriter pw = new java.io.PrintWriter(fw)) {
+            String servicios = (vehiculo.getTiposServicio() == null) ? "" : String.join(";", vehiculo.getTiposServicio());
+            pw.println(vehiculo.getPatente() + ";" + vehiculo.getModelo() + ";" + vehiculo.getCapacidadPasajeros()
+                    + ";" + vehiculo.getTipoVehiculo() + ";" + vehiculo.getCategoriaVehiculo()
+                    + (servicios.isEmpty() ? "" : ";" + servicios));
+        } catch (Exception e) {
+            System.err.println("Advertencia al guardar vehículo en TXT: " + e.getMessage());
+        }
+    }
 }
