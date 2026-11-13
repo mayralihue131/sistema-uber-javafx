@@ -71,6 +71,21 @@ public final class SesionUber {
     }
 
     public void ejecutar(String accion, String... args) throws IOException {
+        if ("USUARIO".equals(accion)) {
+            String email = args.length > 2 && args[2] != null ? args[2].trim() : "";
+            if (sistema.getUsuarios().stream().anyMatch(u -> u.getEmail().equalsIgnoreCase(email))) {
+                throw new IllegalArgumentException("Ese correo ya está registrado.");
+            }
+        } else if ("VEHICULO".equals(accion)) {
+            String pat = args.length > 2 && args[2] != null ? args[2].trim() : "";
+            if (sistema.getUsuarios().stream()
+                    .filter(x -> x.getConductor() != null)
+                    .flatMap(x -> x.getConductor().getVehiculos().stream())
+                    .anyMatch(v -> v.getPatente().equalsIgnoreCase(pat))) {
+                throw new IllegalArgumentException("La patente ya está registrada.");
+            }
+        }
+
         String[] evento = new String[args.length+2];
         evento[0] = accion; evento[1] = LocalDateTime.now().toString();
         System.arraycopy(args,0,evento,2,args.length);
@@ -134,13 +149,16 @@ public final class SesionUber {
         LocalDateTime fecha = LocalDateTime.parse(e[1]);
         switch(e[0]) {
             case "USUARIO" -> {
-                if (m.getUsuarios().stream().anyMatch(u -> u.getEmail().equalsIgnoreCase(e[4]))) throw new IllegalArgumentException("Ese correo ya está registrado.");
+                if (m.getUsuarios().stream().anyMatch(u -> u.getEmail().equalsIgnoreCase(e[4]))) {
+                    break;
+                }
                 m.agregarUsuario(new Usuario(e[2],e[3],e[4]));
             }
             case "VEHICULO" -> {
                 Usuario u = usuario(m,e[2]);
-                if (m.getUsuarios().stream().filter(x -> x.getConductor()!=null).flatMap(x -> x.getConductor().getVehiculos().stream()).anyMatch(v -> v.getPatente().equalsIgnoreCase(e[4])))
-                    throw new IllegalArgumentException("La patente ya está registrada.");
+                if (m.getUsuarios().stream().filter(x -> x.getConductor()!=null).flatMap(x -> x.getConductor().getVehiculos().stream()).anyMatch(v -> v.getPatente().equalsIgnoreCase(e[4]))) {
+                    break;
+                }
                 Vehiculo v = new Vehiculo(e[4],e[5],Integer.parseInt(e[6]),TipoVehiculo.valueOf(e[7]),CategoriaVehiculo.valueOf(e[8]),(Ubicacion)null);
                 for(String tipo : e[9].split(",")) v.agregarTipoServicio(TipoServicio.valueOf(tipo));
                 if (u.getConductor()==null) m.registrarConductor(u,e[3],v); else m.agregarVehiculo(u,v);
