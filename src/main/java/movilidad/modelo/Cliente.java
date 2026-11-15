@@ -29,4 +29,9 @@ public class Cliente {
 		return new ArrayList<Viaje>(viajes);
 	}
 
+	@Override
+	public String toString() {
+		return "Cliente [viajes=" + viajes + "]";
+	}
+
 }

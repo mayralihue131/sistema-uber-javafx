@@ -81,4 +81,11 @@ public class Servicio {
 		this.tipoServicio = tipoServicio;
 	}
 
+	@Override
+	public String toString() {
+		return "Servicio [nombre=" + nombre + ", tarifaBase=" + tarifaBase + ", precioKm=" + precioKm
+				+ ", precioMinuto=" + precioMinuto + ", tipoVehiculo=" + tipoVehiculo + ", categoriaVehiculo="
+				+ categoriaVehiculo + ", tipoServicio=" + tipoServicio + "]";
+	}
+
 }

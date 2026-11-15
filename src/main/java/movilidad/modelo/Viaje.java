@@ -28,6 +28,65 @@ public class Viaje {
 		this.servicio = servicio;
 		registroViaje = new ArrayList<RegistroViaje>();
 	}
+	public UUID getId() {
+		return id;
+	}
+
+	public CalificacionViaje getCalificacionCliente() {
+		return calificacionCliente;
+	}
+
+	public CalificacionViaje getCalificacionConductor() {
+		return calificacionConductor;
+	}
+
+	public void setId(UUID id) {
+		this.id = id;
+	}
+
+	public void setCalificacionCliente(CalificacionViaje calificacionCliente) {
+		this.calificacionCliente = calificacionCliente;
+	}
+
+	public void setCalificacionConductor(CalificacionViaje calificacionConductor) {
+		this.calificacionConductor = calificacionConductor;
+	}
+
+	public Ubicacion getOrigen() {
+		return origen;
+	}
+
+	public Ubicacion getDestino() {
+		return destino;
+	}
+
+	public Vehiculo getVehiculo() {
+		return vehiculo;
+	}
+
+	public Usuario getCliente() {
+		return cliente;
+	}
+
+	public Usuario getConductor() {
+		return conductor;
+	}
+
+	public Servicio getServicio() {
+		return servicio;
+	}
+
+	public String getMotivoCancelacion() {
+		return motivoCancelacion;
+	}
+
+	public RolUsuario getRolCancela() {
+		return rolCancela;
+	}
+
+	public List<RegistroViaje> getRegistroViaje() {
+	    return new ArrayList<RegistroViaje>(this.registroViaje);
+	}
 
 	public void solicitar(LocalDateTime fechaHora) {
 		if (cliente.getRolActivo() != RolUsuario.CLIENTE)
@@ -132,64 +191,14 @@ public class Viaje {
 
 		return registroViaje.get(registroViaje.size() - 1).getEstadoViaje();
 	}
-
-	public UUID getId() {
-		return id;
+	@Override
+	public String toString() {
+		return "Viaje [id=" + id + ", motivoCancelacion=" + motivoCancelacion + ", origen=" + origen + ", destino="
+				+ destino + ", servicio=" + servicio + ", vehiculo=" + vehiculo + ", cliente=" + cliente
+				+ ", conductor=" + conductor + ", rolCancela=" + rolCancela + ", calificacionCliente="
+				+ calificacionCliente + ", calificacionConductor=" + calificacionConductor + ", registroViaje="
+				+ registroViaje + "]";
 	}
 
-	public CalificacionViaje getCalificacionCliente() {
-		return calificacionCliente;
-	}
-
-	public CalificacionViaje getCalificacionConductor() {
-		return calificacionConductor;
-	}
-
-	public void setId(UUID id) {
-		this.id = id;
-	}
-
-	public void setCalificacionCliente(CalificacionViaje calificacionCliente) {
-		this.calificacionCliente = calificacionCliente;
-	}
-
-	public void setCalificacionConductor(CalificacionViaje calificacionConductor) {
-		this.calificacionConductor = calificacionConductor;
-	}
-
-	public Ubicacion getOrigen() {
-		return origen;
-	}
-
-	public Ubicacion getDestino() {
-		return destino;
-	}
-
-	public Vehiculo getVehiculo() {
-		return vehiculo;
-	}
-
-	public Usuario getCliente() {
-		return cliente;
-	}
-
-	public Usuario getConductor() {
-		return conductor;
-	}
-
-	public Servicio getServicio() {
-		return servicio;
-	}
-
-	public String getMotivoCancelacion() {
-		return motivoCancelacion;
-	}
-
-	public RolUsuario getRolCancela() {
-		return rolCancela;
-	}
-
-	public List<RegistroViaje> getRegistroViaje() {
-	    return new ArrayList<RegistroViaje>(this.registroViaje);
-	}
+	
 }

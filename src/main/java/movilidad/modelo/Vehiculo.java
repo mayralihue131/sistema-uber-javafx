@@ -77,5 +77,12 @@ public class Vehiculo {
 	public void setUbicacion(Ubicacion ubicacion) {
 		this.ubicacion = ubicacion;
 	}
+
+	@Override
+	public String toString() {
+		return "Vehiculo [patente=" + patente + ", modelo=" + modelo + ", capacidadPasajeros=" + capacidadPasajeros
+				+ ", ubicacion=" + ubicacion + ", tipoVehiculo=" + tipoVehiculo + ", categoriaVehiculo="
+				+ categoriaVehiculo + ", tipoServicios=" + tipoServicios + "]";
+	}
 	
 }

@@ -19,4 +19,9 @@ public class RegistroViaje {
 			return fechaHora;
 		}
 
+		@Override
+		public String toString() {
+			return "RegistroViaje [estadoViaje=" + estadoViaje + ", fechaHora=" + fechaHora + "]";
+		}
+
 }

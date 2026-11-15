@@ -12,4 +12,5 @@ public enum CategoriaVehiculo {
 	public int getValorNumerico() {
 		return this.valorNumerico;
 	}
+	
 }

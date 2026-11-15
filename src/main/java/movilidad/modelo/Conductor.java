@@ -70,4 +70,11 @@ public class Conductor {
 		this.categoriaVehiculoActivo = categoriaVehiculoActivo;
 	}
 
+	@Override
+	public String toString() {
+		return "Conductor [licenciaConducir=" + licenciaConducir + ", estadoConductor=" + estadoConductor
+				+ ", vehiculoActivo=" + vehiculoActivo + ", categoriaVehiculoActivo=" + categoriaVehiculoActivo
+				+ ", viajes=" + viajes + ", vehiculos=" + vehiculos + "]";
+	}
+
 }

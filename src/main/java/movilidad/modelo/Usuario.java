@@ -89,4 +89,10 @@ public class Usuario {
 		return conductor;
 	}
 
+	@Override
+	public String toString() {
+		return "Usuario [nombre=" + nombre + ", telefono=" + telefono + ", email=" + email + ", cliente=" + cliente
+				+ ", conductor=" + conductor + ", rolActivo=" + rolActivo + "]";
+	}
+
 }
