@@ -42,7 +42,7 @@ public final class SesionUber {
     public Usuario usuario() { return sistema.buscarUsuarioPorMail(correo); }
     public Viaje viaje() { return sistema.buscarViajePorId(viajeSeleccionado); }
     public Path archivo() { return archivo; }
-    
+
     public void ingresar(String email) {
         Usuario u = sistema.getUsuarios().stream()
             .filter(usuario -> usuario.getEmail().equalsIgnoreCase(email.trim()))
@@ -159,8 +159,13 @@ public final class SesionUber {
                 if (m.getUsuarios().stream().filter(x -> x.getConductor()!=null).flatMap(x -> x.getConductor().getVehiculos().stream()).anyMatch(v -> v.getPatente().equalsIgnoreCase(e[4]))) {
                     break;
                 }
-                Vehiculo v = new Vehiculo(e[4],e[5],Integer.parseInt(e[6]),TipoVehiculo.valueOf(e[7]),CategoriaVehiculo.valueOf(e[8]),(Ubicacion)null);
-                for(String tipo : e[9].split(",")) v.agregarTipoServicio(TipoServicio.valueOf(tipo));
+                String[] tipos = e[9].split(",");
+                Vehiculo v = new Vehiculo(e[4], e[5], Integer.parseInt(e[6]),
+                        TipoVehiculo.valueOf(e[7]), CategoriaVehiculo.valueOf(e[8]),
+                        TipoServicio.valueOf(tipos[0]));
+                for (int i = 1; i < tipos.length; i++) {
+                    v.agregarTipoServicio(TipoServicio.valueOf(tipos[i]));
+                }
                 if (u.getConductor()==null) m.registrarConductor(u,e[3],v); else m.agregarVehiculo(u,v);
             }
             case "ACTIVO" -> m.seleccionarVehiculoActivo(usuario(m,e[2]),vehiculo(m,e[2],e[3]));
@@ -193,7 +198,7 @@ public final class SesionUber {
     public boolean vencer() throws IOException {
         boolean cambio=false;
         for(Viaje v : sistema.getViajes()) {
-            if(v.estadoActual()==EstadoViaje.SOLICITADO && java.time.Duration.between(v.getRegistrosViaje().get(0).getFechaHora(),LocalDateTime.now()).toMinutes()>=5) {
+            if(v.estadoActual()==EstadoViaje.SOLICITADO && java.time.Duration.between(v.getRegistroViaje().get(0).getFechaHora(),LocalDateTime.now()).toMinutes()>=5) {
                 ejecutar("VENCER",v.getId().toString()); cambio=true;
             }
         }

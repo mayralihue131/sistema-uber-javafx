@@ -45,9 +45,10 @@ class MovilidadDigitalTest {
         cliente = new Usuario("Cliente", "111", "cliente@mail.com");
         conductor = new Usuario("Conductor", "222", "conductor@mail.com");
         vehiculo = new Vehiculo("AA000AA", "Sedan", 4, TipoVehiculo.AUTO,
-                CategoriaVehiculo.ESTANDAR, new Ubicacion(-34.6, -58.4));
+                CategoriaVehiculo.ESTANDAR, TipoServicio.PASAJEROS);
+        vehiculo.setUbicacion(new Ubicacion(-34.6, -58.4));
         servicio = new Servicio("Pasajeros estándar", 100, 20, 5,
-                CategoriaVehiculo.ESTANDAR, TipoVehiculo.AUTO, TipoServicio.PASAJEROS);
+                TipoVehiculo.AUTO, CategoriaVehiculo.ESTANDAR, TipoServicio.PASAJEROS);
 
         movilidad.agregarUsuario(cliente);
         movilidad.agregarUsuario(conductor);
@@ -81,6 +82,9 @@ class MovilidadDigitalTest {
         assertEquals(EstadoViaje.SOLICITADO, viaje.estadoActual());
         assertTrue(movilidad.buscarConductoresDisponibles(viaje).contains(conductor));
 
+        movilidad.ponerFueraDeServicio(conductor);
+        movilidad.cambiarRolActivo(conductor, RolUsuario.CONDUCTOR);
+        movilidad.ponerDisponible(conductor);
         movilidad.aceptarViaje(viaje.getId(), conductor, INICIO.plusMinutes(1));
         assertEquals(EstadoViaje.ACEPTADO, viaje.estadoActual());
         assertEquals(EstadoConductor.VIAJE_A_ORIGEN,
@@ -156,6 +160,9 @@ class MovilidadDigitalTest {
     @Test
     void cancelarViajeAceptadoCalculaCostoYLiberaAlConductor() {
         Viaje viaje = solicitarViaje();
+        movilidad.ponerFueraDeServicio(conductor);
+        movilidad.cambiarRolActivo(conductor, RolUsuario.CONDUCTOR);
+        movilidad.ponerDisponible(conductor);
         movilidad.aceptarViaje(viaje.getId(), conductor, INICIO.plusMinutes(1));
 
         double costo = movilidad.cancelarViaje(viaje.getId(), cliente,
@@ -177,6 +184,9 @@ class MovilidadDigitalTest {
     @Test
     void devuelveViajesPorClienteYConductor() {
         Viaje viaje = solicitarViaje();
+        movilidad.ponerFueraDeServicio(conductor);
+        movilidad.cambiarRolActivo(conductor, RolUsuario.CONDUCTOR);
+        movilidad.ponerDisponible(conductor);
         movilidad.aceptarViaje(viaje.getId(), conductor, INICIO.plusMinutes(1));
 
         assertTrue(movilidad.obtenerViajesCliente(cliente).contains(viaje));

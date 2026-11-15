@@ -27,8 +27,8 @@ public class MovilidadDigitalTest {
 
         servicio = new Servicio(
                 "Estándar", 2000, 200, 100,
-                CategoriaVehiculo.ESTANDAR,
                 TipoVehiculo.AUTO,
+                CategoriaVehiculo.ESTANDAR,
                 TipoServicio.PASAJEROS);
 
         origen = new Ubicacion(-42.76, -65.03);

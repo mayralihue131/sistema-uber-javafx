@@ -1,17 +1,15 @@
 package movilidad.modelo;
 
 public enum CategoriaVehiculo {
-	ESTANDAR (1),
-	CONFORT (2),
-	PREMIUM(3);
-	
-	private final int codigo;
+	ESTANDAR(0), CONFORT(1), PREMIUM(2);
 
-	private CategoriaVehiculo(int codigo) {
-		this.codigo = codigo;
+	private final int valorNumerico;
+
+	CategoriaVehiculo(int valorNumerico) {
+		this.valorNumerico = valorNumerico;
 	}
-	public int getCodigo() {
-		return codigo;
+
+	public int getValorNumerico() {
+		return this.valorNumerico;
 	}
-	
 }

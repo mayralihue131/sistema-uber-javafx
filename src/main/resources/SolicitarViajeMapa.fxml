@@ -21,7 +21,7 @@
                    style="-fx-text-fill: #1565c0; -fx-font-size: 24px; -fx-font-weight: bold;"
                    wrapText="true"/>
 
-            <HBox spacing="12">
+            <HBox spacing="12" visible="false" managed="false">
                 <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="0">
                     <Label text="%vista.origen"/>
                     <TextField fx:id="origenTexto" editable="false"

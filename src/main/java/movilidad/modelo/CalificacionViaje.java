@@ -1,33 +1,20 @@
 package movilidad.modelo;
 
 public enum CalificacionViaje {
-
-    NO_CALIFICADO(0),
+	NO_CALIFICADO(0),
     MALO(1),
     REGULAR(2),
     BUENO(3),
     MUY_BUENO(4),
     EXCELENTE(5);
 
-    private final int valor;
+    private final int valorNumerico;
 
-    CalificacionViaje(int valor) {
-        this.valor = valor;
+    CalificacionViaje(int valorNumerico) {
+        this.valorNumerico = valorNumerico;
     }
 
-    public int getValor() {
-        return valor;
-    }
-
-    @Override
-    public String toString() {
-        return switch (this) {
-            case NO_CALIFICADO -> "Sin calificar";
-            case MALO -> "Malo";
-            case REGULAR -> "Regular";
-            case BUENO -> "Bueno";
-            case MUY_BUENO -> "Muy bueno";
-            case EXCELENTE -> "Excelente";
-        };
+    public int getValorNumerico() {
+        return this.valorNumerico;
     }
 }

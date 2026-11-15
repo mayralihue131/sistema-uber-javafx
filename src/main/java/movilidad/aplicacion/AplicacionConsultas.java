@@ -95,19 +95,19 @@ public class AplicacionConsultas {
         for (List<String> fila : CargaDatos.cargarVehiculos(
                 CargaParametros.getArchivoVehiculos())) {
 
+            List<String> tipos = fila.subList(Math.min(5, fila.size()), fila.size()).stream()
+                    .filter(tipo -> !tipo.isBlank())
+                    .toList();
             Vehiculo vehiculo = new Vehiculo(
                     fila.get(0),
                     fila.get(1),
                     Integer.parseInt(fila.get(2)),
                     TipoVehiculo.valueOf(fila.get(3)),
                     CategoriaVehiculo.valueOf(fila.get(4)),
-                    (Ubicacion) null);
+                    tipos.isEmpty() ? null : TipoServicio.valueOf(tipos.getFirst()));
 
-            for (int i = 5; i < fila.size(); i++) {
-                if (!fila.get(i).isBlank()) {
-                    vehiculo.agregarTipoServicio(
-                            TipoServicio.valueOf(fila.get(i)));
-                }
+            for (String tipo : tipos.stream().skip(1).toList()) {
+                vehiculo.agregarTipoServicio(TipoServicio.valueOf(tipo));
             }
 
             vehiculos.add(vehiculo);
@@ -182,8 +182,8 @@ public class AplicacionConsultas {
                     Double.parseDouble(fila.get(1)),
                     Double.parseDouble(fila.get(2)),
                     Double.parseDouble(fila.get(3)),
-                    CategoriaVehiculo.valueOf(fila.get(5)),
                     TipoVehiculo.valueOf(fila.get(4)),
+                    CategoriaVehiculo.valueOf(fila.get(5)),
                     TipoServicio.valueOf(fila.get(6)));
 
             aplicacion.agregarServicio(servicio);
@@ -195,15 +195,16 @@ public class AplicacionConsultas {
         List<Vehiculo> vehiculos = new ArrayList<>();
 
         for (VehiculoDTO dto : factory.getVehiculoDAO().obtenerTodos()) {
+            List<String> tipos = dto.getTiposServicio();
             Vehiculo v = new Vehiculo(
                     dto.getPatente(),
                     dto.getModelo(),
                     dto.getCapacidadPasajeros(),
                     TipoVehiculo.valueOf(dto.getTipoVehiculo()),
                     CategoriaVehiculo.valueOf(dto.getCategoriaVehiculo()),
-                    (Ubicacion) null
+                    tipos.isEmpty() ? null : TipoServicio.valueOf(tipos.getFirst())
             );
-            for (String ts : dto.getTiposServicio()) {
+            for (String ts : tipos.stream().skip(1).toList()) {
                 v.agregarTipoServicio(TipoServicio.valueOf(ts));
             }
             vehiculos.add(v);
@@ -239,8 +240,8 @@ public class AplicacionConsultas {
                     dto.getTarifaBase(),
                     dto.getPrecioKm(),
                     dto.getPrecioMinuto(),
-                    CategoriaVehiculo.valueOf(dto.getCategoriaVehiculo()),
                     TipoVehiculo.valueOf(dto.getTipoVehiculo()),
+                    CategoriaVehiculo.valueOf(dto.getCategoriaVehiculo()),
                     TipoServicio.valueOf(dto.getTipoServicio())
             );
             aplicacion.agregarServicio(s);
@@ -471,7 +472,7 @@ public class AplicacionConsultas {
         DateTimeFormatter formato =
                 DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
-        for (RegistroViaje registro : viaje.getRegistrosViaje()) {
+        for (RegistroViaje registro : viaje.getRegistroViaje()) {
             System.out.println(registro.getEstadoViaje()
                     + " -> "
                     + registro.getFechaHora().format(formato));

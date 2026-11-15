@@ -23,7 +23,7 @@ class SesionUberTest {
         s.ejecutar("CALIFICAR_CONDUCTOR","paula.vazquez@email.com",id,"EXCELENTE");
         s.ejecutar("CALIFICAR_CLIENTE","juan.perez@email.com",id,"BUENO");
         SesionUber recuperada=nueva();Viaje v=recuperada.sistema.buscarViajePorId(UUID.fromString(id));
-        assertEquals(EstadoViaje.FINALIZADO,v.estadoActual());assertEquals(4,v.getRegistrosViaje().size());
+        assertEquals(EstadoViaje.FINALIZADO,v.estadoActual());assertEquals(4,v.getRegistroViaje().size());
         assertEquals(CalificacionViaje.EXCELENTE,v.getCalificacionConductor());assertEquals(CalificacionViaje.BUENO,v.getCalificacionCliente());
         assertFalse(v.getCliente().getCliente().enViaje());
     }

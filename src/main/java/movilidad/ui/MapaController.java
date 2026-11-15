@@ -463,9 +463,9 @@ public class MapaController {
             // Este objeto se usa solo para consultar compatibilidad.
             // No se registra ni se solicita el viaje.
             Viaje consulta = new Viaje(
+                cliente,
                 origenCotizado,
                 destinoCotizado,
-                cliente,
                 servicio
             );
 

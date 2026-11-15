@@ -545,7 +545,7 @@ public final class UberController {
     }
 
     private void configurarViajes(ListView<Viaje> lista) {
-        celdas(lista, v -> app.nombreServicio(v.getServicio()) + " · " + estadoTexto(v.estadoActual()), v -> v.getCliente().getNombre() + " · " + fecha(v.getRegistrosViaje().get(0).getFechaHora()) + " · " + v.getId().toString().substring(0, 8));
+        celdas(lista, v -> app.nombreServicio(v.getServicio()) + " · " + estadoTexto(v.estadoActual()), v -> v.getCliente().getNombre() + " · " + fecha(v.getRegistroViaje().get(0).getFechaHora()) + " · " + v.getId().toString().substring(0, 8));
     }
 
     // Historial y apertura del detalle.
@@ -671,7 +671,7 @@ public final class UberController {
             exigirConductor();
             Vehiculo v = vehiculoActivo.getValue();
             if (v == null || categoriaMinima.getValue() == null) throw new IllegalArgumentException(t("control.selecciona.vehiculo.y.categoria.minima"));
-            if (categoriaMinima.getValue().getCodigo() > v.getCategoriaVehiculo().getCodigo()) throw new IllegalArgumentException(t("control.la.categoria.minima.supera.la.del.vehiculo"));
+            if (categoriaMinima.getValue().getValorNumerico() > v.getCategoriaVehiculo().getValorNumerico()) throw new IllegalArgumentException(t("control.la.categoria.minima.supera.la.del.vehiculo"));
             s().ejecutar("ACTIVO", s().correo, v.getPatente());
             s().ejecutar("CATEGORIA", s().correo, categoriaMinima.getValue().name());
             actualizarPanel();
@@ -795,7 +795,7 @@ public final class UberController {
         visible(bloqueCalificar, e == EstadoViaje.FINALIZADO);
         CalificacionViaje propia = cliente ? v.getCalificacionConductor() : v.getCalificacionCliente();
         miCalificacion.setText(propia == null || propia == CalificacionViaje.NO_CALIFICADO ? t("control.todavia.no.calificaste") : t("control.tu.evaluacion.guardada") + (app.locale().getLanguage().equals("en") ? app.etiqueta(propia) : propia.name().replace('_', ' ')));
-        List<String> registros = v.getRegistrosViaje().stream().map(r -> fecha(r.getFechaHora()) + " · " + estadoTexto(r.getEstadoViaje())).toList();
+        List<String> registros = v.getRegistroViaje().stream().map(r -> fecha(r.getFechaHora()) + " · " + estadoTexto(r.getEstadoViaje())).toList();
         if (!historial.getItems().equals(registros)) historial.getItems().setAll(registros);
         actualizarMapaDetalle();
     }

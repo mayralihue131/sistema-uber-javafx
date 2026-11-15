@@ -54,7 +54,7 @@ class ViajeTest {
         conductor.altaConductor("LIC-12345", vehiculo);
         // Ponemos al chofer en estado operativo para la simulación de aceptación
         conductor.cambiarRolActivo(RolUsuario.CONDUCTOR);
-        conductor.getConductor().setEstadoConductor(EstadoConductor.DISPONIBLE);//estaba como Estado
+        conductor.getConductor().setEstado(EstadoConductor.DISPONIBLE);
 
         // 4. Instanciar la unidad bajo prueba (SUT)
         viaje = new Viaje(cliente, origen, destino, servicio);
