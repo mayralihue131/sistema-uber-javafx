@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import java.util.List;
-import java.util.Objects;
 
 import java.util.UUID;
 
@@ -161,8 +160,7 @@ public class MovilidadDigital {
 
                 }
 
-                if (usuarioRegistrado.getConductor().getVehiculos().stream()
-                        .anyMatch(registrado -> Objects.equals(registrado.getPatente(), vehiculo.getPatente()))) {
+                if (usuarioRegistrado.getConductor().getVehiculos().contains(vehiculo)) {
 
                     throw new IllegalArgumentException("El conductor ya tiene registrado este vehículo");
 
@@ -222,7 +220,7 @@ public class MovilidadDigital {
 
                 for (Vehiculo vehiculoRegistrado : conductor.getVehiculos()) {
 
-                    if (Objects.equals(vehiculoRegistrado.getPatente(), vehiculo.getPatente())) {
+                    if (vehiculoRegistrado.equals(vehiculo)) {
 
                         vehiculoRegistrado.agregarTipoServicio(tipoServicio);
 
@@ -286,7 +284,7 @@ public class MovilidadDigital {
 
                 for (Vehiculo vehiculoRegistrado : conductor.getVehiculos()) {
 
-                    if (Objects.equals(vehiculoRegistrado.getPatente(), vehiculo.getPatente())) {
+                    if (vehiculoRegistrado.equals(vehiculo)) {
 
                         conductor.setVehiculoActivo(vehiculoRegistrado);
 
@@ -615,7 +613,7 @@ public class MovilidadDigital {
 
         }
 
-        if (!usuarioDAO.listarTodos().stream().anyMatch(registrado -> mismoUsuario(registrado, cliente)) || !servicios.contains(servicio)) {
+        if (!usuarioDAO.listarTodos().contains(cliente) || !servicios.contains(servicio)) {
 
             throw new IllegalArgumentException("El cliente y el servicio deben estar registrados");
 
@@ -663,7 +661,7 @@ public class MovilidadDigital {
                     || viaje.getServicio().getCategoriaVehiculo().getValorNumerico() > conductor.getVehiculoActivo()
                             .getCategoriaVehiculo().getValorNumerico()
 
-                    || mismoUsuario(usuario, viaje.getCliente())) {
+                    || usuario.equals(viaje.getCliente())) {
 
                 continue;
 
@@ -692,7 +690,7 @@ public class MovilidadDigital {
         for (Viaje viaje : viajes) {
 
             if (viaje.estadoActual() == EstadoViaje.SOLICITADO
-                    && buscarConductoresDisponibles(viaje).stream().anyMatch(disponible -> mismoUsuario(disponible, conductor))) {
+                    && buscarConductoresDisponibles(viaje).contains(conductor)) {
 
                 solicitudes.add(viaje);
 
@@ -712,7 +710,7 @@ public class MovilidadDigital {
 
         validarConductor(conductor);
 
-        if (!buscarConductoresDisponibles(viaje).stream().anyMatch(disponible -> mismoUsuario(disponible, conductor))) {
+        if (!buscarConductoresDisponibles(viaje).contains(conductor)) {
 
             throw new IllegalStateException("El conductor no está disponible o no es compatible");
 
@@ -802,13 +800,13 @@ public class MovilidadDigital {
 
         }
 
-        if (!mismoUsuario(usuario, viaje.getCliente()) && !mismoUsuario(usuario, viaje.getConductor())) {
+        if (!usuario.equals(viaje.getCliente()) && !usuario.equals(viaje.getConductor())) {
 
             throw new IllegalArgumentException("El usuario no participa en el viaje");
 
         }
 
-        if (viaje.estadoActual() == EstadoViaje.SOLICITADO && mismoUsuario(usuario, viaje.getCliente())) {
+        if (viaje.estadoActual() == EstadoViaje.SOLICITADO && usuario.equals(viaje.getCliente())) {
 
             return 0.0;
 
@@ -820,7 +818,7 @@ public class MovilidadDigital {
 
         }
 
-        if (mismoUsuario(usuario, viaje.getConductor())) {
+        if (usuario.equals(viaje.getConductor())) {
 
             return 0.0;
 
@@ -940,7 +938,7 @@ public class MovilidadDigital {
 
         for (Viaje viaje : viajes) {
 
-            if (mismoUsuario(usuario, viaje.getCliente())) {
+            if (usuario.equals(viaje.getCliente())) {
 
                 resultado.add(viaje);
 
@@ -966,7 +964,7 @@ public class MovilidadDigital {
 
         for (Viaje viaje : viajes) {
 
-            if (mismoUsuario(usuario, viaje.getConductor())) {
+            if (usuario.equals(viaje.getConductor())) {
 
                 resultado.add(viaje);
 
@@ -992,11 +990,6 @@ public class MovilidadDigital {
 
     }
 
-    private boolean mismoUsuario(Usuario primero, Usuario segundo) {
-        return primero != null && segundo != null
-                && Objects.equals(primero.getEmail(), segundo.getEmail());
-    }
-
     private void validarConductor(Usuario conductor) {
 
         if (conductor == null || conductor.getConductor() == null) {
@@ -1011,7 +1004,7 @@ public class MovilidadDigital {
 
         validarConductor(conductor);
 
-        if (!mismoUsuario(conductor, viaje.getConductor())) {
+        if (!conductor.equals(viaje.getConductor())) {
 
             throw new IllegalArgumentException("El conductor no está asignado al viaje");
 
@@ -1021,7 +1014,7 @@ public class MovilidadDigital {
 
     private void validarCalificacion(Viaje viaje, Usuario usuario, Usuario participanteEsperado, CalificacionViaje calificacion) {
 
-        if (usuario == null || !mismoUsuario(usuario, participanteEsperado)) {
+        if (usuario == null || !usuario.equals(participanteEsperado)) {
 
             throw new IllegalArgumentException("El usuario no corresponde al viaje");
 
