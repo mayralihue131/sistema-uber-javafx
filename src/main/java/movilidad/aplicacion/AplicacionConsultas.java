@@ -81,9 +81,11 @@ public class AplicacionConsultas {
             throws IOException {
 
         DAOFactory factory = DAOLoader.getFactory();
+        System.out.println("[DATOS] Origen activo: " + factory.getClass().getSimpleName());
         if (factory instanceof BdDAOFactory bdFactory) {
             try {
                 cargarDatosDesdeBD(aplicacion, bdFactory);
+                System.out.println("[DATOS] Datos cargados desde PostgreSQL.");
                 return;
             } catch (Exception e) {
                 System.err.println("Advertencia: Falló carga desde BD, recurriendo a archivos TXT: " + e.getMessage());
