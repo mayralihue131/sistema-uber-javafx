@@ -30,6 +30,8 @@ public class ConductorConsumidor implements Runnable {
                     Thread.sleep(duracionViajeMs);
                     
                     System.out.println("[CONDUCTOR - " + nombreConductor + "] Completó: " + viajeAsignado);
+                } else {
+                    break;
                 }
             }
         } catch (InterruptedException e) {

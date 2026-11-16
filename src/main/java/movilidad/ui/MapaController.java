@@ -1,6 +1,7 @@
 package movilidad.ui;
 
 import java.net.URL;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -51,6 +52,8 @@ public class MapaController {
 
     private AplicacionUberFX aplicacion;
 
+    private Ubicacion origenSeleccionado;
+    private Ubicacion destinoSeleccionado;
     private Ubicacion origenCotizado;
     private Ubicacion destinoCotizado;
 
@@ -74,63 +77,55 @@ public class MapaController {
         }
 
         opciones.getSelectionModel()
-            .selectedItemProperty()
-            .addListener((observable, anterior, actual) -> {
-                if (btnSolicitar != null) {
-                    btnSolicitar.setDisable(
-                        actual == null
-                            || origenCotizado == null
-                            || destinoCotizado == null
-                    );
-                }
+                .selectedItemProperty()
+                .addListener((observable, anterior, actual) -> {
+                    if (btnSolicitar != null) {
+                        btnSolicitar.setDisable(
+                                actual == null
+                                        || origenCotizado == null
+                                        || destinoCotizado == null);
+                    }
 
-                if (actual != null) {
-                    dibujarRutaSeleccionada();
-                }
-            });
+                    if (actual != null) {
+                        dibujarRutaSeleccionada();
+                    }
+                });
 
         origenTexto.textProperty().addListener(
-            (observable, anterior, actual) -> limpiarCotizacion()
-        );
+                (observable, anterior, actual) -> limpiarCotizacion());
 
         destinoTexto.textProperty().addListener(
-            (observable, anterior, actual) -> limpiarCotizacion()
-        );
+                (observable, anterior, actual) -> limpiarCotizacion());
 
         tipoServicio.valueProperty().addListener(
-            (observable, anterior, actual) -> limpiarCotizacion()
-        );
+                (observable, anterior, actual) -> limpiarCotizacion());
 
         categoria.valueProperty().addListener(
-            (observable, anterior, actual) -> limpiarCotizacion()
-        );
+                (observable, anterior, actual) -> limpiarCotizacion());
 
         mapaWeb.sceneProperty().addListener(
-            (observable, anterior, actual) -> {
-                if (anterior != null && actual == null) {
-                    cerrarPantalla();
-                }
-            }
-        );
+                (observable, anterior, actual) -> {
+                    if (anterior != null && actual == null) {
+                        cerrarPantalla();
+                    }
+                });
 
         WebEngine motor = mapaWeb.getEngine();
 
         motor.getLoadWorker().stateProperty().addListener(
-            (observable, anterior, actual) -> {
-                if (actual == Worker.State.SUCCEEDED
-                        && !pantallaCerrada) {
-                    try {
-                        conectarClics(motor);
-                        dibujarRutaSeleccionada();
-                    } catch (Exception e) {
-                        avisar(
-                            t("mapa.no.se.pudieron.conectar.los.clics")
-                                + aplicacion.mensajeError(e)
-                        );
+                (observable, anterior, actual) -> {
+                    if (actual == Worker.State.SUCCEEDED
+                            && !pantallaCerrada) {
+                        try {
+                            conectarClics(motor);
+                            dibujarRutaSeleccionada();
+                        } catch (Exception e) {
+                            avisar(
+                                    t("mapa.no.se.pudieron.conectar.los.clics")
+                                            + aplicacion.mensajeError(e));
+                        }
                     }
-                }
-            }
-        );
+                });
 
     }
 
@@ -154,81 +149,103 @@ public class MapaController {
         JSObject ventana = (JSObject) motor.executeScript("window");
         ventana.setMember("javaBridge", puente);
 
-        motor.executeScript("""
-            if (typeof mapa !== "undefined") {
-                var puntoOrigen = null;
-                var puntoDestino = null;
-                var eligiendoOrigen = true;
+        motor.executeScript(
+                """
+                        if (typeof mapa !== "undefined") {
+                            var puntoOrigen = null;
+                            var puntoDestino = null;
+                            var eligiendoOrigen = true;
 
-                aviso.textContent =
-                    mensajesMapa.elegirOrigen;
+                            aviso.textContent =
+                                mensajesMapa.elegirOrigen;
 
-                mapa.on("click", function (evento) {
-                    var lat = evento.latlng.lat;
-                    var lon = evento.latlng.lng;
+                            function buscarCalle(tipo, lat, lon, marcador) {
+                                try {
+                                    var url = "https://nominatim.openstreetmap.org/reverse?format=json&lat=" + lat + "&lon=" + lon + "&zoom=18&addressdetails=1";
+                                    fetch(url, { headers: { "Accept-Language": "es" } })
+                                        .then(function(r) { return r.json(); })
+                                        .then(function(data) {
+                                            if (data && data.address) {
+                                                var a = data.address;
+                                                var via = a.road || a.pedestrian || a.footway || a.suburb || a.neighbourhood || a.amenity;
+                                                var num = a.house_number ? (" " + a.house_number) : "";
+                                                var calle = via ? (via + num) : (data.display_name ? data.display_name.split(",")[0] : "");
+                                                if (calle && window.javaBridge && window.javaBridge.actualizarCalle) {
+                                                    window.javaBridge.actualizarCalle(tipo, calle);
+                                                    if (marcador) {
+                                                        marcador.bindTooltip((tipo === "ORIGEN" ? "Origen: " : "Destino: ") + calle).openTooltip();
+                                                    }
+                                                }
+                                            }
+                                        })
+                                        .catch(function(e) {});
+                                } catch(err) {}
+                            }
 
-                    if (lat < -42.832 || lat > -42.704 ||
-                        lon < -65.126 || lon > -65.005) {
-                        aviso.textContent =
-                            mensajesMapa.fuera;
-                        return;
-                    }
+                            mapa.on("click", function (evento) {
+                                var lat = evento.latlng.lat;
+                                var lon = evento.latlng.lng;
 
-                    if (eligiendoOrigen) {
-                        if (puntoOrigen) {
-                            mapa.removeLayer(puntoOrigen);
+                                if (lat < -42.832 || lat > -42.704 ||
+                                    lon < -65.126 || lon > -65.005) {
+                                    aviso.textContent =
+                                        mensajesMapa.fuera;
+                                    return;
+                                }
+
+                                if (eligiendoOrigen) {
+                                    if (puntoOrigen) {
+                                        mapa.removeLayer(puntoOrigen);
+                                    }
+
+                                    if (puntoDestino) {
+                                        mapa.removeLayer(puntoDestino);
+                                        puntoDestino = null;
+                                    }
+
+                                    if (typeof window.limpiarRutas === "function") {
+                                        window.limpiarRutas();
+                                    }
+
+                                    puntoOrigen = L.circleMarker([lat, lon], {
+                                        radius: 9,
+                                        color: "#ffffff",
+                                        weight: 3,
+                                        fillColor: "#2864D4",
+                                        fillOpacity: 1
+                                    }).addTo(mapa);
+
+                                    puntoOrigen.bindTooltip("Origen");
+
+                                    window.javaBridge.seleccionar("ORIGEN", lat, lon);
+                                    buscarCalle("ORIGEN", lat, lon, puntoOrigen);
+
+                                    eligiendoOrigen = false;
+
+                                    aviso.textContent =
+                                        mensajesMapa.elegirDestino;
+                                } else {
+                                    puntoDestino = L.circleMarker([lat, lon], {
+                                        radius: 9,
+                                        color: "#ffffff",
+                                        weight: 3,
+                                        fillColor: "#22c55e",
+                                        fillOpacity: 1
+                                    }).addTo(mapa);
+
+                                    puntoDestino.bindTooltip("Destino");
+
+                                    window.javaBridge.seleccionar("DESTINO", lat, lon);
+                                    buscarCalle("DESTINO", lat, lon, puntoDestino);
+
+                                    eligiendoOrigen = true;
+
+                                    aviso.textContent =
+                                        mensajesMapa.cotizar;
+                                }
+                            });
                         }
-
-                        if (puntoDestino) {
-                            mapa.removeLayer(puntoDestino);
-                            puntoDestino = null;
-                        }
-
-                        if (typeof window.limpiarRutas === "function") {
-                            window.limpiarRutas();
-                        }
-
-                        puntoOrigen = L.circleMarker([lat, lon], {
-                            radius: 9,
-                            color: "#ffffff",
-                            weight: 3,
-                            fillColor: "#2864D4",
-                            fillOpacity: 1
-                        }).addTo(mapa);
-
-                        puntoOrigen.bindTooltip("Origen");
-
-                        window.javaBridge.seleccionar(
-                            "ORIGEN", lat, lon
-                        );
-
-                        eligiendoOrigen = false;
-
-                        aviso.textContent =
-                            mensajesMapa.elegirDestino;
-                    } else {
-                        puntoDestino = L.circleMarker([lat, lon], {
-                            radius: 9,
-                            color: "#ffffff",
-                            weight: 3,
-                            fillColor: "#22c55e",
-                            fillOpacity: 1
-                        }).addTo(mapa);
-
-                        puntoDestino.bindTooltip("Destino");
-
-                        window.javaBridge.seleccionar(
-                            "DESTINO", lat, lon
-                        );
-
-                        eligiendoOrigen = true;
-
-                        aviso.textContent =
-                            mensajesMapa.cotizar;
-                    }
-                });
-            }
-            """);
+                        """);
     }
 
     private void cancelarCalculoRuta() {
@@ -263,69 +280,65 @@ public class MapaController {
     private void limpiarRutaVisible() {
         WebEngine motor = mapaWeb.getEngine();
 
-        if (motor.getLoadWorker().getState()
-                == Worker.State.SUCCEEDED) {
+        if (motor.getLoadWorker().getState() == Worker.State.SUCCEEDED) {
 
             motor.executeScript("""
-                if (typeof window.limpiarRutas === "function") {
-                    window.limpiarRutas();
-                }
-                """);
+                    if (typeof window.limpiarRutas === "function") {
+                        window.limpiarRutas();
+                    }
+                    """);
         }
     }
 
     private void mostrarAvisoMapa(String mensaje) {
-        JSObject avisoMapa = (JSObject)
-            mapaWeb.getEngine().executeScript(
-                "document.getElementById('aviso')"
-            );
+        JSObject avisoMapa = (JSObject) mapaWeb.getEngine().executeScript(
+                "document.getElementById('aviso')");
 
         avisoMapa.setMember("textContent", mensaje);
     }
 
-    private Ubicacion leerPunto(TextField campo) {
+    private Ubicacion leerPunto(TextField campo, Ubicacion seleccionado) {
+        if (seleccionado != null) {
+            return seleccionado;
+        }
+
         String texto = campo.getText();
 
         if (texto == null || texto.isBlank()) {
             throw new IllegalArgumentException(
-                t("mapa.primero.elegi.origen.y.destino.en.el")
-            );
+                    t("mapa.primero.elegi.origen.y.destino.en.el"));
         }
 
         String[] partes = texto.split(",");
 
-        if (partes.length != 2) {
-            throw new IllegalArgumentException(
-                t("mapa.primero.elegi.origen.y.destino.en.el")
-            );
+        if (partes.length == 2) {
+            try {
+                double lat = Double.parseDouble(partes[0].trim());
+                double lon = Double.parseDouble(partes[1].trim());
+                if (puntoValido(lat, lon)) {
+                    return new Ubicacion(lat, lon);
+                }
+            } catch (Exception ignored) {
+            }
         }
 
-        double lat = Double.parseDouble(partes[0].trim());
-        double lon = Double.parseDouble(partes[1].trim());
-
-        if (!puntoValido(lat, lon)) {
-            throw new IllegalArgumentException(
-                t("mapa.elegi.puntos.dentro.de.puerto.madryn")
-            );
-        }
-
-        return new Ubicacion(lat, lon);
+        throw new IllegalArgumentException(
+                t("mapa.primero.elegi.origen.y.destino.en.el"));
     }
 
     private boolean puntoValido(double lat, double lon) {
         return Double.isFinite(lat)
-            && Double.isFinite(lon)
-            && lat >= -42.832
-            && lat <= -42.704
-            && lon >= -65.126
-            && lon <= -65.005;
+                && Double.isFinite(lon)
+                && lat >= -42.832
+                && lat <= -42.704
+                && lon >= -65.126
+                && lon <= -65.005;
     }
 
     private void exigirAplicacion() {
         if (aplicacion == null) {
             throw new IllegalStateException(
-                "Falta conectar setAplicacion en AplicacionUberFX."
-            );
+                    "Falta conectar setAplicacion en AplicacionUberFX.");
         }
     }
 
@@ -335,30 +348,27 @@ public class MapaController {
             exigirAplicacion();
             limpiarCotizacion();
 
-            Ubicacion origen = leerPunto(origenTexto);
-            Ubicacion destino = leerPunto(destinoTexto);
+            Ubicacion origen = leerPunto(origenTexto, origenSeleccionado);
+            Ubicacion destino = leerPunto(destinoTexto, destinoSeleccionado);
 
             double km = origen.calcularDistancia(destino);
 
             if (km <= 0) {
                 throw new IllegalArgumentException(
-                    t("mapa.elegi.un.origen.y.un.destino.diferentes")
-                );
+                        t("mapa.elegi.un.origen.y.un.destino.diferentes"));
             }
 
             if (tipoServicio.getValue() == null
                     || categoria.getValue() == null) {
                 throw new IllegalArgumentException(
-                    t("mapa.elegi.tipo.de.servicio.y.categoria")
-                );
+                        t("mapa.elegi.tipo.de.servicio.y.categoria"));
             }
 
             var sistema = aplicacion.sesion.sistema;
 
             var servicios = sistema.consultarServicios(
-                tipoServicio.getValue(),
-                categoria.getValue()
-            );
+                    tipoServicio.getValue(),
+                    categoria.getValue());
 
             opciones.setCellFactory(lista -> new ListCell<Servicio>() {
 
@@ -375,22 +385,19 @@ public class MapaController {
                     }
 
                     double minutos = sistema.estimarTiempo(
-                        servicio, origen, destino
-                    );
+                            servicio, origen, destino);
 
                     double precio = servicio.calcularCosto(
-                        km, minutos
-                    );
+                            km, minutos);
 
                     setText(String.format(
-                        aplicacion.locale(),
-                        t("mapa.s.s.2f.km.1f.min.2f"),
-                        aplicacion.nombreServicio(servicio),
-                        aplicacion.etiqueta(servicio.getTipoVehiculo()),
-                        km,
-                        minutos,
-                        precio
-                    ));
+                            aplicacion.locale(),
+                            t("mapa.s.s.2f.km.1f.min.2f"),
+                            aplicacion.nombreServicio(servicio),
+                            aplicacion.etiqueta(servicio.getTipoVehiculo()),
+                            km,
+                            minutos,
+                            precio));
 
                     setStyle("-fx-padding: 14;");
                 }
@@ -403,8 +410,7 @@ public class MapaController {
 
             if (servicios.isEmpty()) {
                 avisar(
-                    t("mapa.no.hay.servicios.para.esa.combinacion.proba")
-                );
+                        t("mapa.no.hay.servicios.para.esa.combinacion.proba"));
             } else {
                 opciones.getSelectionModel().selectFirst();
             }
@@ -415,13 +421,12 @@ public class MapaController {
     }
 
     private void dibujarRutaSeleccionada() {
-        if (mapaWeb.getEngine().getLoadWorker().getState()
-                != Worker.State.SUCCEEDED) {
+        if (mapaWeb.getEngine().getLoadWorker().getState() != Worker.State.SUCCEEDED) {
             return;
         }
 
         Servicio servicio = opciones.getSelectionModel()
-            .getSelectedItem();
+                .getSelectedItem();
 
         if (servicio == null
                 || origenCotizado == null
@@ -438,103 +443,81 @@ public class MapaController {
             limpiarRutaVisible();
 
             PuntoRuta origen = new PuntoRuta(
-                origenCotizado.getLatitud(),
-                origenCotizado.getLongitud()
-            );
+                    origenCotizado.getLatitud(),
+                    origenCotizado.getLongitud());
 
             PuntoRuta destino = new PuntoRuta(
-                destinoCotizado.getLatitud(),
-                destinoCotizado.getLongitud()
-            );
+                    destinoCotizado.getLatitud(),
+                    destinoCotizado.getLongitud());
 
             var tipoVehiculo = servicio.getTipoVehiculo();
 
             var sistema = aplicacion.sesion.sistema;
             var cliente = sistema.buscarUsuarioPorMail(
-                aplicacion.sesion.correo
-            );
+                    aplicacion.sesion.correo);
 
             if (cliente == null) {
                 throw new IllegalStateException(
-                    t("mapa.no.se.encontro.el.usuario.de.la")
-                );
+                        t("mapa.no.se.encontro.el.usuario.de.la"));
             }
 
             // Este objeto se usa solo para consultar compatibilidad.
             // No se registra ni se solicita el viaje.
             Viaje consulta = new Viaje(
-                cliente,
-                origenCotizado,
-                destinoCotizado,
-                servicio
-            );
+                    cliente,
+                    origenCotizado,
+                    destinoCotizado,
+                    servicio);
 
-            var candidatos =
-                sistema.buscarConductoresDisponibles(consulta)
+            var candidatos = sistema.buscarConductoresDisponibles(consulta)
                     .stream()
                     .map(usuario -> java.util.Map.entry(
-                        usuario.getEmail(),
-                        usuario.getNombre()
-                    ))
+                            usuario.getEmail(),
+                            usuario.getNombre()))
                     .toList();
 
             mostrarAvisoMapa(
-                t("mapa.calculando.rutas.la.primera.preparacion.del.mapa")
-            );
+                    t("mapa.calculando.rutas.la.primera.preparacion.del.mapa"));
 
             Task<ResultadoRutas> tarea = new Task<>() {
 
                 @Override
                 protected ResultadoRutas call() {
-                    var planificador =
-                        aplicacion.getPlanificadorRutas();
+                    var planificador = aplicacion.getPlanificadorRutas();
 
                     if (isCancelled()) {
                         return null;
                     }
 
-                    PuntoRuta origenEnCalle =
-                        planificador.ajustarACalle(
-                            origen, tipoVehiculo
-                        ).orElseThrow(() ->
-                            new IllegalArgumentException(
-                                t("mapa.el.origen.esta.lejos.de.una.calle")
-                            )
-                        );
+                    PuntoRuta origenEnCalle = planificador.ajustarACalle(
+                            origen, tipoVehiculo).orElseThrow(
+                                    () -> new IllegalArgumentException(
+                                            t("mapa.el.origen.esta.lejos.de.una.calle")));
 
-                    PuntoRuta destinoEnCalle =
-                        planificador.ajustarACalle(
-                            destino, tipoVehiculo
-                        ).orElseThrow(() ->
-                            new IllegalArgumentException(
-                                t("mapa.el.destino.esta.lejos.de.una.calle")
-                            )
-                        );
+                    PuntoRuta destinoEnCalle = planificador.ajustarACalle(
+                            destino, tipoVehiculo).orElseThrow(
+                                    () -> new IllegalArgumentException(
+                                            t("mapa.el.destino.esta.lejos.de.una.calle")));
 
                     if (isCancelled()) {
                         return null;
                     }
 
-                    RutaCalculada rutaViaje =
-                        planificador.calcular(
+                    RutaCalculada rutaViaje = planificador.calcular(
                             origenEnCalle,
                             destinoEnCalle,
-                            tipoVehiculo
-                        );
+                            tipoVehiculo);
 
                     RutaCalculada rutaConductor = null;
                     String nombreConductor = null;
 
-                    double distanciaMenor =
-                        Double.POSITIVE_INFINITY;
+                    double distanciaMenor = Double.POSITIVE_INFINITY;
 
-                    var ubicaciones =
-                        aplicacion.getUbicacionesConductores();
+                    var ubicaciones = aplicacion.getUbicacionesConductores();
 
                     Ubicacion ubicacionOrigen = new Ubicacion(
-                        origenEnCalle.latitud(),
-                        origenEnCalle.longitud()
-                    );
+                            origenEnCalle.latitud(),
+                            origenEnCalle.longitud());
 
                     for (var candidato : candidatos) {
                         if (isCancelled()) {
@@ -545,34 +528,29 @@ public class MapaController {
 
                         try {
                             posicion = ubicaciones.obtener(
-                                candidato.getKey(),
-                                tipoVehiculo,
-                                planificador
-                            );
+                                    candidato.getKey(),
+                                    tipoVehiculo,
+                                    planificador);
                         } catch (IllegalStateException e) {
                             continue;
                         }
 
                         double distancia = new Ubicacion(
-                            posicion.latitud(),
-                            posicion.longitud()
-                        ).calcularDistancia(ubicacionOrigen);
+                                posicion.latitud(),
+                                posicion.longitud()).calcularDistancia(ubicacionOrigen);
 
                         if (distancia >= distanciaMenor) {
                             continue;
                         }
 
                         try {
-                            RutaCalculada recogida =
-                                planificador.calcular(
+                            RutaCalculada recogida = planificador.calcular(
                                     posicion,
                                     origenEnCalle,
-                                    tipoVehiculo
-                                );
+                                    tipoVehiculo);
 
                             rutaConductor = recogida;
-                            nombreConductor =
-                                candidato.getValue();
+                            nombreConductor = candidato.getValue();
 
                             distanciaMenor = distancia;
 
@@ -583,10 +561,9 @@ public class MapaController {
                     }
 
                     return new ResultadoRutas(
-                        rutaViaje,
-                        rutaConductor,
-                        nombreConductor
-                    );
+                            rutaViaje,
+                            rutaConductor,
+                            nombreConductor);
                 }
             };
 
@@ -603,39 +580,32 @@ public class MapaController {
 
                 try {
                     String puntosViaje = convertirPuntos(
-                        resultado.viaje()
-                    );
+                            resultado.viaje());
 
-                    String puntosConductor =
-                        resultado.recogida() == null
+                    String puntosConductor = resultado.recogida() == null
                             ? "[]"
                             : convertirPuntos(
-                                resultado.recogida()
-                            );
+                                    resultado.recogida());
 
                     mapaWeb.getEngine().executeScript(
-                        "window.mostrarRutas("
-                            + puntosConductor + ","
-                            + puntosViaje + ");"
-                    );
+                            "window.mostrarRutas("
+                                    + puntosConductor + ","
+                                    + puntosViaje + ");");
 
                     if (resultado.conductor() == null) {
                         mostrarAvisoMapa(
-                            t("mapa.ruta.del.viaje.calculada.sin.conductor.compatible")
-                        );
+                                t("mapa.ruta.del.viaje.calculada.sin.conductor.compatible"));
                     } else {
                         mostrarAvisoMapa(
-                            t("mapa.vista.previa")
-                                + resultado.conductor()
-                                + t("mapa.leyenda.vista.previa")
-                        );
+                                t("mapa.vista.previa")
+                                        + resultado.conductor()
+                                        + t("mapa.leyenda.vista.previa"));
                     }
 
                 } catch (Exception e) {
                     avisar(
-                        t("mapa.no.se.pudieron.dibujar.las.rutas")
-                            + aplicacion.mensajeError(e)
-                    );
+                            t("mapa.no.se.pudieron.dibujar.las.rutas")
+                                    + aplicacion.mensajeError(e));
                 }
             });
 
@@ -645,13 +615,11 @@ public class MapaController {
                 }
 
                 mostrarAvisoMapa(
-                    t("mapa.no.se.pudieron.calcular.las.rutas")
-                );
+                        t("mapa.no.se.pudieron.calcular.las.rutas"));
 
                 avisar(
-                    t("mapa.la.cotizacion.esta.disponible.pero.no.se")
-                        + aplicacion.mensajeError(tarea.getException())
-                );
+                        t("mapa.la.cotizacion.esta.disponible.pero.no.se")
+                                + aplicacion.mensajeError(tarea.getException()));
             });
 
             tareaRutas = tarea;
@@ -662,9 +630,8 @@ public class MapaController {
 
         } catch (Exception e) {
             avisar(
-                t("mapa.no.se.pudo.preparar.la.vista.previa")
-                    + aplicacion.mensajeError(e)
-            );
+                    t("mapa.no.se.pudo.preparar.la.vista.previa")
+                            + aplicacion.mensajeError(e));
         }
     }
 
@@ -676,8 +643,8 @@ public class MapaController {
 
     private boolean resultadoVigente(long version) {
         return !pantallaCerrada
-            && version == versionRuta
-            && mapaWeb.getScene() != null;
+                && version == versionRuta
+                && mapaWeb.getScene() != null;
     }
 
     private String convertirPuntos(RutaCalculada ruta) {
@@ -689,10 +656,10 @@ public class MapaController {
             }
 
             resultado.append("[")
-                .append(punto.latitud())
-                .append(",")
-                .append(punto.longitud())
-                .append("]");
+                    .append(punto.latitud())
+                    .append(",")
+                    .append(punto.longitud())
+                    .append("]");
         }
 
         return resultado.append("]").toString();
@@ -704,29 +671,27 @@ public class MapaController {
             exigirAplicacion();
 
             Servicio servicio = opciones.getSelectionModel()
-                .getSelectedItem();
+                    .getSelectedItem();
 
             if (servicio == null
                     || origenCotizado == null
                     || destinoCotizado == null) {
                 throw new IllegalArgumentException(
-                    t("mapa.primero.cotiza.y.selecciona.un.servicio")
-                );
+                        t("mapa.primero.cotiza.y.selecciona.un.servicio"));
             }
 
             var sesion = aplicacion.sesion;
             UUID id = UUID.randomUUID();
 
             sesion.ejecutar(
-                "SOLICITAR",
-                sesion.correo,
-                id.toString(),
-                servicio.getNombre(),
-                Double.toString(origenCotizado.getLatitud()),
-                Double.toString(origenCotizado.getLongitud()),
-                Double.toString(destinoCotizado.getLatitud()),
-                Double.toString(destinoCotizado.getLongitud())
-            );
+                    "SOLICITAR",
+                    sesion.correo,
+                    id.toString(),
+                    servicio.getNombre(),
+                    Double.toString(origenCotizado.getLatitud()),
+                    Double.toString(origenCotizado.getLongitud()),
+                    Double.toString(destinoCotizado.getLatitud()),
+                    Double.toString(destinoCotizado.getLongitud()));
 
             sesion.viajeSeleccionado = id;
             aplicacion.mostrar("DetalleViaje.fxml");
@@ -759,12 +724,66 @@ public class MapaController {
         alerta.setHeaderText(null);
 
         alerta.setContentText(
-            texto == null
-                ? t("mapa.no.se.pudo.completar.la.accion")
-                : texto
-        );
+                texto == null
+                        ? t("mapa.no.se.pudo.completar.la.accion")
+                        : texto);
 
         alerta.showAndWait();
+    }
+
+    private static final class ReferenciaCalle {
+        final String nombre;
+        final double lat;
+        final double lon;
+
+        ReferenciaCalle(String nombre, double lat, double lon) {
+            this.nombre = nombre;
+            this.lat = lat;
+            this.lon = lon;
+        }
+
+        double distanciaCuadrada(double l, double ln) {
+            double dLat = lat - l;
+            double dLon = lon - ln;
+            return dLat * dLat + dLon * dLon;
+        }
+    }
+
+    private static final List<ReferenciaCalle> CALLES_MADRYN = List.of(
+            new ReferenciaCalle("Av. Julio A. Roca (Costanera)", -42.766, -65.031),
+            new ReferenciaCalle("Av. Roca y 28 de Julio", -42.769, -65.032),
+            new ReferenciaCalle("Belgrano y 9 de Julio", -42.769, -65.038),
+            new ReferenciaCalle("Plaza San Martín (San Martín y Belgrano)", -42.768, -65.037),
+            new ReferenciaCalle("San Martín y 28 de Julio", -42.770, -65.037),
+            new ReferenciaCalle("Av. Gales y Mitre", -42.773, -65.035),
+            new ReferenciaCalle("Av. Gales y San Martín", -42.773, -65.037),
+            new ReferenciaCalle("Av. Gales y Alvear", -42.774, -65.044),
+            new ReferenciaCalle("Sarmiento y 25 de Mayo", -42.776, -65.034),
+            new ReferenciaCalle("Terminal de Ómnibus (Dr. Ávila)", -42.762, -65.042),
+            new ReferenciaCalle("Roberto Gómez y Domecq García", -42.759, -65.044),
+            new ReferenciaCalle("Paulina Escardó y Av. Rawson", -42.763, -65.033),
+            new ReferenciaCalle("Boulevard Brown y Primera Bajada", -42.775, -65.029),
+            new ReferenciaCalle("Boulevard Brown y Tercera Bajada", -42.782, -65.024),
+            new ReferenciaCalle("UNPSJB (Boulevard Brown 3051)", -42.785, -65.021),
+            new ReferenciaCalle("Juan B. Justo y Av. Gales", -42.775, -65.050),
+            new ReferenciaCalle("Marcos A. Zar y Roque Sáenz Peña", -42.766, -65.043),
+            new ReferenciaCalle("España y Mitre", -42.779, -65.033),
+            new ReferenciaCalle("Muelle Luis Piedrabuena", -42.765, -65.028),
+            new ReferenciaCalle("Barrio Sur (Boulevard Brown)", -42.790, -65.018),
+            new ReferenciaCalle("Parque Industrial (Av. Juan XXIII)", -42.780, -65.065),
+            new ReferenciaCalle("Pujol Norte", -42.750, -65.055));
+
+    private String resolverCalleCercana(double lat, double lon) {
+        ReferenciaCalle mejor = null;
+        double minD = Double.MAX_VALUE;
+        for (ReferenciaCalle r : CALLES_MADRYN) {
+            double d = r.distanciaCuadrada(lat, lon);
+            if (d < minD) {
+                minD = d;
+                mejor = r;
+            }
+        }
+        return mejor != null ? mejor.nombre : String.format(Locale.US, "Calle (%.4f, %.4f)", lat, lon);
     }
 
     public class PuenteMapa {
@@ -779,16 +798,35 @@ public class MapaController {
                     return;
                 }
 
-                String coordenadas = String.format(
-                    Locale.US, "%.5f, %.5f", lat, lon
-                );
+                String calle = resolverCalleCercana(lat, lon);
 
                 if ("ORIGEN".equals(tipo)) {
-                    origenTexto.setText(coordenadas);
+                    origenSeleccionado = new Ubicacion(lat, lon);
+                    origenTexto.setText(calle);
+                    destinoSeleccionado = null;
                     destinoTexto.clear();
 
                 } else if ("DESTINO".equals(tipo)) {
-                    destinoTexto.setText(coordenadas);
+                    destinoSeleccionado = new Ubicacion(lat, lon);
+                    destinoTexto.setText(calle);
+                }
+            });
+        }
+
+        public void actualizarCalle(String tipo, String calle) {
+            if (calle == null || calle.isBlank() || calle.equalsIgnoreCase("null")) {
+                return;
+            }
+
+            Platform.runLater(() -> {
+                if (pantallaCerrada) {
+                    return;
+                }
+
+                if ("ORIGEN".equals(tipo) && origenSeleccionado != null) {
+                    origenTexto.setText(calle);
+                } else if ("DESTINO".equals(tipo) && destinoSeleccionado != null) {
+                    destinoTexto.setText(calle);
                 }
             });
         }

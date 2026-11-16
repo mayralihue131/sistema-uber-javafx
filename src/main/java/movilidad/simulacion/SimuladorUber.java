@@ -12,11 +12,55 @@ public class SimuladorUber {
     private int capacidadCola;
     private int intervaloGeneracionMs;
 
+    public SimuladorUber() {
+        this(15, 3, 20, 5, 800);
+    }
+
     public SimuladorUber(int duracionSimulacionSegundos, int cantidadConductores, int maxViajes, int capacidadCola, int intervaloGeneracionMs) {
         this.duracionSimulacionSegundos = duracionSimulacionSegundos;
         this.cantidadConductores = cantidadConductores;
         this.maxViajes = maxViajes;
         this.capacidadCola = capacidadCola;
+        this.intervaloGeneracionMs = intervaloGeneracionMs;
+    }
+
+    public int getDuracionSimulacionSegundos() {
+        return duracionSimulacionSegundos;
+    }
+
+    public void setDuracionSimulacionSegundos(int duracionSimulacionSegundos) {
+        this.duracionSimulacionSegundos = duracionSimulacionSegundos;
+    }
+
+    public int getCantidadConductores() {
+        return cantidadConductores;
+    }
+
+    public void setCantidadConductores(int cantidadConductores) {
+        this.cantidadConductores = cantidadConductores;
+    }
+
+    public int getMaxViajes() {
+        return maxViajes;
+    }
+
+    public void setMaxViajes(int maxViajes) {
+        this.maxViajes = maxViajes;
+    }
+
+    public int getCapacidadCola() {
+        return capacidadCola;
+    }
+
+    public void setCapacidadCola(int capacidadCola) {
+        this.capacidadCola = capacidadCola;
+    }
+
+    public int getIntervaloGeneracionMs() {
+        return intervaloGeneracionMs;
+    }
+
+    public void setIntervaloGeneracionMs(int intervaloGeneracionMs) {
         this.intervaloGeneracionMs = intervaloGeneracionMs;
     }
 

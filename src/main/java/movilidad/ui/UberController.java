@@ -580,6 +580,11 @@ public final class UberController {
         categoriaVehiculo.getItems().setAll(CategoriaVehiculo.values());
         tipoVehiculo.setValue(TipoVehiculo.AUTO);
         categoriaVehiculo.setValue(CategoriaVehiculo.ESTANDAR);
+        tipoVehiculo.valueProperty().addListener((obs, viejo, nuevo) -> {
+            if (nuevo == TipoVehiculo.MOTO) {
+                capacidad.setText("1");
+            }
+        });
         pasajeros.setSelected(true);
         Usuario u = s().usuario();
         tituloVehiculo.setText(u.getConductor() == null ? t("control.habilitar.perfil.de.conductor") : t("control.agregar.otro.vehiculo"));
@@ -605,6 +610,9 @@ public final class UberController {
             double cap = numero(capacidad, t("control.capacidad"), 1, 50);
             if (cap != (int)cap) throw new IllegalArgumentException(t("control.la.capacidad.debe.ser.un.numero.entero"));
             if (tipoVehiculo.getValue() == null) throw new IllegalArgumentException(t("control.elegi.un.tipo.de.vehiculo"));
+            if (tipoVehiculo.getValue() == TipoVehiculo.MOTO && (int)cap > 1) {
+                throw new IllegalArgumentException(t("control.moto.capacidad.maxima"));
+            }
             if (categoriaVehiculo.getValue() == null) throw new IllegalArgumentException(t("control.elegi.una.categoria"));
             if (!pasajeros.isSelected() && !envios.isSelected()) throw new IllegalArgumentException(t("control.elegi.al.menos.un.tipo.de.servicio"));
             String tipos = pasajeros.isSelected() ? (envios.isSelected() ? "PASAJEROS,ENVIOS" : "PASAJEROS") : "ENVIOS";

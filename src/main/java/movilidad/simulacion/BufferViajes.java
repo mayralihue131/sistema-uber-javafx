@@ -79,4 +79,17 @@ public class BufferViajes {
             lock.unlock();
         }
     }
+
+    public int getCapacidadMaxima() {
+        return capacidadMaxima;
+    }
+
+    public int getCantidadPendientes() {
+        lock.lock();
+        try {
+            return colaViajes.size();
+        } finally {
+            lock.unlock();
+        }
+    }
 }

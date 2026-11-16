@@ -173,7 +173,8 @@ public final class SesionUber {
             case "DISPONIBLE" -> {
                 Usuario u=usuario(m,e[2]);
                 if(u.getCliente().enViaje()) throw new IllegalStateException("Tenés un viaje activo como cliente.");
-                m.cambiarRolActivo(u,RolUsuario.CONDUCTOR); m.ponerDisponible(u);
+                if (u.getRolActivo() != RolUsuario.CONDUCTOR) m.cambiarRolActivo(u,RolUsuario.CONDUCTOR);
+                m.ponerDisponible(u);
             }
             case "FUERA" -> m.ponerFueraDeServicio(usuario(m,e[2]));
             case "SOLICITAR" -> {

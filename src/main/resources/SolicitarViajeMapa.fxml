@@ -21,16 +21,18 @@
                    style="-fx-text-fill: #1565c0; -fx-font-size: 24px; -fx-font-weight: bold;"
                    wrapText="true"/>
 
-            <HBox spacing="12" visible="false" managed="false">
+            <HBox spacing="12">
                 <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="0">
                     <Label text="%vista.origen"/>
                     <TextField fx:id="origenTexto" editable="false"
+                               style="-fx-background-color: #f8fafc; -fx-border-color: #cbd5e1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8; -fx-font-weight: bold; -fx-text-fill: #1e293b;"
                                promptText="%vista.elegi.el.origen.en.el.mapa"/>
                 </VBox>
 
                 <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="0">
                     <Label text="%vista.destino"/>
                     <TextField fx:id="destinoTexto" editable="false"
+                               style="-fx-background-color: #f8fafc; -fx-border-color: #cbd5e1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8; -fx-font-weight: bold; -fx-text-fill: #1e293b;"
                                promptText="%vista.elegi.el.destino.en.el.mapa"/>
                 </VBox>
             </HBox>
