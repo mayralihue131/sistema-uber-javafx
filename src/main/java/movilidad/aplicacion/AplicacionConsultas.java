@@ -30,6 +30,9 @@ import movilidad.modelo.*;
  */
 public class AplicacionConsultas {
 
+    private static final DateTimeFormatter FORMATO_FECHA_HORA =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+
     /**
      * Punto de entrada para la ejecución exclusiva en modo consola.
      *
@@ -136,20 +139,34 @@ public class AplicacionConsultas {
             aplicacion.agregarUsuario(usuario);
 
             if (fila.size() > 3 && !fila.get(3).isBlank()) {
-                String licencia = fila.get(3);
-                boolean primero = true;
-
+                String licencia = fila.get(3).trim();
+                List<String> patentesFila = new ArrayList<>();
                 for (int i = 4; i < fila.size(); i++) {
-                    String patente = fila.get(i);
+                    String p = fila.get(i).trim();
+                    if (!p.isBlank()) patentesFila.add(p);
+                }
 
-                    if (patente.isBlank()) {
-                        continue;
+                if (patentesFila.isEmpty() && licencia.contains("-")) {
+                    int guion = licencia.lastIndexOf('-');
+                    String posiblePatente = licencia.substring(guion + 1).trim();
+                    boolean existeVehiculo = vehiculos.stream()
+                            .anyMatch(v -> v.getPatente().equalsIgnoreCase(posiblePatente));
+                    if (existeVehiculo) {
+                        patentesFila.add(posiblePatente);
+                        licencia = licencia.substring(0, guion).trim();
                     }
+                }
 
+                if (patentesFila.isEmpty()) {
+                    continue;
+                }
+
+                boolean primero = true;
+                for (String patente : patentesFila) {
                     Vehiculo encontrado = null;
 
                     for (Vehiculo vehiculo : vehiculos) {
-                        if (patente.equals(vehiculo.getPatente())) {
+                        if (patente.equalsIgnoreCase(vehiculo.getPatente())) {
                             encontrado = vehiculo;
                             break;
                         }
@@ -167,12 +184,6 @@ public class AplicacionConsultas {
                     } else {
                         aplicacion.agregarVehiculo(usuario, encontrado);
                     }
-                }
-
-                if (primero) {
-                    throw new IllegalArgumentException(
-                            "Falta la patente en la fila de "
-                                    + usuario.getEmail());
                 }
 
                 Vehiculo activo =
@@ -483,13 +494,10 @@ public class AplicacionConsultas {
 
         System.out.println("\n------------- HISTORIAL -------------");
 
-        DateTimeFormatter formato =
-                DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-
         for (RegistroViaje registro : viaje.getRegistroViaje()) {
             System.out.println(registro.getEstadoViaje()
                     + " -> "
-                    + registro.getFechaHora().format(formato));
+                    + registro.getFechaHora().format(FORMATO_FECHA_HORA));
         }
 
         System.out.println("================================================");

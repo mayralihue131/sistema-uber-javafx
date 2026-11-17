@@ -49,6 +49,15 @@ public class UsuarioDaoTxt implements UsuarioDAO {
                 String licencia = (campos.length > 3) ? campos[3].trim() : "";
                 String patente  = (campos.length > 4) ? campos[4].trim() : "";
 
+                if (patente.isEmpty() && licencia.contains("-")) {
+                    int guion = licencia.lastIndexOf('-');
+                    String posiblePatente = licencia.substring(guion + 1).trim();
+                    if (posiblePatente.length() >= 6) {
+                        patente = posiblePatente;
+                        licencia = licencia.substring(0, guion).trim();
+                    }
+                }
+
                 lista.add(new UsuarioDTO(nombre, telefono, email, licencia, patente));
             }
         }
