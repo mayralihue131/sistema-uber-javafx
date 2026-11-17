@@ -13,7 +13,13 @@ import movilidad.dao.txt.CargaParametros;
 import movilidad.logica.MovilidadDigital;
 import movilidad.modelo.*;
 
-/** Conserva las acciones en texto; reconstruye y valida antes de guardar cada cambio. */
+/**
+ * Gestor de sesión y persistencia por registro de transacciones (event journal) para la interfaz JavaFX.
+ *
+ * <p>Conserva todas las mutaciones del modelo en un archivo de texto con codificación Base64.
+ * Antes de consolidar un cambio, reconstruye y valida el estado completo en memoria en una copia
+ * tentativa para garantizar consistencia atómica y tolerancia a fallos.
+ */
 public final class SesionUber {
     public MovilidadDigital sistema;
     public String correo;
@@ -21,6 +27,13 @@ public final class SesionUber {
     private final Path archivo;
     private final List<String[]> eventos = new ArrayList<>();
 
+    /**
+     * Inicializa una sesión cargando los parámetros globales y reproduciendo los eventos
+     * previos registrados en el archivo journal especificado.
+     *
+     * @param archivo ruta al archivo de persistencia de eventos (.txt)
+     * @throws IOException si ocurre un error de lectura o corrupción de datos
+     */
     public SesionUber(Path archivo) throws IOException {
         this.archivo = archivo.toAbsolutePath();
         CargaParametros.parametros();
@@ -43,6 +56,12 @@ public final class SesionUber {
     public Viaje viaje() { return sistema.buscarViajePorId(viajeSeleccionado); }
     public Path archivo() { return archivo; }
 
+    /**
+     * Autentica e inicia sesión para el usuario con el correo provisto.
+     *
+     * @param email dirección de correo electrónico del usuario
+     * @throws IllegalArgumentException si el correo no está registrado en el sistema
+     */
     public void ingresar(String email) {
         Usuario u = sistema.getUsuarios().stream()
             .filter(usuario -> usuario.getEmail().equalsIgnoreCase(email.trim()))
@@ -53,6 +72,16 @@ public final class SesionUber {
 
         correo = u.getEmail();
     }
+
+    /**
+     * Registra un nuevo usuario en el sistema y persiste el evento.
+     *
+     * @param nombre nombre completo del usuario
+     * @param telefono número telefónico de contacto
+     * @param email correo electrónico único
+     * @throws IOException si falla la escritura en disco
+     * @throws IllegalArgumentException si el correo está vacío o duplicado
+     */
     public void registrarUsuario(String nombre, String telefono, String email)
             throws IOException {
         if (email == null || email.isBlank()) {
@@ -70,6 +99,14 @@ public final class SesionUber {
         ejecutar("USUARIO", nombreLimpio, telefonoLimpio, emailLimpio);
     }
 
+    /**
+     * Aplica una mutación de dominio, la valida atómicamente y la almacena en el journal de eventos.
+     * Si la fábrica DAO activa persiste en base de datos o almacenamiento externo, sincroniza el registro.
+     *
+     * @param accion identificador del comando (e.g. USUARIO, VEHICULO, SOLICITAR, etc.)
+     * @param args argumentos específicos de la acción
+     * @throws IOException si falla la persistencia atómica en el archivo journal
+     */
     public void ejecutar(String accion, String... args) throws IOException {
         if ("USUARIO".equals(accion)) {
             String email = args.length > 2 && args[2] != null ? args[2].trim() : "";
@@ -196,6 +233,13 @@ public final class SesionUber {
             default -> throw new IllegalArgumentException("Acción desconocida: " + e[0]);
         }
     }
+    /**
+     * Evalúa todos los viajes solicitados y rechaza/vence automáticamente aquellos
+     * que hayan superado el tiempo de espera límite (5 minutos).
+     *
+     * @return {@code true} si al menos un viaje venció y cambió de estado, {@code false} en caso contrario
+     * @throws IOException si ocurre un fallo al persistir el evento de vencimiento
+     */
     public boolean vencer() throws IOException {
         boolean cambio=false;
         for(Viaje v : sistema.getViajes()) {

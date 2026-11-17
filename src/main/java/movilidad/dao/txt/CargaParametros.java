@@ -5,6 +5,10 @@ import java.io.InputStream;
 import java.util.Locale;
 import java.util.Properties;
 
+/**
+ * Utilidad encargada de leer y disponibilizar los parámetros globales de la aplicación
+ * configurados en {@code config.properties} y {@code application.properties}.
+ */
 public class CargaParametros {
 
     private static double velocidadPromedioKmH = 40.0;

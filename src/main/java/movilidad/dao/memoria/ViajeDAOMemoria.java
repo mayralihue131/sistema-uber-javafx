@@ -5,6 +5,10 @@ import java.util.List;
 import movilidad.dao.interfaces.ViajeDAO;
 import movilidad.modelo.Viaje;
 
+/**
+ * Implementación en memoria de {@link ViajeDAO}.
+ * Mantiene la lista de viajes en RAM durante la sesión activa.
+ */
 public class ViajeDAOMemoria implements ViajeDAO {
 
     private final List<Viaje> viajes;

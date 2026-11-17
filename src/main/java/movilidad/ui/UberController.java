@@ -24,6 +24,12 @@ import movilidad.rutas.PuntoRuta;
 import movilidad.rutas.RutaCalculada;
 import netscape.javascript.JSObject;
 
+/**
+ * Controlador principal de la interfaz grafica JavaFX del sistema Uber.
+ * Gestiona los eventos de usuario, navegacion entre pantallas (login, registro,
+ * pasajero, conductor, mapa en vivo), solicitudes de viajes e interaccion
+ * bidireccional con el visor WebView de Leaflet/OpenStreetMap.
+ */
 public final class UberController {
     // Referencias de la pantalla y estado temporal de la solicitud.
     private final AplicacionUberFX app;

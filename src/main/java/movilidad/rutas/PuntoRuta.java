@@ -1,5 +1,12 @@
 package movilidad.rutas;
 
+/**
+ * Objeto de valor inmutable (Record) que representa una coordenada geográfica en la superficie terrestre.
+ * Valida los rangos estándar de latitud ([-90, 90]) y longitud ([-180, 180]).
+ *
+ * @param latitud  componente de latitud en grados decimales
+ * @param longitud componente de longitud en grados decimales
+ */
 public record PuntoRuta(double latitud, double longitud) {
 
     public PuntoRuta {
@@ -12,5 +19,4 @@ public record PuntoRuta(double latitud, double longitud) {
             );
         }
     }
-}//Guarda la latitud y longitud de un punto del mapa y verifica que sean válidas. 
-//La usaremos para formar el recorrido.
+}

@@ -31,6 +31,13 @@ import movilidad.ui.MapaController;
 import movilidad.ui.SesionUber;
 import movilidad.ui.UberController;
 
+/**
+ * Aplicación de escritorio principal basada en JavaFX.
+ *
+ * <p>Administra el ciclo de vida de la ventana gráfica ({@link Stage}), la carga de vistas FXML,
+ * la gestión de idiomas dinámicos ({@link ResourceBundle}) y la inicialización de los servicios
+ * de sesión y ruteo vial.
+ */
 public class AplicacionUberFX extends Application {
 
     public SesionUber sesion;

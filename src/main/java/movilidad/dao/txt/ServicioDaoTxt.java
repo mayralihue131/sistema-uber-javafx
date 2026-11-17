@@ -9,12 +9,17 @@ import movilidad.dao.dto.ServicioDTO;
 import movilidad.dao.interfaces.ServicioDAO;
 
 /**
- * Implementación TXT de {@link ServicioDAO}.
+ * Implementación de lectura de {@link ServicioDAO} a partir de archivos de texto (.txt).
  */
 public class ServicioDaoTxt implements ServicioDAO {
 
     private final String rutaArchivo;
 
+    /**
+     * Construye un DAO de servicios para el archivo especificado.
+     *
+     * @param rutaArchivo ruta al archivo de texto de servicios
+     */
     public ServicioDaoTxt(String rutaArchivo) {
         this.rutaArchivo = rutaArchivo;
     }

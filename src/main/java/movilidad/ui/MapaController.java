@@ -27,6 +27,17 @@ import movilidad.rutas.PuntoRuta;
 import movilidad.rutas.RutaCalculada;
 import netscape.javascript.JSObject;
 
+/**
+ * Controlador de la vista interactiva con mapa ({@code SolicitarViajeMapa.fxml}).
+ *
+ * <p>Responsabilidades:
+ * <ul>
+ *   <li>Integración con el motor Leaflet/OpenStreetMap mediante {@link WebView} y {@link WebEngine}.</li>
+ *   <li>Geocodificación inversa con resolución offline de puntos de interés y online vía Nominatim.</li>
+ *   <li>Trazado asíncrono en segundo plano de rutas viales y cálculo de cotizaciones.</li>
+ *   <li>Confirmación y publicación de nuevas solicitudes de viaje.</li>
+ * </ul>
+ */
 public class MapaController {
 
     @FXML

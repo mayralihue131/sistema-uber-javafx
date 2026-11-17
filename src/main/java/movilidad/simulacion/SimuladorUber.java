@@ -4,6 +4,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Orquestador principal de la simulación concurrente multihilo del sistema de movilidad.
+ *
+ * <p>Modela escenarios de estrés y horas pico gestionando un pool de hilos ({@link ExecutorService})
+ * con un hilo productor de solicitudes y múltiples hilos conductores que consumen viajes
+ * coordinados mediante el monitor {@link BufferViajes}.
+ *
+ * <p>Todos los parámetros de la simulación son configurables en tiempo de diseño y ejecución.
+ */
 public class SimuladorUber {
     // Parámetros fácilmente configurables según consigna
     private int duracionSimulacionSegundos;
@@ -12,10 +21,23 @@ public class SimuladorUber {
     private int capacidadCola;
     private int intervaloGeneracionMs;
 
+    /**
+     * Construye un simulador con parámetros predeterminados:
+     * 15 segundos de duración, 3 conductores, máximo 20 viajes, búfer de 5 y 800 ms de cadencia.
+     */
     public SimuladorUber() {
         this(15, 3, 20, 5, 800);
     }
 
+    /**
+     * Construye un simulador con parámetros personalizados.
+     *
+     * @param duracionSimulacionSegundos duración máxima en segundos antes del apagado automático
+     * @param cantidadConductores        número de hilos consumidores concurrentes
+     * @param maxViajes                  límite de viajes generados por el productor
+     * @param capacidadCola              capacidad máxima de la cola bloqueante
+     * @param intervaloGeneracionMs      tiempo en milisegundos entre solicitudes consecutivas
+     */
     public SimuladorUber(int duracionSimulacionSegundos, int cantidadConductores, int maxViajes, int capacidadCola, int intervaloGeneracionMs) {
         this.duracionSimulacionSegundos = duracionSimulacionSegundos;
         this.cantidadConductores = cantidadConductores;
@@ -64,6 +86,11 @@ public class SimuladorUber {
         this.intervaloGeneracionMs = intervaloGeneracionMs;
     }
 
+    /**
+     * Inicia la ejecución de la simulación concurrente, lanzando el pool de hilos
+     * para el productor y los conductores, y administrando el apagado ordenado
+     * tras cumplirse el tiempo de ejecución establecido.
+     */
     public void iniciarSimulacion() {
         System.out.println("=== INICIANDO SIMULACIÓN UBER ===");
         System.out.println("Duración: " + duracionSimulacionSegundos + "s | Conductores: " + cantidadConductores + " | Max Viajes: " + maxViajes);

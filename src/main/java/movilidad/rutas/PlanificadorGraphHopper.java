@@ -12,11 +12,22 @@ import com.graphhopper.util.PMap;
 
 import movilidad.modelo.TipoVehiculo;
 
+/**
+ * Implementación de {@link PlanificadorRutas} basada en la biblioteca {@link GraphHopper}.
+ *
+ * <p>Resuelve el cálculo de caminos mínimos ponderados sobre la red vial y proyecta
+ * coordenadas geográficas hacia las aristas de calzada transitables más cercanas.
+ */
 public final class PlanificadorGraphHopper
         implements PlanificadorRutas {
 
     private final GraphHopper motor;
 
+    /**
+     * Construye un nuevo planificador asociado al motor GraphHopper provisto.
+     *
+     * @param motor instancia configurada e indexada de GraphHopper
+     */
     public PlanificadorGraphHopper(GraphHopper motor) {
         this.motor = Objects.requireNonNull(motor);
     }

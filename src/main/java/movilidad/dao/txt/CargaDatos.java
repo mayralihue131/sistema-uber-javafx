@@ -17,16 +17,37 @@ public class CargaDatos {
 
     // ── Métodos clásicos (compatibilidad hacia atrás) ─────────────────────────
 
+    /**
+     * Carga y parsea la lista de registros de usuarios desde un archivo de texto delimitado por punto y coma.
+     *
+     * @param fileName ruta al archivo de texto
+     * @return matriz de strings con los campos leídos
+     * @throws FileNotFoundException si el archivo no existe
+     */
     public static List<List<String>> cargarUsuarios(String fileName)
             throws FileNotFoundException {
         return leerArchivo(fileName);
     }
 
+    /**
+     * Carga y parsea la lista de registros de vehículos desde un archivo de texto.
+     *
+     * @param fileName ruta al archivo de texto
+     * @return matriz de strings con los campos leídos
+     * @throws FileNotFoundException si el archivo no existe
+     */
     public static List<List<String>> cargarVehiculos(String fileName)
             throws FileNotFoundException {
         return leerArchivo(fileName);
     }
 
+    /**
+     * Carga y parsea la lista de registros de servicios desde un archivo de texto.
+     *
+     * @param fileName ruta al archivo de texto
+     * @return matriz de strings con los campos leídos
+     * @throws FileNotFoundException si el archivo no existe
+     */
     public static List<List<String>> cargarServicios(String fileName)
             throws FileNotFoundException {
         return leerArchivo(fileName);

@@ -14,6 +14,13 @@ public class TxtDAOFactory implements DAOFactory {
     private final String rutaVehiculos;
     private final String rutaServicios;
 
+    /**
+     * Construye una fábrica DAO basada en archivos de texto delimitados.
+     *
+     * @param rutaUsuarios ruta al archivo de usuarios
+     * @param rutaVehiculos ruta al archivo de vehículos
+     * @param rutaServicios ruta al archivo de servicios
+     */
     public TxtDAOFactory(String rutaUsuarios, String rutaVehiculos, String rutaServicios) {
         this.rutaUsuarios  = rutaUsuarios;
         this.rutaVehiculos = rutaVehiculos;

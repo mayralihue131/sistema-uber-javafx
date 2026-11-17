@@ -15,17 +15,37 @@ import movilidad.dao.memoria.UsuarioDAOMemoria;
 import movilidad.dao.txt.CargaParametros;
 import movilidad.modelo.*;
 
+/**
+ * Fachada principal del sistema (Facade Pattern) que encapsula todas las reglas de negocio
+ * de la plataforma de movilidad urbana y paquetería.
+ *
+ * <p>Responsabilidades principales:
+ * <ul>
+ *   <li>Gestión y búsqueda de usuarios, clientes y conductores.</li>
+ *   <li>Filtrado y asignación de viajes según cercanía, disponibilidad, categorías y modalidades.</li>
+ *   <li>Cotización formal de viajes calculando tiempo y distancia.</li>
+ *   <li>Control de transiciones del ciclo de vida del viaje (solicitar, aceptar, iniciar, finalizar, cancelar, calificar).</li>
+ * </ul>
+ */
 public class MovilidadDigital {
 
     private UsuarioDAO usuarioDAO;
     private List<Viaje> viajes;
     private List<Servicio> servicios;
 
+    /**
+     * Construye la fachada utilizando persistencia en memoria RAM por defecto.
+     */
     public MovilidadDigital() {
         this(new UsuarioDAOMemoria());
 
     }
 
+    /**
+     * Construye la fachada inyectando la implementación de acceso a datos de usuarios deseada.
+     *
+     * @param usuarioDAO abstracción DAO para la gestión de usuarios
+     */
     public MovilidadDigital(UsuarioDAO usuarioDAO) {
 
         this.usuarioDAO = usuarioDAO;

@@ -54,6 +54,11 @@ public class DAOLoader {
         instanciaFabrica = fabrica;
     }
 
+    /**
+     * Retorna la instancia singleton de la fábrica de persistencia configurada.
+     *
+     * @return fábrica concreta de DAO activa (BD, TXT o Memoria)
+     */
     public static DAOFactory getFactory() {
         return instanciaFabrica;
     }

@@ -8,11 +8,24 @@ import com.graphhopper.config.CHProfile;
 import com.graphhopper.config.Profile;
 import com.graphhopper.util.GHUtility;
 
+/**
+ * Fábrica que inicializa y configura el motor de ruteo vial {@link GraphHopper}.
+ *
+ * <p>Carga la cartografía local OpenStreetMap (archivo {@code .osm}), configura los perfiles
+ * de vehículo para automóvil ({@code car}) y motocicleta ({@code motorcycle}), y genera o
+ * recupera la caché de ruteo en disco.
+ */
 public final class FabricaGraphHopper {
 
     private FabricaGraphHopper() {
     }
 
+    /**
+     * Construye e inicializa una instancia lista para calcular rutas de GraphHopper.
+     *
+     * @return instancia de {@link GraphHopper} cargada
+     * @throws IllegalStateException si no se encuentra el archivo cartográfico .osm
+     */
     public static GraphHopper crear() {
         Path archivo = Path.of(
             "datos", "mapas", "puerto_madryn_ampliado.osm"

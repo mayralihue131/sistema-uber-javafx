@@ -21,8 +21,20 @@ import movilidad.dao.dto.VehiculoDTO;
 import movilidad.logica.MovilidadDigital;
 import movilidad.modelo.*;
 
+/**
+ * Aplicación de consola interactiva (CLI) y módulo de carga inicial de datos.
+ *
+ * <p>Provee un menú numérico de opciones para consultar servicios, cotizar y solicitar
+ * viajes, e inspeccionar el historial y estados por terminal. Asimismo, centraliza
+ * el método {@link #cargarDatos(MovilidadDigital)} con soporte para PostgreSQL y Fallback a archivos TXT.
+ */
 public class AplicacionConsultas {
 
+    /**
+     * Punto de entrada para la ejecución exclusiva en modo consola.
+     *
+     * @param args argumentos de línea de comandos
+     */
     public static void main(String[] args) {
 
         MovilidadDigital aplicacion = new MovilidadDigital();

@@ -5,6 +5,10 @@ import java.util.List;
 import movilidad.dao.interfaces.UsuarioDAO;
 import movilidad.modelo.Usuario;
 
+/**
+ * Implementación en memoria de {@link UsuarioDAO}.
+ * Almacena los usuarios en colecciones en memoria RAM, ideal para pruebas unitarias aisladas.
+ */
 public class UsuarioDAOMemoria implements UsuarioDAO {
 
     private List<Usuario> usuarios = new ArrayList<>();

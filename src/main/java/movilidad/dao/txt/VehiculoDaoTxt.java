@@ -9,12 +9,17 @@ import movilidad.dao.dto.VehiculoDTO;
 import movilidad.dao.interfaces.VehiculoDAO;
 
 /**
- * Implementación TXT de {@link VehiculoDAO}.
+ * Implementación de lectura y registro de {@link VehiculoDAO} a partir de archivos de texto (.txt).
  */
 public class VehiculoDaoTxt implements VehiculoDAO {
 
     private final String rutaArchivo;
 
+    /**
+     * Construye un DAO de vehículos para el archivo indicado.
+     *
+     * @param rutaArchivo ruta al archivo de texto de vehículos
+     */
     public VehiculoDaoTxt(String rutaArchivo) {
         this.rutaArchivo = rutaArchivo;
     }

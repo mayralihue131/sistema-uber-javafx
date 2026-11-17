@@ -10,16 +10,27 @@ import movilidad.dao.interfaces.UsuarioDAO;
 import movilidad.modelo.Usuario;
 
 /**
- * Implementación TXT de {@link UsuarioDAO}.
+ * Implementación de persistencia y lectura de {@link UsuarioDAO} basada en archivos de texto plano (.txt).
  */
 public class UsuarioDaoTxt implements UsuarioDAO {
 
     private final String rutaArchivo;
 
+    /**
+     * Construye un DAO de usuarios a partir de la ruta de archivo configurada.
+     *
+     * @param rutaArchivo ruta relativa o absoluta al archivo de texto
+     */
     public UsuarioDaoTxt(String rutaArchivo) {
         this.rutaArchivo = rutaArchivo;
     }
 
+    /**
+     * Lee y parsea todos los registros de usuarios y conductores del archivo TXT.
+     *
+     * @return lista de objetos {@link UsuarioDTO}
+     * @throws Exception si el archivo no se puede abrir o leer
+     */
     public List<UsuarioDTO> obtenerTodos() throws Exception {
         List<UsuarioDTO> lista = new ArrayList<>();
 
