@@ -674,13 +674,9 @@ public class MovilidadDigital {
                     || !conductor.getVehiculoActivo().getTipoServicios().contains(viaje.getServicio().getTipoServicio())
 
                     || conductor.getVehiculoActivo().getTipoVehiculo() != viaje.getServicio().getTipoVehiculo()
-                    || conductor.getCategoriaVehiculoActivo() == null
                     || conductor.getVehiculoActivo().getCategoriaVehiculo() == null
-                    || viaje.getServicio().getCategoriaVehiculo().getValorNumerico() < conductor.getCategoriaVehiculoActivo()
-                            .getValorNumerico()
                     || viaje.getServicio().getCategoriaVehiculo().getValorNumerico() > conductor.getVehiculoActivo()
                             .getCategoriaVehiculo().getValorNumerico()
-
                     || usuario.equals(viaje.getCliente())) {
 
                 continue;

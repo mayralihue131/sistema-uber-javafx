@@ -190,7 +190,7 @@ public class AplicacionConsultas {
                         usuario.getConductor().getVehiculoActivo();
 
                 aplicacion.definirCategoriaAceptada(
-                        usuario, activo.getCategoriaVehiculo());
+                        usuario, CategoriaVehiculo.ESTANDAR);
 
                 aplicacion.cambiarRolActivo(
                         usuario, RolUsuario.CONDUCTOR);
@@ -252,7 +252,7 @@ public class AplicacionConsultas {
                 }
                 if (activo != null) {
                     aplicacion.registrarConductor(u, dto.getLicenciaConducir(), activo);
-                    aplicacion.definirCategoriaAceptada(u, activo.getCategoriaVehiculo());
+                    aplicacion.definirCategoriaAceptada(u, CategoriaVehiculo.ESTANDAR);
                     aplicacion.cambiarRolActivo(u, RolUsuario.CONDUCTOR);
                     aplicacion.ponerDisponible(u);
                 }

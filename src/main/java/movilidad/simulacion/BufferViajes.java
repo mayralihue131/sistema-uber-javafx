@@ -5,9 +5,10 @@ import java.util.Queue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import movilidad.modelo.Viaje;
 
 /**
- * Monitor concurrente que implementa un búfer acotado de solicitudes de viajes
+ * Monitor concurrente que implementa un búfer acotado de solicitudes de viajes ({@link Viaje})
  * para resolver el problema del Productor-Consumidor.
  *
  * <p>Utiliza un cerrojo reentrante equitativo ({@link ReentrantLock}) y dos variables
@@ -18,7 +19,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * </ul>
  */
 public class BufferViajes {
-    private final Queue<String> colaViajes;
+    private final Queue<Viaje> colaViajes;
     private final int capacidadMaxima;
     private final Lock lock;
     private final Condition noLleno;
@@ -44,23 +45,27 @@ public class BufferViajes {
     }
 
     /**
-     * Agrega una solicitud de viaje al búfer. Si la cola está llena, el hilo productor
+     * Agrega una solicitud de viaje real al búfer. Si la cola está llena, el hilo productor
      * espera pasivamente hasta que un conductor libere un espacio.
      *
-     * @param viaje identificador o descripción del viaje a encolar
+     * @param viaje entidad del viaje a encolar
      * @throws InterruptedException si el hilo es interrumpido durante la espera
      */
-    public void agregarViaje(String viaje) throws InterruptedException {
+    public void agregarViaje(Viaje viaje) throws InterruptedException {
+        if (viaje == null) return;
         lock.lock();
         try {
             while (colaViajes.size() == capacidadMaxima && simulacionActiva) {
-                noLleno.await(); // Espera si la cola está llena
+                noLleno.await();
             }
             if (!simulacionActiva) return;
 
             colaViajes.add(viaje);
-            System.out.println("[BUFFER] Nuevo viaje en espera: " + viaje + " | Pendientes: " + colaViajes.size());
-            noVacio.signal(); // Avisa a un conductor que hay viaje disponible
+            String servicioNombre = (viaje.getServicio() != null) ? viaje.getServicio().getNombre() : "General";
+            System.out.println("[BUFFER] Nuevo viaje en espera: Viaje #"
+                    + viaje.getId().toString().substring(0, 8)
+                    + " (" + servicioNombre + ") | Pendientes: " + colaViajes.size());
+            noVacio.signal();
         } finally {
             lock.unlock();
         }
@@ -70,21 +75,64 @@ public class BufferViajes {
      * Retira y devuelve una solicitud de viaje pendiente para que sea atendida por un conductor.
      * Si la cola está vacía y la simulación está activa, el conductor espera pasivamente.
      *
-     * @return el identificador del viaje retirado, o {@code null} si la simulación ha finalizado
+     * @return la entidad {@link Viaje} retirada, o {@code null} si la simulación ha finalizado
      * @throws InterruptedException si el hilo es interrumpido durante la espera
      */
-    public String tomarViaje() throws InterruptedException { //metodo
+    public Viaje tomarViaje() throws InterruptedException {
         lock.lock();
         try {
             while (colaViajes.isEmpty() && simulacionActiva) {
-                noVacio.await(); // El conductor espera si no hay viajes
+                noVacio.await();
             }
             if (!simulacionActiva && colaViajes.isEmpty()) {
                 return null;
             }
-            String viaje = colaViajes.poll();
-            noLleno.signal(); // Avisa al productor que se liberó un lugar
+            Viaje viaje = colaViajes.poll();
+            noLleno.signal();
             return viaje;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Retira el primer viaje encolado compatible con el conductor especificado según las reglas
+     * de {@link movilidad.logica.MovilidadDigital}. Si no hay viajes compatibles en el momento,
+     * espera pasivamente la llegada de nuevas solicitudes.
+     *
+     * @param conductor usuario conductor que solicita el viaje
+     * @param sistema   instancia de lógica de movilidad para verificación de compatibilidad
+     * @return viaje asignado compatible, o {@code null} si la simulación se detuvo
+     * @throws InterruptedException si el hilo es interrumpido
+     */
+    public Viaje tomarViajeCompatible(movilidad.modelo.Usuario conductor, movilidad.logica.MovilidadDigital sistema)
+            throws InterruptedException {
+        lock.lock();
+        try {
+            while (simulacionActiva) {
+                if (colaViajes.isEmpty()) {
+                    noVacio.await();
+                    continue;
+                }
+
+                java.util.Iterator<Viaje> iter = colaViajes.iterator();
+                while (iter.hasNext()) {
+                    Viaje candidato = iter.next();
+                    boolean compatible;
+                    synchronized (sistema) {
+                        compatible = sistema.buscarConductoresDisponibles(candidato).contains(conductor);
+                    }
+                    if (compatible) {
+                        iter.remove();
+                        noLleno.signal();
+                        return candidato;
+                    }
+                }
+
+                // Hay viajes pero ninguno compatible con este chofer; espera brevemente a nuevos pedidos
+                noVacio.await(200, java.util.concurrent.TimeUnit.MILLISECONDS);
+            }
+            return null;
         } finally {
             lock.unlock();
         }
@@ -98,45 +146,45 @@ public class BufferViajes {
         lock.lock();
         try {
             this.simulacionActiva = false;
+            noVacio.signalAll();
             noLleno.signalAll();
-            noVacio.signalAll(); // Despierta a todos los hilos bloqueados para que puedan terminar
         } finally {
             lock.unlock();
         }
     }
 
     /**
-     * Indica si el búfer se encuentra activo y admitiendo operaciones.
+     * Devuelve la capacidad máxima configurada en el búfer.
      *
-     * @return {@code true} si la simulación está activa; {@code false} en caso contrario
-     */
-    public boolean isSimulacionActiva() {
-        lock.lock();
-        try {
-            return simulacionActiva;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    /**
-     * Devuelve la capacidad máxima del búfer.
-     *
-     * @return tamaño máximo de la cola
+     * @return capacidad máxima
      */
     public int getCapacidadMaxima() {
         return capacidadMaxima;
     }
 
     /**
-     * Devuelve la cantidad de viajes que esperan ser atendidos actualmente en la cola.
+     * Devuelve la cantidad actual de viajes encolados pendientes de atención.
      *
-     * @return cantidad de solicitudes pendientes
+     * @return viajes pendientes
      */
     public int getCantidadPendientes() {
         lock.lock();
         try {
             return colaViajes.size();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Indica si el monitor se encuentra activo admitiendo operaciones.
+     *
+     * @return {@code true} si está activo
+     */
+    public boolean isSimulacionActiva() {
+        lock.lock();
+        try {
+            return simulacionActiva;
         } finally {
             lock.unlock();
         }

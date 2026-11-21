@@ -76,6 +76,45 @@ class MovilidadDigitalTest {
     }
 
     @Test
+    void vehiculoSuperiorAceptaCategoriasMenores() {
+        Usuario choferPremium = new Usuario("Chofer Premium", "999", "premium@test.com");
+        Vehiculo autoPremium = new Vehiculo("PRE001", "Corolla", 4, TipoVehiculo.AUTO, CategoriaVehiculo.PREMIUM, TipoServicio.PASAJEROS);
+        movilidad.agregarUsuario(choferPremium);
+        movilidad.registrarConductor(choferPremium, "LIC-PRE", autoPremium);
+        movilidad.ponerDisponible(choferPremium);
+
+        Servicio srvEstandar = new Servicio("Estandar", 100, 20, 5, TipoVehiculo.AUTO, CategoriaVehiculo.ESTANDAR, TipoServicio.PASAJEROS);
+        Servicio srvConfort = new Servicio("Confort", 150, 25, 7, TipoVehiculo.AUTO, CategoriaVehiculo.CONFORT, TipoServicio.PASAJEROS);
+        Servicio srvPremium = new Servicio("Premium", 200, 30, 10, TipoVehiculo.AUTO, CategoriaVehiculo.PREMIUM, TipoServicio.PASAJEROS);
+        movilidad.agregarServicio(srvEstandar);
+        movilidad.agregarServicio(srvConfort);
+        movilidad.agregarServicio(srvPremium);
+
+        Usuario c1 = new Usuario("C1", "1", "c1@test.com");
+        Usuario c2 = new Usuario("C2", "2", "c2@test.com");
+        Usuario c3 = new Usuario("C3", "3", "c3@test.com");
+        movilidad.agregarUsuario(c1);
+        movilidad.agregarUsuario(c2);
+        movilidad.agregarUsuario(c3);
+
+        Ubicacion origen = new Ubicacion(-34.60, -58.40);
+        Ubicacion destino = new Ubicacion(-34.61, -58.41);
+
+        Viaje viajeEstandar = movilidad.solicitarViaje(c1, srvEstandar, origen, destino, INICIO);
+        Viaje viajeConfort = movilidad.solicitarViaje(c2, srvConfort, origen, destino, INICIO);
+        Viaje viajePremium = movilidad.solicitarViaje(c3, srvPremium, origen, destino, INICIO);
+
+        assertTrue(movilidad.buscarConductoresDisponibles(viajeEstandar).contains(choferPremium));
+        assertTrue(movilidad.buscarConductoresDisponibles(viajeConfort).contains(choferPremium));
+        assertTrue(movilidad.buscarConductoresDisponibles(viajePremium).contains(choferPremium));
+
+        List<Viaje> disponibles = movilidad.obtenerSolicitudesDisponibles(choferPremium);
+        assertTrue(disponibles.contains(viajeEstandar));
+        assertTrue(disponibles.contains(viajeConfort));
+        assertTrue(disponibles.contains(viajePremium));
+    }
+
+    @Test
     void solicitaAceptaIniciaYFinalizaUnViaje() {
         Viaje viaje = solicitarViaje();
 

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.web.WebView?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="movilidad.ui.MapaController"
+            prefWidth="650"
+            prefHeight="650"
+            fitToWidth="true">
+    <content>
+        <VBox spacing="10">
+            <padding>
+                <Insets top="16" right="16" bottom="16" left="16"/>
+            </padding>
+
+            <Label text="%vista.a.donde.queres.ir"
+                   style="-fx-text-fill: #1565c0; -fx-font-size: 24px; -fx-font-weight: bold;"
+                   wrapText="true"/>
+
+            <HBox spacing="12">
+                <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="0">
+                    <Label text="%vista.origen"/>
+                    <TextField fx:id="origenTexto" editable="false"
+                               style="-fx-background-color: #f8fafc; -fx-border-color: #cbd5e1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8; -fx-font-weight: bold; -fx-text-fill: #1e293b;"
+                               promptText="%vista.elegi.el.origen.en.el.mapa"/>
+                </VBox>
+
+                <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="0">
+                    <Label text="%vista.destino"/>
+                    <TextField fx:id="destinoTexto" editable="false"
+                               style="-fx-background-color: #f8fafc; -fx-border-color: #cbd5e1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8; -fx-font-weight: bold; -fx-text-fill: #1e293b;"
+                               promptText="%vista.elegi.el.destino.en.el.mapa"/>
+                </VBox>
+            </HBox>
+
+            <HBox spacing="12">
+                <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="0">
+                    <Label text="%vista.tipo.de.servicio"/>
+                    <ComboBox fx:id="tipoServicio" maxWidth="Infinity"
+                              promptText="%vista.pasajeros.o.envios"/>
+                </VBox>
+
+                <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="0">
+                    <Label text="%vista.categoria"/>
+                    <ComboBox fx:id="categoria" maxWidth="Infinity"
+                              promptText="%vista.elegi.una.categoria"/>
+                </VBox>
+            </HBox>
+
+            <FlowPane hgap="8" vgap="8">
+                <Button text="%vista.cotizar.viaje" onAction="#cotizarViaje"/>
+                <Button text="%vista.volver.al.menu" onAction="#volverMenu"/>
+            </FlowPane>
+
+            <StackPane fx:id="contenedorMapa" prefHeight="250">
+                <WebView fx:id="mapaWeb" prefHeight="250"/>
+            </StackPane>
+
+            <Label text="%vista.opciones.de.viaje"/>
+            <ListView fx:id="opciones" prefHeight="100">
+                <placeholder>
+                    <Label text="%vista.todavia.no.hay.una.cotizacion"/>
+                </placeholder>
+            </ListView>
+
+            <Button fx:id="btnSolicitar"
+                    text="%vista.solicitar.viaje"
+                    onAction="#solicitarViaje"
+                    disable="true"/>
+        </VBox>
+    </content>
+</ScrollPane>

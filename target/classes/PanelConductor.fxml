@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+    <center>
+        <ScrollPane fitToWidth="true">
+            <content>
+                <VBox spacing="12">
+                    <padding><Insets top="16" right="20" bottom="16" left="20"/></padding>
+                    <Label text="%vista.panel.del.conductor" style="-fx-text-fill: #1565c0; -fx-font-size: 24px; -fx-font-weight: bold;" wrapText="true"/>
+                    <Label text="%vista.ponete.disponible.para.recibir.solicitudes.compatibles" wrapText="true"/>
+                    <VBox spacing="8">
+                        <Label text="" wrapText="true" fx:id="estadoConductor"/>
+                        <Label text="" wrapText="true" fx:id="ayudaConductor"/>
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <VBox spacing="16" HBox.hgrow="ALWAYS" minWidth="0">
+                                <Label text="%vista.vehiculo.activo" wrapText="true"/>
+                                <ComboBox fx:id="vehiculoActivo" promptText="%vista.selecciona.tu.vehiculo" maxWidth="Infinity"/>
+                            </VBox>
+                            <VBox spacing="16" HBox.hgrow="ALWAYS" minWidth="0">
+                                <Label text="%vista.categoria.minima.aceptada" wrapText="true"/>
+                                <ComboBox fx:id="categoriaMinima" promptText="%vista.selecciona" maxWidth="Infinity"/>
+                            </VBox>
+                        </HBox>
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <Button text="%vista.aplicar.vehiculo.y.categoria" onAction="#aplicarVehiculo"/>
+                            <Button text="%vista.agregar.vehiculo" onAction="#abrirRegistroConductor"/>
+                        </HBox>
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <Button text="%vista.ponerme.disponible" onAction="#ponerDisponible"/>
+                            <Button text="%vista.salir.de.servicio" onAction="#fueraServicio"/>
+                        </HBox>
+                    </VBox>
+                    <VBox spacing="8">
+                        <Label text="%vista.tu.viaje.en.curso" wrapText="true"/>
+                        <ListView fx:id="viajesConductor" prefHeight="110">
+                            <placeholder>
+                                <Label text="%vista.no.tenes.un.viaje.en.curso" wrapText="true"/>
+                            </placeholder>
+                        </ListView>
+                        <Button text="%vista.abrir.viaje.en.curso" onAction="#verViajeConductor"/>
+                    </VBox>
+                    <VBox spacing="8">
+                        <Label text="%vista.solicitudes.compatibles" wrapText="true"/>
+                        <ListView fx:id="solicitudes" prefHeight="220">
+                            <placeholder>
+                                <Label text="%vista.no.hay.solicitudes.compatibles.comproba.tu.disponibilidad" wrapText="true"/>
+                            </placeholder>
+                        </ListView>
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <Button text="%vista.actualizar" onAction="#actualizarPanel"/>
+                            <Button text="%vista.aceptar.solicitud.seleccionada" onAction="#aceptarSolicitud"/>
+                        </HBox>
+                    </VBox>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+    <bottom>
+        <Label text="" wrapText="true" fx:id="mensaje" maxWidth="Infinity">
+            <BorderPane.margin><Insets top="4" right="20" bottom="8" left="20"/></BorderPane.margin>
+        </Label>
+    </bottom>
+</BorderPane>
