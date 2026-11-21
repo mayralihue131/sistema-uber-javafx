@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+    <center>
+        <ScrollPane fitToWidth="true">
+            <content>
+                <VBox spacing="12">
+                    <padding><Insets top="16" right="20" bottom="16" left="20"/></padding>
+                    <Label text="%vista.tus.vehiculos" style="-fx-text-fill: #1565c0; -fx-font-size: 24px; -fx-font-weight: bold;" wrapText="true"/>
+                    <Label text="%vista.habilitate.como.conductor.o.agrega.otro.vehiculo" wrapText="true"/>
+                    <VBox spacing="8">
+                        <Label text="" wrapText="true" fx:id="tituloVehiculo"/>
+                        <VBox spacing="16" HBox.hgrow="ALWAYS" minWidth="0">
+                            <Label text="%vista.licencia.de.conducir" wrapText="true"/>
+                            <TextField fx:id="licencia" promptText="%vista.numero.de.licencia" maxWidth="Infinity"/>
+                        </VBox>
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <VBox spacing="16" HBox.hgrow="ALWAYS" minWidth="0">
+                                <Label text="%vista.patente" wrapText="true"/>
+                                <TextField fx:id="patente" promptText="%vista.ej.af123cd" maxWidth="Infinity"/>
+                            </VBox>
+                            <VBox spacing="16" HBox.hgrow="ALWAYS" minWidth="0">
+                                <Label text="%vista.modelo" wrapText="true"/>
+                                <TextField fx:id="modelo" promptText="%vista.ej.toyota.corolla" maxWidth="Infinity"/>
+                            </VBox>
+                        </HBox>
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <VBox spacing="16" HBox.hgrow="ALWAYS" minWidth="0">
+                                <Label text="%vista.capacidad.de.pasajeros" wrapText="true"/>
+                                <TextField fx:id="capacidad" promptText="%vista.ej.4" maxWidth="Infinity"/>
+                            </VBox>
+                            <VBox spacing="16" HBox.hgrow="ALWAYS" minWidth="0">
+                                <Label text="%vista.tipo.de.vehiculo" wrapText="true"/>
+                                <ComboBox fx:id="tipoVehiculo" promptText="%vista.auto.moto" maxWidth="Infinity"/>
+                            </VBox>
+                            <VBox spacing="16" HBox.hgrow="ALWAYS" minWidth="0">
+                                <Label text="%vista.categoria" wrapText="true"/>
+                                <ComboBox fx:id="categoriaVehiculo" promptText="%vista.categoria" maxWidth="Infinity"/>
+                            </VBox>
+                        </HBox>
+                        <Label text="%vista.servicios.que.ofrece" wrapText="true"/>
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <CheckBox fx:id="pasajeros" text="%vista.pasajeros"/>
+                            <CheckBox fx:id="envios" text="%vista.envios"/>
+                        </HBox>
+                        <Button text="%vista.guardar.vehiculo" onAction="#registrarVehiculo"/>
+                        <Button text="%vista.panel.conductor" onAction="#abrirPanel"/>
+                        <Label text="%vista.selecciona.el.vehiculo.activo.desde.el.panel" wrapText="true"/>
+                    </VBox>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+    <bottom>
+        <Label text="" wrapText="true" fx:id="mensaje" maxWidth="Infinity">
+            <BorderPane.margin><Insets top="4" right="20" bottom="8" left="20"/></BorderPane.margin>
+        </Label>
+    </bottom>
+</BorderPane>

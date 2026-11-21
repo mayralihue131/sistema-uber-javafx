@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Mapa de Sistema Uber</title>
+
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #152740;
+            font-family: Arial, sans-serif;
+        }
+
+        #mapa {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #dce3e8;
+        }
+
+        #aviso {
+            position: absolute;
+            top: 12px;
+            left: 55px;
+            right: 12px;
+            z-index: 1000;
+            padding: 10px 14px;
+            border-radius: 8px;
+            background: #101d33;
+            color: white;
+            font-size: 13px;
+            pointer-events: none;
+        }
+    </style>
+
+    <!-- Debe estar ANTES de cargar Leaflet. -->
+    <script>
+        window.L_DISABLE_3D = true;
+    </script>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+
+<body>
+    <div id="mapa"></div>
+    <div id="aviso"></div>
+
+    <script>
+        var ingles = window.location.hash === "#en";
+        document.documentElement.lang = ingles ? "en" : "es";
+        document.title = ingles ? "Uber System map" : "Mapa de Sistema Uber";
+        var mensajesMapa = ingles
+            ? {
+    "inicio": "Loading Puerto Madryn…",
+    "sinMapa": "Could not load the map. Check your internet connection.",
+    "cargando": "Loading map…",
+    "sinImagenes": "Some map tiles could not load.",
+    "ayuda": "Puerto Madryn · Drag to pan and use + or − to zoom.",
+    "conductor": "Driver",
+    "origen": "Pickup",
+    "destino": "Destination",
+    "elegirOrigen": "Click to choose the pickup point.",
+    "fuera": "Choose a point within Puerto Madryn.",
+    "elegirDestino": "Pickup selected. Now choose the destination.",
+    "cotizar": "Route selected. Click Get a quote."
+}
+            : {
+    "inicio": "Cargando Puerto Madryn…",
+    "sinMapa": "No se pudo cargar el mapa. Revisá Internet.",
+    "cargando": "Cargando mapa…",
+    "sinImagenes": "No se pudieron cargar algunas imágenes del mapa.",
+    "ayuda": "Puerto Madryn · Arrastrá para moverte y usá + o −.",
+    "conductor": "Conductor",
+    "origen": "Origen",
+    "destino": "Destino",
+    "elegirOrigen": "Hacé clic para elegir el origen.",
+    "fuera": "Elegí un punto dentro de Puerto Madryn.",
+    "elegirDestino": "Origen elegido. Ahora elegí el destino.",
+    "cotizar": "Recorrido elegido. Tocá Cotizar viaje."
+};
+        var aviso = document.getElementById("aviso");
+        aviso.textContent = mensajesMapa.inicio;
+
+        if (typeof L === "undefined") {
+            aviso.textContent =
+                mensajesMapa.sinMapa;
+        } else {
+            var mapa = L.map("mapa", {
+                zoomControl: false,
+                zoomAnimation: false,
+                fadeAnimation: false,
+                markerZoomAnimation: false,
+                inertia: false,
+                trackResize: true
+            }).setView([-42.785, -65.070], 13);
+
+            L.control.zoom({
+                zoomInTitle: ingles ? "Zoom in" : "Acercar",
+                zoomOutTitle: ingles ? "Zoom out" : "Alejar"
+            }).addTo(mapa);
+
+            var huboError = false;
+
+            var fondo = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+                    maxZoom: 19,
+                    detectRetina: false,
+                    attribution: "&copy; OpenStreetMap contributors"
+                }
+            );
+
+            fondo.on("loading", function () {
+                huboError = false;
+                aviso.textContent = mensajesMapa.cargando;
+            });
+
+            fondo.on("tileerror", function () {
+                huboError = true;
+                aviso.textContent =
+                    mensajesMapa.sinImagenes;
+            });
+
+            fondo.on("load", function () {
+                if (!huboError) {
+                    aviso.textContent =
+                        mensajesMapa.ayuda;
+                }
+            });
+
+            window.refrescarTamano = function () {
+                mapa.invalidateSize({
+                    animate: false,
+                    pan: false
+                });
+            };
+
+            window.addEventListener(
+                "resize",
+                window.refrescarTamano
+            );
+			var capaRutas = L.layerGroup().addTo(mapa);
+			var animacionVehiculo = null;
+
+			window.limpiarRutas = function () {
+			    if (animacionVehiculo) {
+			        clearInterval(animacionVehiculo);
+			        animacionVehiculo = null;
+			    }
+			    capaRutas.clearLayers();
+			};
+
+			window.fijarAviso = function (texto) {
+			    if (aviso && texto) {
+			        aviso.textContent = texto;
+			    }
+			};
+
+			window.mostrarRutas = function (hastaOrigen, hastaDestino, estado) {
+			    window.limpiarRutas();
+
+			    var limites = L.latLngBounds([]);
+
+			    // Recorrido del conductor al origen, cuando esté disponible.
+			    if (hastaOrigen && hastaOrigen.length >= 2) {
+			        var rutaConductor = L.polyline(hastaOrigen, {
+			            color: "#2864D4",
+			            weight: 5,
+			            opacity: 0.9,
+			            interactive: false
+			        }).addTo(capaRutas);
+
+			        limites.extend(rutaConductor.getBounds());
+
+			        var marcadorConductor = L.circleMarker(hastaOrigen[0], {
+			            radius: 8,
+			            color: "#ffffff",
+			            weight: 3,
+			            fillColor: "#f59e0b",
+			            fillOpacity: 1,
+			            interactive: false
+			        }).bindTooltip(mensajesMapa.conductor).addTo(capaRutas);
+
+			        if (estado === "ACEPTADO") {
+			            var indiceCond = 0;
+			            var totalPasosCond = 20;
+			            var pasoCond = Math.max(1, Math.ceil(hastaOrigen.length / totalPasosCond));
+			            animacionVehiculo = setInterval(function () {
+			                indiceCond += pasoCond;
+			                if (indiceCond >= hastaOrigen.length - 1) {
+			                    indiceCond = hastaOrigen.length - 1;
+			                    marcadorConductor.setLatLng(hastaOrigen[indiceCond]);
+			                    clearInterval(animacionVehiculo);
+			                    animacionVehiculo = null;
+			                    if (window.javaBridge && window.javaBridge.onConductorLlegadoAlOrigen) {
+			                        window.javaBridge.onConductorLlegadoAlOrigen();
+			                    }
+			                } else {
+			                    marcadorConductor.setLatLng(hastaOrigen[indiceCond]);
+			                }
+			            }, 250);
+			        }
+			    } else if (estado === "ACEPTADO") {
+			        if (window.javaBridge && window.javaBridge.onConductorLlegadoAlOrigen) {
+			            window.javaBridge.onConductorLlegadoAlOrigen();
+			        }
+			    }
+
+			    // Recorrido del pasajero al destino.
+			    if (hastaDestino && hastaDestino.length >= 2) {
+			        var rutaViaje = L.polyline(hastaDestino, {
+			            color: "#22c55e",
+			            weight: 5,
+			            opacity: 0.9,
+			            interactive: false
+			        }).addTo(capaRutas);
+
+			        limites.extend(rutaViaje.getBounds());
+
+			        // Marcador de origen (pickup)
+			        L.circleMarker(hastaDestino[0], {
+			            radius: 7,
+			            color: "#ffffff",
+			            weight: 2,
+			            fillColor: "#3b82f6",
+			            fillOpacity: 1,
+			            interactive: false
+			        }).bindTooltip(mensajesMapa.origen || "Origen").addTo(capaRutas);
+
+			        // Marcador de destino
+			        L.circleMarker(hastaDestino[hastaDestino.length - 1], {
+			            radius: 7,
+			            color: "#ffffff",
+			            weight: 2,
+			            fillColor: "#ef4444",
+			            fillOpacity: 1,
+			            interactive: false
+			        }).bindTooltip(mensajesMapa.destino || "Destino").addTo(capaRutas);
+
+			        // Si el viaje ya está finalizado, mostramos el vehículo en el destino
+			        if (estado === "FINALIZADO") {
+			            L.circleMarker(hastaDestino[hastaDestino.length - 1], {
+			                radius: 8,
+			                color: "#ffffff",
+			                weight: 3,
+			                fillColor: "#f59e0b",
+			                fillOpacity: 1,
+			                interactive: false
+			            }).bindTooltip(mensajesMapa.conductor).addTo(capaRutas);
+			        }
+
+			        // Animación del vehículo en traslado cuando el viaje está iniciado
+			        if (estado === "INICIADO") {
+			            var indiceViaje = 0;
+			            var totalPasos = 25;
+			            var pasoViaje = Math.max(1, Math.ceil(hastaDestino.length / totalPasos));
+			            var marcadorViaje = L.circleMarker(hastaDestino[0], {
+			                radius: 8,
+			                color: "#ffffff",
+			                weight: 3,
+			                fillColor: "#f59e0b",
+			                fillOpacity: 1,
+			                interactive: false
+			            }).bindTooltip(mensajesMapa.conductor).addTo(capaRutas);
+
+			            animacionVehiculo = setInterval(function () {
+			                indiceViaje += pasoViaje;
+			                if (indiceViaje >= hastaDestino.length - 1) {
+			                    indiceViaje = hastaDestino.length - 1;
+			                    marcadorViaje.setLatLng(hastaDestino[indiceViaje]);
+			                    clearInterval(animacionVehiculo);
+			                    animacionVehiculo = null;
+			                    if (window.javaBridge && window.javaBridge.onViajeLlegadoAlDestino) {
+			                        window.javaBridge.onViajeLlegadoAlDestino();
+			                    }
+			                } else {
+			                    marcadorViaje.setLatLng(hastaDestino[indiceViaje]);
+			                }
+			            }, 350);
+			        }
+			    }
+
+			    if (limites.isValid()) {
+			        mapa.fitBounds(limites, {
+			            paddingTopLeft: [30, 70],
+			            paddingBottomRight: [30, 30],
+			            maxZoom: 16,
+			            animate: false
+			        });
+			    }
+			};
+            fondo.addTo(mapa);
+
+            // Ajustar cuando JavaFX termine de acomodar la pantalla.
+            window.setTimeout(window.refrescarTamano, 200);
+            window.setTimeout(window.refrescarTamano, 800);
+        }
+    </script>
+</body>
+</html>

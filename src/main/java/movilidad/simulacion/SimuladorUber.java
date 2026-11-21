@@ -1,20 +1,31 @@
 package movilidad.simulacion;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import movilidad.aplicacion.AplicacionConsultas;
+import movilidad.dao.txt.CargaParametros;
+import movilidad.logica.MovilidadDigital;
+import movilidad.modelo.CategoriaVehiculo;
+import movilidad.modelo.RolUsuario;
+import movilidad.modelo.Servicio;
+import movilidad.modelo.TipoServicio;
+import movilidad.modelo.TipoVehiculo;
+import movilidad.modelo.Usuario;
+import movilidad.modelo.Vehiculo;
 
 /**
  * Orquestador principal de la simulación concurrente multihilo del sistema de movilidad.
  *
- * <p>Modela escenarios de estrés y horas pico gestionando un pool de hilos ({@link ExecutorService})
- * con un hilo productor de solicitudes y múltiples hilos conductores que consumen viajes
- * coordinados mediante el monitor {@link BufferViajes}.
- *
- * <p>Todos los parámetros de la simulación son configurables en tiempo de diseño y ejecución.
+ * <p>Coordina productores de viajes y conductores consumidores sobre el modelo de dominio real
+ * ({@link MovilidadDigital}, {@link Usuario}, {@link movilidad.modelo.Viaje}, {@link Vehiculo}).
+ * Modela escenarios de concurrencia y horas pico administrando un pool de hilos
+ * ({@link ExecutorService}) y el monitor {@link BufferViajes}.
  */
 public class SimuladorUber {
-    // Parámetros fácilmente configurables según consigna
+    private final MovilidadDigital sistema;
     private int duracionSimulacionSegundos;
     private int cantidadConductores;
     private int maxViajes;
@@ -30,7 +41,7 @@ public class SimuladorUber {
     }
 
     /**
-     * Construye un simulador con parámetros personalizados.
+     * Construye un simulador con parámetros personalizados inicializando automáticamente el sistema.
      *
      * @param duracionSimulacionSegundos duración máxima en segundos antes del apagado automático
      * @param cantidadConductores        número de hilos consumidores concurrentes
@@ -39,11 +50,51 @@ public class SimuladorUber {
      * @param intervaloGeneracionMs      tiempo en milisegundos entre solicitudes consecutivas
      */
     public SimuladorUber(int duracionSimulacionSegundos, int cantidadConductores, int maxViajes, int capacidadCola, int intervaloGeneracionMs) {
+        this(crearSistemaPorDefecto(), duracionSimulacionSegundos, cantidadConductores, maxViajes, capacidadCola, intervaloGeneracionMs);
+    }
+
+    /**
+     * Construye un simulador sobre una instancia de {@link MovilidadDigital} provista.
+     *
+     * @param sistema                    instancia central de lógica y datos
+     * @param duracionSimulacionSegundos duración máxima en segundos
+     * @param cantidadConductores        número de conductores concurrentes
+     * @param maxViajes                  límite de solicitudes a crear
+     * @param capacidadCola              capacidad del buffer monitor
+     * @param intervaloGeneracionMs      tiempo entre solicitudes en ms
+     */
+    public SimuladorUber(MovilidadDigital sistema, int duracionSimulacionSegundos, int cantidadConductores, int maxViajes, int capacidadCola, int intervaloGeneracionMs) {
+        this.sistema = (sistema != null) ? sistema : crearSistemaPorDefecto();
         this.duracionSimulacionSegundos = duracionSimulacionSegundos;
         this.cantidadConductores = cantidadConductores;
         this.maxViajes = maxViajes;
         this.capacidadCola = capacidadCola;
         this.intervaloGeneracionMs = intervaloGeneracionMs;
+    }
+
+    private static MovilidadDigital crearSistemaPorDefecto() {
+        MovilidadDigital m = new MovilidadDigital();
+        try {
+            CargaParametros.parametros();
+            AplicacionConsultas.cargarDatos(m);
+        } catch (Exception e) {
+            Servicio s = new Servicio("Estandar", 2000, 200, 100, TipoVehiculo.AUTO, CategoriaVehiculo.ESTANDAR, TipoServicio.PASAJEROS);
+            m.agregarServicio(s);
+            for (int i = 1; i <= 3; i++) {
+                Usuario c = new Usuario("Chofer " + i, "111" + i, "chofer" + i + "@sim.com");
+                Vehiculo v = new Vehiculo("CH" + i, "Auto " + i, 4, TipoVehiculo.AUTO, CategoriaVehiculo.ESTANDAR, TipoServicio.PASAJEROS);
+                m.agregarUsuario(c);
+                m.registrarConductor(c, "B1", v);
+                m.definirCategoriaAceptada(c, CategoriaVehiculo.ESTANDAR);
+                m.cambiarRolActivo(c, RolUsuario.CONDUCTOR);
+                m.ponerDisponible(c);
+            }
+        }
+        return m;
+    }
+
+    public MovilidadDigital getSistema() {
+        return sistema;
     }
 
     public int getDuracionSimulacionSegundos() {
@@ -88,26 +139,49 @@ public class SimuladorUber {
 
     /**
      * Inicia la ejecución de la simulación concurrente, lanzando el pool de hilos
-     * para el productor y los conductores, y administrando el apagado ordenado
-     * tras cumplirse el tiempo de ejecución establecido.
+     * para el productor y los conductores interactuando con el modelo de dominio.
      */
     public void iniciarSimulacion() {
-        System.out.println("=== INICIANDO SIMULACIÓN UBER ===");
+        System.out.println("=== INICIANDO SIMULACIÓN UBER (CON MODELO REAL) ===");
         System.out.println("Duración: " + duracionSimulacionSegundos + "s | Conductores: " + cantidadConductores + " | Max Viajes: " + maxViajes);
 
         BufferViajes buffer = new BufferViajes(capacidadCola);
-        
-        // Creamos un pool con 1 hilo para el productor + N hilos para los conductores
+
+        // Obtener conductores disponibles del modelo
+        List<Usuario> conductoresDisponibles = new ArrayList<>(
+            sistema.getUsuarios().stream()
+                .filter(u -> u.getConductor() != null && u.getConductor().getVehiculoActivo() != null)
+                .toList()
+        );
+
+        // Si faltan conductores en el modelo para la cantidad solicitada, registrar conductores auxiliares
+        while (conductoresDisponibles.size() < cantidadConductores) {
+            int idx = conductoresDisponibles.size() + 1;
+            Usuario c = new Usuario("Conductor Auxiliar " + idx, "+54911000" + idx, "auxiliar" + idx + "@sim.com");
+            Vehiculo v = new Vehiculo("AUX0" + idx, "Cronos", 4, TipoVehiculo.AUTO, CategoriaVehiculo.PREMIUM, TipoServicio.PASAJEROS);
+            v.agregarTipoServicio(TipoServicio.ENVIOS);
+            sistema.agregarUsuario(c);
+            sistema.registrarConductor(c, "B1-D1", v);
+            sistema.definirCategoriaAceptada(c, CategoriaVehiculo.PREMIUM);
+            sistema.cambiarRolActivo(c, RolUsuario.CONDUCTOR);
+            sistema.ponerDisponible(c);
+            conductoresDisponibles.add(c);
+        }
+
+        List<Usuario> conductoresAsignados = conductoresDisponibles.subList(0, cantidadConductores);
+
         ExecutorService executor = Executors.newFixedThreadPool(cantidadConductores + 1);
 
-        // 1. Lanzar hilo productor
-        ProductorViajes productor = new ProductorViajes(buffer, maxViajes, intervaloGeneracionMs);
+        // 1. Lanzar hilo productor integrado con el modelo
+        ProductorViajes productor = new ProductorViajes(sistema, buffer, maxViajes, intervaloGeneracionMs);
         executor.execute(productor);
 
-        // 2. Lanzar un hilo por cada conductor
-        for (int i = 1; i <= cantidadConductores; i++) {
-            ConductorConsumidor conductor = new ConductorConsumidor("Conductor-" + i, buffer);
-            executor.execute(conductor);
+        // 2. Lanzar hilos consumidores con conductores del modelo real
+        for (Usuario cond : conductoresAsignados) {
+            sistema.definirCategoriaAceptada(cond, CategoriaVehiculo.ESTANDAR);
+            sistema.ponerDisponible(cond);
+            ConductorConsumidor consumidor = new ConductorConsumidor(sistema, cond, buffer);
+            executor.execute(consumidor);
         }
 
         // 3. Controlar el tiempo de ejecución de la simulación
@@ -122,9 +196,9 @@ public class SimuladorUber {
 
     private void detenerSimulacion(BufferViajes buffer, ExecutorService executor) {
         System.out.println("\n=== TIEMPO CUMPLIDO: DETENIENDO SIMULACIÓN ===");
-        buffer.detener(); // Libera hilos en espera en las Conditions
-        executor.shutdownNow(); // Interrumpe hilos activos o durmiendo
-        
+        buffer.detener();
+        executor.shutdownNow();
+
         try {
             if (!executor.awaitTermination(3, TimeUnit.SECONDS)) {
                 System.err.println("Algunos hilos tardaron en cerrarse.");
@@ -135,15 +209,8 @@ public class SimuladorUber {
         System.out.println("=== SIMULACIÓN FINALIZADA ===");
     }
 
-    // Método main de prueba rápida (luego puedes llamarlo desde un botón en JavaFX)
     public static void main(String[] args) {
-        SimuladorUber simulador = new SimuladorUber(
-            15,   // Duración: 15 segundos
-            3,    // 3 conductores simultáneos
-            20,   // Máximo 20 viajes generados
-            5,    // Capacidad máxima de 5 viajes en espera
-            800   // Se genera un viaje cada 800 ms
-        );
+        SimuladorUber simulador = new SimuladorUber(15, 3, 20, 5, 800);
         simulador.iniciarSimulacion();
     }
 }
