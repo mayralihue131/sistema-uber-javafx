@@ -73,7 +73,7 @@ public class BufferViajes {
      * @return el identificador del viaje retirado, o {@code null} si la simulación ha finalizado
      * @throws InterruptedException si el hilo es interrumpido durante la espera
      */
-    public String tomarViaje() throws InterruptedException {
+    public String tomarViaje() throws InterruptedException { //metodo
         lock.lock();
         try {
             while (colaViajes.isEmpty() && simulacionActiva) {

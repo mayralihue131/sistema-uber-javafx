@@ -125,7 +125,7 @@ public class AplicacionUberFX extends Application {
     }
 
     private void mostrar(String archivo, String correoEscrito) throws IOException {
-        URL recurso = getClass().getResource("/" + archivo);
+        URL recurso = getClass().getResource("/ui/javafx/view/" + archivo);
 
         if (recurso == null) {
             throw new IOException(
