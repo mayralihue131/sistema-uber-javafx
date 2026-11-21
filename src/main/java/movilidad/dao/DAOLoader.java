@@ -11,7 +11,7 @@ import movilidad.dao.txt.TxtDAOFactory;
 /**
  * Carga y mantiene la única instancia de {@link DAOFactory} para toda la aplicación.
  *
- * <p>Lee el archivo {@code src/main/resources/config.properties} en busca de la clave
+ * <p>Lee el archivo {@code src/main/resources/config/config.properties} en busca de la clave
  * {@code origen.datos}:
  * <ul>
  *   <li>{@code BD}      → usa {@link BdDAOFactory} (PostgreSQL vía JDBC).</li>
@@ -27,7 +27,7 @@ public class DAOLoader {
         DAOFactory fabrica;
         try {
             Properties prop = new Properties();
-            try (InputStream input = new FileInputStream("src/main/resources/config.properties")) {
+            try (InputStream input = new FileInputStream("src/main/resources/config/config.properties")) {
                 prop.load(input);
             }
 

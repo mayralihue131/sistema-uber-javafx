@@ -396,7 +396,7 @@ public class AplicacionConsultas {
         Properties parametros = new Properties();
 
         try (FileInputStream archivo =
-                new FileInputStream("src/main/resources/config.properties")) {
+                new FileInputStream("src/main/resources/config/config.properties")) {
             parametros.load(archivo);
         } catch (IOException e) {
             throw new IllegalStateException(

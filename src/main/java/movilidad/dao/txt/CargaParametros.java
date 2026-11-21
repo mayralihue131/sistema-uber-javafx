@@ -20,7 +20,7 @@ public class CargaParametros {
         Properties prop = new Properties();
 
         try (InputStream input = CargaParametros.class
-                .getResourceAsStream("/config.properties")) {
+                .getResourceAsStream("/config/config.properties")) {
 
             if (input == null) {
                 throw new IOException("No se encontró config.properties");

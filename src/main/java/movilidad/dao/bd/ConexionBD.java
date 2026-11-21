@@ -9,7 +9,7 @@ import java.util.Properties;
 /**
  * Singleton de conexión JDBC para el sistema Uber.
  *
- * <p>Lee el archivo {@code src/main/resources/jdbc.properties} con las claves:
+ * <p>Lee el archivo {@code src/main/resources/config/jdbc.properties} con las claves:
  * <ul>
  *   <li>{@code driver}  – nombre completo del driver JDBC (ej. {@code org.postgresql.Driver})</li>
  *   <li>{@code url}     – URL de conexión (ej. {@code jdbc:postgresql://host:5432/uber})</li>
@@ -37,7 +37,7 @@ public class ConexionBD {
                 Runtime.getRuntime().addShutdownHook(new ShutdownHook());
 
                 Properties prop = new Properties();
-                try (FileInputStream input = new FileInputStream("src/main/resources/jdbc.properties")) {
+                try (FileInputStream input = new FileInputStream("src/main/resources/config/jdbc.properties")) {
                     prop.load(input);
                 }
 

@@ -58,42 +58,47 @@
     <div id="aviso"></div>
 
     <script>
-        var ingles = window.location.hash === "#en";
+        var parametros = new URLSearchParams(window.location.hash.substring(1));
+        var ingles = parametros.get("idioma") === "en";
+        var ciudad = parametros.get("nombre");
+        var latitud = Number(parametros.get("latitud"));
+        var longitud = Number(parametros.get("longitud"));
+        var zoom = Number(parametros.get("zoom"));
         document.documentElement.lang = ingles ? "en" : "es";
         document.title = ingles ? "Uber System map" : "Mapa de Sistema Uber";
         var mensajesMapa = ingles
             ? {
-    "inicio": "Loading Puerto Madryn…",
+    "inicio": "Loading map…",
     "sinMapa": "Could not load the map. Check your internet connection.",
     "cargando": "Loading map…",
     "sinImagenes": "Some map tiles could not load.",
-    "ayuda": "Puerto Madryn · Drag to pan and use + or − to zoom.",
+    "ayuda": ciudad + " · Drag to pan and use + or − to zoom.",
     "conductor": "Driver",
     "origen": "Pickup",
     "destino": "Destination",
     "elegirOrigen": "Click to choose the pickup point.",
-    "fuera": "Choose a point within Puerto Madryn.",
+    "fuera": "Choose a point within " + ciudad + ".",
     "elegirDestino": "Pickup selected. Now choose the destination.",
     "cotizar": "Route selected. Click Get a quote."
 }
             : {
-    "inicio": "Cargando Puerto Madryn…",
+    "inicio": "Cargando mapa…",
     "sinMapa": "No se pudo cargar el mapa. Revisá Internet.",
     "cargando": "Cargando mapa…",
     "sinImagenes": "No se pudieron cargar algunas imágenes del mapa.",
-    "ayuda": "Puerto Madryn · Arrastrá para moverte y usá + o −.",
+    "ayuda": ciudad + " · Arrastrá para moverte y usá + o −.",
     "conductor": "Conductor",
     "origen": "Origen",
     "destino": "Destino",
     "elegirOrigen": "Hacé clic para elegir el origen.",
-    "fuera": "Elegí un punto dentro de Puerto Madryn.",
+    "fuera": "Elegí un punto dentro de " + ciudad + ".",
     "elegirDestino": "Origen elegido. Ahora elegí el destino.",
     "cotizar": "Recorrido elegido. Tocá Cotizar viaje."
 };
         var aviso = document.getElementById("aviso");
         aviso.textContent = mensajesMapa.inicio;
 
-        if (typeof L === "undefined") {
+        if (!ciudad || typeof L === "undefined") {
             aviso.textContent =
                 mensajesMapa.sinMapa;
         } else {
@@ -104,7 +109,7 @@
                 markerZoomAnimation: false,
                 inertia: false,
                 trackResize: true
-            }).setView([-42.785, -65.070], 13);
+            }).setView([latitud, longitud], zoom);
 
             L.control.zoom({
                 zoomInTitle: ingles ? "Zoom in" : "Acercar",

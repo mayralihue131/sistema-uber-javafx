@@ -2,7 +2,6 @@ package movilidad.ui;
 
 import java.net.URL;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 
 import javafx.application.Platform;
@@ -23,6 +22,7 @@ import movilidad.modelo.Servicio;
 import movilidad.modelo.TipoServicio;
 import movilidad.modelo.Ubicacion;
 import movilidad.modelo.Viaje;
+import movilidad.rutas.FabricaGraphHopper;
 import movilidad.rutas.PuntoRuta;
 import movilidad.rutas.RutaCalculada;
 import netscape.javascript.JSObject;
@@ -33,7 +33,7 @@ import netscape.javascript.JSObject;
  * <p>Responsabilidades:
  * <ul>
  *   <li>Integración con el motor Leaflet/OpenStreetMap mediante {@link WebView} y {@link WebEngine}.</li>
- *   <li>Geocodificación inversa con resolución offline de puntos de interés y online vía Nominatim.</li>
+ *   <li>Geocodificación inversa de direcciones vía Nominatim.</li>
  *   <li>Trazado asíncrono en segundo plano de rutas viales y cálculo de cotizaciones.</li>
  *   <li>Confirmación y publicación de nuevas solicitudes de viaje.</li>
  * </ul>
@@ -148,8 +148,8 @@ public class MapaController {
         if (archivo == null) {
             throw new IllegalStateException(t("mapa.no.se.encontro.ui.map.mapa.html"));
         }
-        mapaWeb.getEngine().load(archivo.toExternalForm()
-                + "#" + aplicacion.locale().getLanguage());
+        mapaWeb.getEngine().load(FabricaGraphHopper.urlMapa(
+                archivo, aplicacion.locale().getLanguage()));
     }
 
     private String t(String clave) {
@@ -178,14 +178,14 @@ public class MapaController {
                                         .then(function(data) {
                                             if (data && data.address) {
                                                 var a = data.address;
-                                                var via = a.road || a.pedestrian || a.footway || a.suburb || a.neighbourhood || a.amenity;
-                                                var num = a.house_number ? (" " + a.house_number) : "";
-                                                var calle = via ? (via + num) : (data.display_name ? data.display_name.split(",")[0] : "");
-                                                if (calle && window.javaBridge && window.javaBridge.actualizarCalle) {
+                                                var via = a.road || a.pedestrian || a.footway || a.residential;
+                                                var actual = tipo === "ORIGEN" ? puntoOrigen : puntoDestino;
+                                                if (via && marcador === actual && window.javaBridge && window.javaBridge.actualizarCalle) {
+                                                    var calle = via + (a.house_number ? (" " + a.house_number) : "");
                                                     window.javaBridge.actualizarCalle(tipo, calle);
-                                                    if (marcador) {
-                                                        marcador.bindTooltip((tipo === "ORIGEN" ? "Origen: " : "Destino: ") + calle).openTooltip();
-                                                    }
+                                                    var etiqueta = document.createElement("span");
+                                                    etiqueta.textContent = (tipo === "ORIGEN" ? "Origen: " : "Destino: ") + calle;
+                                                    marcador.setTooltipContent(etiqueta).openTooltip();
                                                 }
                                             }
                                         })
@@ -197,8 +197,7 @@ public class MapaController {
                                 var lat = evento.latlng.lat;
                                 var lon = evento.latlng.lng;
 
-                                if (lat < -42.832 || lat > -42.704 ||
-                                    lon < -65.126 || lon > -65.005) {
+                                if (!window.javaBridge.puntoPermitido(lat, lon)) {
                                     aviso.textContent =
                                         mensajesMapa.fuera;
                                     return;
@@ -338,12 +337,7 @@ public class MapaController {
     }
 
     private boolean puntoValido(double lat, double lon) {
-        return Double.isFinite(lat)
-                && Double.isFinite(lon)
-                && lat >= -42.832
-                && lat <= -42.704
-                && lon >= -65.126
-                && lon <= -65.005;
+        return FabricaGraphHopper.puntoAdmitido(lat, lon);
     }
 
     private void exigirAplicacion() {
@@ -404,7 +398,7 @@ public class MapaController {
                     setText(String.format(
                             aplicacion.locale(),
                             t("mapa.s.s.2f.km.1f.min.2f"),
-                            aplicacion.nombreServicio(servicio),
+                            aplicacion.etiqueta(servicio.getCategoriaVehiculo()),
                             aplicacion.etiqueta(servicio.getTipoVehiculo()),
                             km,
                             minutos,
@@ -742,62 +736,11 @@ public class MapaController {
         alerta.showAndWait();
     }
 
-    private static final class ReferenciaCalle {
-        final String nombre;
-        final double lat;
-        final double lon;
-
-        ReferenciaCalle(String nombre, double lat, double lon) {
-            this.nombre = nombre;
-            this.lat = lat;
-            this.lon = lon;
-        }
-
-        double distanciaCuadrada(double l, double ln) {
-            double dLat = lat - l;
-            double dLon = lon - ln;
-            return dLat * dLat + dLon * dLon;
-        }
-    }
-
-    private static final List<ReferenciaCalle> CALLES_MADRYN = List.of(
-            new ReferenciaCalle("Av. Julio A. Roca (Costanera)", -42.766, -65.031),
-            new ReferenciaCalle("Av. Roca y 28 de Julio", -42.769, -65.032),
-            new ReferenciaCalle("Belgrano y 9 de Julio", -42.769, -65.038),
-            new ReferenciaCalle("Plaza San Martín (San Martín y Belgrano)", -42.768, -65.037),
-            new ReferenciaCalle("San Martín y 28 de Julio", -42.770, -65.037),
-            new ReferenciaCalle("Av. Gales y Mitre", -42.773, -65.035),
-            new ReferenciaCalle("Av. Gales y San Martín", -42.773, -65.037),
-            new ReferenciaCalle("Av. Gales y Alvear", -42.774, -65.044),
-            new ReferenciaCalle("Sarmiento y 25 de Mayo", -42.776, -65.034),
-            new ReferenciaCalle("Terminal de Ómnibus (Dr. Ávila)", -42.762, -65.042),
-            new ReferenciaCalle("Roberto Gómez y Domecq García", -42.759, -65.044),
-            new ReferenciaCalle("Paulina Escardó y Av. Rawson", -42.763, -65.033),
-            new ReferenciaCalle("Boulevard Brown y Primera Bajada", -42.775, -65.029),
-            new ReferenciaCalle("Boulevard Brown y Tercera Bajada", -42.782, -65.024),
-            new ReferenciaCalle("UNPSJB (Boulevard Brown 3051)", -42.785, -65.021),
-            new ReferenciaCalle("Juan B. Justo y Av. Gales", -42.775, -65.050),
-            new ReferenciaCalle("Marcos A. Zar y Roque Sáenz Peña", -42.766, -65.043),
-            new ReferenciaCalle("España y Mitre", -42.779, -65.033),
-            new ReferenciaCalle("Muelle Luis Piedrabuena", -42.765, -65.028),
-            new ReferenciaCalle("Barrio Sur (Boulevard Brown)", -42.790, -65.018),
-            new ReferenciaCalle("Parque Industrial (Av. Juan XXIII)", -42.780, -65.065),
-            new ReferenciaCalle("Pujol Norte", -42.750, -65.055));
-
-    private String resolverCalleCercana(double lat, double lon) {
-        ReferenciaCalle mejor = null;
-        double minD = Double.MAX_VALUE;
-        for (ReferenciaCalle r : CALLES_MADRYN) {
-            double d = r.distanciaCuadrada(lat, lon);
-            if (d < minD) {
-                minD = d;
-                mejor = r;
-            }
-        }
-        return mejor != null ? mejor.nombre : String.format(Locale.US, "Calle (%.4f, %.4f)", lat, lon);
-    }
-
     public class PuenteMapa {
+
+        public boolean puntoPermitido(double latitud, double longitud) {
+            return puntoValido(latitud, longitud);
+        }
 
         public void seleccionar(String tipo, double lat, double lon) {
             if (!puntoValido(lat, lon)) {
@@ -809,17 +752,15 @@ public class MapaController {
                     return;
                 }
 
-                String calle = resolverCalleCercana(lat, lon);
-
                 if ("ORIGEN".equals(tipo)) {
                     origenSeleccionado = new Ubicacion(lat, lon);
-                    origenTexto.setText(calle);
+                    origenTexto.clear();
                     destinoSeleccionado = null;
                     destinoTexto.clear();
 
                 } else if ("DESTINO".equals(tipo)) {
                     destinoSeleccionado = new Ubicacion(lat, lon);
-                    destinoTexto.setText(calle);
+                    destinoTexto.clear();
                 }
             });
         }

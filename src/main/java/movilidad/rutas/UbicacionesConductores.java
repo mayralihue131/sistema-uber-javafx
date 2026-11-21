@@ -12,7 +12,7 @@ import movilidad.modelo.TipoVehiculo;
  * Gestiona y cachea en tiempo constante O(1) la ubicación geográfica de los conductores.
  *
  * <p>Para fines pedagógicos y de simulación, si el chofer no cuenta con GPS físico, genera
- * determinísticamente una coordenada verosímil dentro de la red vial de Puerto Madryn
+ * determinísticamente una coordenada verosímil dentro de la red vial de la ciudad configurada
  * mediante la semilla del correo y ajusta el punto a la calzada transitable más cercana.
  */
 public final class UbicacionesConductores {
@@ -48,12 +48,14 @@ public final class UbicacionesConductores {
 
         Random aleatorio = new Random(clave.hashCode());
 
+        double[] zona = FabricaGraphHopper.zonaConductores();
+        double latitudMinima = zona[0];
+        double longitudMinima = zona[1];
+        double amplitudLatitud = zona[2] - latitudMinima;
+        double amplitudLongitud = zona[3] - longitudMinima;
         for (int intento = 0; intento < 200; intento++) {
-            double latitud = -42.810
-                + aleatorio.nextDouble() * 0.050;
-
-            double longitud = -65.090
-                + aleatorio.nextDouble() * 0.060;
+            double latitud = latitudMinima + aleatorio.nextDouble() * amplitudLatitud;
+            double longitud = longitudMinima + aleatorio.nextDouble() * amplitudLongitud;
 
             PuntoRuta candidato = new PuntoRuta(
                 latitud, longitud

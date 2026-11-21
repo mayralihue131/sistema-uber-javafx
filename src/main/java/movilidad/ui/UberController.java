@@ -20,6 +20,7 @@ import javafx.util.Duration;
 import javafx.util.StringConverter;
 import movilidad.aplicacion.AplicacionUberFX;
 import movilidad.modelo.*;
+import movilidad.rutas.FabricaGraphHopper;
 import movilidad.rutas.PuntoRuta;
 import movilidad.rutas.RutaCalculada;
 import netscape.javascript.JSObject;
@@ -40,7 +41,23 @@ public final class UberController {
     private final List<Lugar> lugares;
 
     private List<Lugar> lugaresTraducidos() {
-        return List.of(new Lugar(t("control.centro.punto.de.ejemplo"), -42.77, -65.04), new Lugar(t("control.universidad.punto.de.ejemplo"), -42.78, -65.02), new Lugar(t("control.terminal.punto.de.ejemplo"), -42.76, -65.04), new Lugar(t("control.costanera.punto.de.ejemplo"), -42.77, -65.03));
+        List<Lugar> puntos = new java.util.ArrayList<>();
+        for (int i = 1; ; i++) {
+            String ejemplo = FabricaGraphHopper.parametroMapa("ejemplo." + i);
+            if (ejemplo.isEmpty()) {
+                break;
+            }
+            String[] datos = ejemplo.split(",");
+            String nombre = datos[0].startsWith("%") ? t(datos[0].substring(1)) : datos[0];
+            puntos.add(new Lugar(nombre, Double.parseDouble(datos[1]),
+                    Double.parseDouble(datos[2])));
+        }
+        if (puntos.isEmpty()) {
+            PuntoRuta centro = FabricaGraphHopper.centroMapa();
+            puntos.add(new Lugar(t("control.centro.punto.de.ejemplo"),
+                    centro.latitud(), centro.longitud()));
+        }
+        return puntos;
     }
 
     private record Lugar(String nombre, double lat, double lon) {
@@ -831,7 +848,8 @@ public final class UberController {
             }
         });
 
-        mapaWeb.getEngine().load(archivo.toExternalForm() + "#" + app.locale().getLanguage());
+        mapaWeb.getEngine().load(FabricaGraphHopper.urlMapa(
+                archivo, app.locale().getLanguage()));
     }
 
     private void finalizarViajeAutomatico() {

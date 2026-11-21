@@ -77,7 +77,7 @@ public class AplicacionUberFX extends Application {
             mostrar("Inicio.fxml");
             ventana.setMinWidth(650);
             ventana.setMinHeight(550);
-       
+
             ventana.show();
 
         } catch (Exception e) {
@@ -88,7 +88,7 @@ public class AplicacionUberFX extends Application {
                     : texto("error.inicio") + " " + mensajeError(e)),
                 mensajes == null ? ButtonType.OK : botonAceptar()
             );
-            
+
             alerta.showAndWait();
         }
     }
@@ -186,7 +186,7 @@ public class AplicacionUberFX extends Application {
     private void aplicarIdioma(String codigo) {
         Locale nuevoIdioma = Locale.forLanguageTag("en".equals(codigo) ? "en-US" : "es-AR");
         ResourceBundle nuevosMensajes = ResourceBundle.getBundle(
-                "mensajes", nuevoIdioma,
+                "ui.i18n.mensajes", nuevoIdioma,
                 ResourceBundle.Control.getNoFallbackControl(
                         ResourceBundle.Control.FORMAT_PROPERTIES));
         mensajes = nuevosMensajes;
@@ -293,7 +293,7 @@ public class AplicacionUberFX extends Application {
             return mensaje == null ? error.getClass().getSimpleName() : mensaje;
         }
 
-        ResourceBundle base = ResourceBundle.getBundle("mensajes", Locale.ROOT,
+        ResourceBundle base = ResourceBundle.getBundle("ui.i18n.mensajes", Locale.ROOT,
                 ResourceBundle.Control.getNoFallbackControl(
                         ResourceBundle.Control.FORMAT_PROPERTIES));
         for (String clave : base.keySet()) {

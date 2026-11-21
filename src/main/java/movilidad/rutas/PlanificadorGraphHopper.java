@@ -101,6 +101,10 @@ public final class PlanificadorGraphHopper
             filtro
         );
 
+        System.out.printf("[MAPA] lat=%s lon=%s vehiculo=%s distanciaACalle=%s%n",
+                punto.latitud(), punto.longitud(), tipoVehiculo,
+                ajuste.isValid() ? ajuste.getQueryDistance() + " m" : "sin calle");
+
         if (!ajuste.isValid()
                 || ajuste.getQueryDistance() > 100) {
             return Optional.empty();
