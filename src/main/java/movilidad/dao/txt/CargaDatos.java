@@ -58,7 +58,22 @@ public class CargaDatos {
 
         List<List<String>> datos = new ArrayList<>();
 
-        try (Scanner archivo = new Scanner(new File(fileName), "UTF-8")) {
+        File archivoFisico = new File(fileName);
+        if (!archivoFisico.exists()) {
+            if (fileName.contains("src/main/resources/") && !fileName.contains("src/main/resources/datos/")) {
+                File alternativo = new File(fileName.replace("src/main/resources/", "src/main/resources/datos/"));
+                if (alternativo.exists()) {
+                    archivoFisico = alternativo;
+                }
+            } else if (!fileName.contains("datos/")) {
+                File alternativo = new File("src/main/resources/datos/" + archivoFisico.getName());
+                if (alternativo.exists()) {
+                    archivoFisico = alternativo;
+                }
+            }
+        }
+
+        try (Scanner archivo = new Scanner(archivoFisico, "UTF-8")) {
             while (archivo.hasNextLine()) {
                 String linea = archivo.nextLine().trim();
 

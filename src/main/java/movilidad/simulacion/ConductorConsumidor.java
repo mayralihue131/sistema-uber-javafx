@@ -6,6 +6,7 @@ import java.util.Random;
 import movilidad.logica.MovilidadDigital;
 import movilidad.modelo.CalificacionViaje;
 import movilidad.modelo.EstadoConductor;
+import movilidad.modelo.RolUsuario;
 import movilidad.modelo.Usuario;
 import movilidad.modelo.Viaje;
 
@@ -54,6 +55,9 @@ public class ConductorConsumidor implements Runnable {
             // Asegura que el conductor comience disponible en el modelo
             synchronized (sistema) {
                 if (conductor.getConductor() != null) {
+                    if (conductor.getRolActivo() != RolUsuario.CONDUCTOR) {
+                        sistema.cambiarRolActivo(conductor, RolUsuario.CONDUCTOR);
+                    }
                     sistema.ponerDisponible(conductor);
                 }
             }
@@ -83,9 +87,9 @@ public class ConductorConsumidor implements Runnable {
                 Thread.sleep(random.nextInt(250) + 100);
 
                 synchronized (sistema) {
-                    sistema.finalizarViaje(viaje.getId(), conductor, LocalDateTime.now());
                     viaje.setCalificacionCliente(CalificacionViaje.EXCELENTE);
                     viaje.setCalificacionConductor(CalificacionViaje.EXCELENTE);
+                    sistema.finalizarViaje(viaje.getId(), conductor, LocalDateTime.now());
                 }
                 viajesCompletados++;
                 System.out.println("[CONDUCTOR - " + conductor.getNombre() + "] Completó: Viaje #"

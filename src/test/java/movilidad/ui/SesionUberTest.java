@@ -10,6 +10,20 @@ import static org.junit.jupiter.api.Assertions.*;
 class SesionUberTest {
     @TempDir Path carpeta;
     private SesionUber nueva() throws Exception {return new SesionUber(carpeta.resolve("eventos.txt"));}
+
+    @org.junit.jupiter.api.BeforeEach
+    @org.junit.jupiter.api.AfterEach
+    void limpiarBD() {
+        try {
+            java.sql.Connection con = movilidad.dao.bd.ConexionBD.obtenerConexion();
+            try (java.sql.Statement st = con.createStatement()) {
+                st.executeUpdate("DELETE FROM conductor_vehiculo WHERE email IN ('prueba@example.com', 'moto@example.com', 'PRUEBA@example.com')");
+                st.executeUpdate("DELETE FROM usuario WHERE email IN ('prueba@example.com', 'moto@example.com', 'PRUEBA@example.com')");
+                st.executeUpdate("DELETE FROM vehiculo WHERE patente IN ('XX123YY', 'MO123TO')");
+            }
+        } catch (Exception ignored) {}
+    }
+
     private String pedir(SesionUber s) throws Exception {
         String id=UUID.randomUUID().toString();
         s.ejecutar("SOLICITAR","paula.vazquez@email.com",id,"Estandar","-42.77","-65.04","-42.78","-65.02");return id;
@@ -59,5 +73,19 @@ class SesionUberTest {
         java.nio.file.Files.writeString(archivo,String.join("|",partes)+"\n");
         SesionUber recuperada=nueva();assertTrue(recuperada.vencer());
         assertEquals(EstadoViaje.RECHAZADO,nueva().sistema.buscarViajePorId(UUID.fromString(id)).estadoActual());
+    }
+
+    @Test void solicitarMotoApareceEnPerfilConductor() throws Exception {
+        SesionUber s = nueva();
+        String id = UUID.randomUUID().toString();
+        // Carlos Rodriguez pide Mototaxi
+        s.ejecutar("SOLICITAR", "carlos.rodriguez@email.com", id, "Mototaxi", "-42.77", "-65.04", "-42.78", "-65.02");
+        // Manuel Rios (chofer de moto) abre su sesión
+        Usuario manuel = s.sistema.buscarUsuarioPorMail("manuel.rios@email.com");
+        java.util.List<Viaje> disponibles = s.sistema.obtenerSolicitudesDisponibles(manuel);
+        assertTrue(disponibles.stream().anyMatch(v -> v.getId().equals(UUID.fromString(id))),
+                "Manuel Rios debe ver la solicitud de moto");
+        s.ejecutar("ACEPTAR", "manuel.rios@email.com", id);
+        assertEquals(EstadoViaje.ACEPTADO, s.sistema.buscarViajePorId(UUID.fromString(id)).estadoActual());
     }
 }

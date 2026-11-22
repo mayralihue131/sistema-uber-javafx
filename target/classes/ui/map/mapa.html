@@ -173,6 +173,41 @@
 			    }
 			};
 
+			window.cambiarCiudad = function (nombreCiudad, nuevaLat, nuevaLon, nuevoZoom) {
+			    ciudad = nombreCiudad;
+			    latitud = Number(nuevaLat);
+			    longitud = Number(nuevaLon);
+			    zoom = Number(nuevoZoom) || 15;
+
+			    try {
+			        var params = new URLSearchParams(window.location.hash.substring(1));
+			        params.set("nombre", ciudad);
+			        params.set("latitud", latitud);
+			        params.set("longitud", longitud);
+			        params.set("zoom", zoom);
+			        if (window.history && window.history.replaceState) {
+			            window.history.replaceState(null, null, "#" + params.toString());
+			        } else {
+			            window.location.hash = params.toString();
+			        }
+			    } catch (e) {}
+
+			    mensajesMapa.ayuda = ciudad + " · " + (ingles ? "Drag to pan and use + or − to zoom." : "Arrastrá para moverte y usá + o −.");
+			    mensajesMapa.fuera = (ingles ? "Choose a point within " : "Elegí un punto dentro de ") + ciudad + ".";
+
+			    if (typeof mapa !== "undefined") {
+			        mapa.setView([latitud, longitud], zoom);
+			        if (typeof window.limpiarRutas === "function") {
+			            window.limpiarRutas();
+			        }
+			        if (typeof window.limpiarPuntosUsuario === "function") {
+			            window.limpiarPuntosUsuario();
+			        } else if (aviso) {
+			            aviso.textContent = mensajesMapa.elegirOrigen || (ingles ? "Click to choose the pickup point." : "Hacé clic para elegir el origen.");
+			        }
+			    }
+			};
+
 			window.mostrarRutas = function (hastaOrigen, hastaDestino, estado) {
 			    window.limpiarRutas();
 

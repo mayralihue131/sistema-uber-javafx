@@ -18,13 +18,10 @@
                                 <Label text="%vista.vehiculo.activo" wrapText="true"/>
                                 <ComboBox fx:id="vehiculoActivo" promptText="%vista.selecciona.tu.vehiculo" maxWidth="Infinity"/>
                             </VBox>
-                            <VBox spacing="16" HBox.hgrow="ALWAYS" minWidth="0">
-                                <Label text="%vista.categoria.minima.aceptada" wrapText="true"/>
-                                <ComboBox fx:id="categoriaMinima" promptText="%vista.selecciona" maxWidth="Infinity"/>
-                            </VBox>
                         </HBox>
+                        <Label fx:id="detalleVehiculoActivo" wrapText="true" style="-fx-text-fill: #1e293b; -fx-font-weight: bold;"/>
                         <HBox spacing="12" alignment="CENTER_LEFT">
-                            <Button text="%vista.aplicar.vehiculo.y.categoria" onAction="#aplicarVehiculo"/>
+                            <Button text="%vista.aplicar.vehiculo" onAction="#aplicarVehiculo"/>
                             <Button text="%vista.agregar.vehiculo" onAction="#abrirRegistroConductor"/>
                         </HBox>
                         <HBox spacing="12" alignment="CENTER_LEFT">

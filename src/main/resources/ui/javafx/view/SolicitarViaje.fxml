@@ -14,6 +14,10 @@
                         <Label text="%vista.1.tu.recorrido" wrapText="true"/>
                         <Label text="%vista.los.lugares.son.puntos.de.demostracion.con" wrapText="true"/>
                         <VBox spacing="16" HBox.hgrow="ALWAYS" minWidth="0">
+                            <Label text="%vista.ciudad" wrapText="true"/>
+                            <ComboBox fx:id="selectorCiudad" promptText="%vista.selecciona.ciudad" maxWidth="Infinity"/>
+                        </VBox>
+                        <VBox spacing="16" HBox.hgrow="ALWAYS" minWidth="0">
                             <Label text="%vista.origen" wrapText="true"/>
                             <ComboBox fx:id="origenLugar" promptText="%vista.elegi.un.lugar" maxWidth="Infinity"/>
                         </VBox>

@@ -50,6 +50,9 @@ public class MapaController {
     private TextField destinoTexto;
 
     @FXML
+    private ComboBox<String> selectorCiudad;
+
+    @FXML
     private ComboBox<TipoServicio> tipoServicio;
 
     @FXML
@@ -78,10 +81,22 @@ public class MapaController {
     @FXML
     private void initialize() {
         tipoServicio.getItems().setAll(TipoServicio.values());
-        categoria.getItems().setAll(CategoriaVehiculo.values());
-
         tipoServicio.setValue(TipoServicio.PASAJEROS);
-        categoria.setValue(CategoriaVehiculo.ESTANDAR);
+
+        categoria.getItems().add(null);
+        categoria.getItems().addAll(CategoriaVehiculo.values());
+        categoria.setValue(null);
+
+        if (selectorCiudad != null) {
+            selectorCiudad.getItems().setAll(FabricaGraphHopper.getCiudadesDisponibles());
+            selectorCiudad.setValue(FabricaGraphHopper.getCiudadActiva());
+            selectorCiudad.valueProperty().addListener((observable, anterior, actual) -> {
+                if (actual != null && aplicacion != null
+                        && !actual.equalsIgnoreCase(FabricaGraphHopper.getCiudadActiva())) {
+                    cambiarCiudad(actual);
+                }
+            });
+        }
 
         if (btnSolicitar != null) {
             btnSolicitar.setDisable(true);
@@ -129,6 +144,19 @@ public class MapaController {
                             && !pantallaCerrada) {
                         try {
                             conectarClics(motor);
+                            if (aplicacion != null) {
+                                String ciudadActiva = FabricaGraphHopper.getCiudadActiva();
+                                PuntoRuta centro = FabricaGraphHopper.centroMapa();
+                                int zoom = 15;
+                                try {
+                                    zoom = Integer.parseInt(FabricaGraphHopper.parametroMapa("zoom"));
+                                } catch (Exception ignored) {
+                                }
+                                String script = String.format(java.util.Locale.US,
+                                        "if (typeof window.cambiarCiudad === 'function') { window.cambiarCiudad('%s', %f, %f, %d); }",
+                                        ciudadActiva.replace("'", "\\'"), centro.latitud(), centro.longitud(), zoom);
+                                motor.executeScript(script);
+                            }
                             dibujarRutaSeleccionada();
                         } catch (Exception e) {
                             avisar(
@@ -144,12 +172,55 @@ public class MapaController {
         this.aplicacion = aplicacion;
         aplicacion.traducirOpciones(tipoServicio, categoria);
 
+        if (selectorCiudad != null) {
+            selectorCiudad.setValue(FabricaGraphHopper.getCiudadActiva());
+        }
+
         URL archivo = getClass().getResource("/ui/map/mapa.html");
         if (archivo == null) {
             throw new IllegalStateException(t("mapa.no.se.encontro.ui.map.mapa.html"));
         }
         mapaWeb.getEngine().load(FabricaGraphHopper.urlMapa(
                 archivo, aplicacion.locale().getLanguage()));
+    }
+
+    private void cambiarCiudad(String nuevaCiudad) {
+        if (aplicacion == null) {
+            return;
+        }
+        aplicacion.cambiarCiudad(nuevaCiudad);
+        limpiarCotizacion();
+        origenTexto.setText("");
+        destinoTexto.setText("");
+        origenSeleccionado = null;
+        destinoSeleccionado = null;
+        origenCotizado = null;
+        destinoCotizado = null;
+        opciones.getItems().clear();
+        if (btnSolicitar != null) {
+            btnSolicitar.setDisable(true);
+        }
+
+        PuntoRuta centro = FabricaGraphHopper.centroMapa();
+        String nombre = FabricaGraphHopper.parametroMapa("nombre");
+        int zoom = 15;
+        try {
+            zoom = Integer.parseInt(FabricaGraphHopper.parametroMapa("zoom"));
+        } catch (Exception ignored) {
+        }
+
+        String script = String.format(java.util.Locale.US,
+                "if (typeof window.cambiarCiudad === 'function') { window.cambiarCiudad('%s', %f, %f, %d); }",
+                nombre.replace("'", "\\'"), centro.latitud(), centro.longitud(), zoom);
+        try {
+            mapaWeb.getEngine().executeScript(script);
+        } catch (Exception e) {
+            URL archivo = getClass().getResource("/ui/map/mapa.html");
+            if (archivo != null) {
+                mapaWeb.getEngine().load(FabricaGraphHopper.urlMapa(
+                        archivo, aplicacion.locale().getLanguage()));
+            }
+        }
     }
 
     private String t(String clave) {
@@ -166,6 +237,19 @@ public class MapaController {
                             var puntoOrigen = null;
                             var puntoDestino = null;
                             var eligiendoOrigen = true;
+
+                            window.limpiarPuntosUsuario = function() {
+                                if (puntoOrigen) {
+                                    mapa.removeLayer(puntoOrigen);
+                                    puntoOrigen = null;
+                                }
+                                if (puntoDestino) {
+                                    mapa.removeLayer(puntoDestino);
+                                    puntoDestino = null;
+                                }
+                                eligiendoOrigen = true;
+                                aviso.textContent = mensajesMapa.elegirOrigen;
+                            };
 
                             aviso.textContent =
                                 mensajesMapa.elegirOrigen;
@@ -184,7 +268,7 @@ public class MapaController {
                                                     var calle = via + (a.house_number ? (" " + a.house_number) : "");
                                                     window.javaBridge.actualizarCalle(tipo, calle);
                                                     var etiqueta = document.createElement("span");
-                                                    etiqueta.textContent = (tipo === "ORIGEN" ? "Origen: " : "Destino: ") + calle;
+                                                    etiqueta.textContent = (tipo === "ORIGEN" ? (mensajesMapa.origen + ": ") : (mensajesMapa.destino + ": ")) + calle;
                                                     marcador.setTooltipContent(etiqueta).openTooltip();
                                                 }
                                             }
@@ -225,7 +309,7 @@ public class MapaController {
                                         fillOpacity: 1
                                     }).addTo(mapa);
 
-                                    puntoOrigen.bindTooltip("Origen");
+                                    puntoOrigen.bindTooltip(mensajesMapa.origen);
 
                                     window.javaBridge.seleccionar("ORIGEN", lat, lon);
                                     buscarCalle("ORIGEN", lat, lon, puntoOrigen);
@@ -243,7 +327,7 @@ public class MapaController {
                                         fillOpacity: 1
                                     }).addTo(mapa);
 
-                                    puntoDestino.bindTooltip("Destino");
+                                    puntoDestino.bindTooltip(mensajesMapa.destino);
 
                                     window.javaBridge.seleccionar("DESTINO", lat, lon);
                                     buscarCalle("DESTINO", lat, lon, puntoDestino);
@@ -363,17 +447,22 @@ public class MapaController {
                         t("mapa.elegi.un.origen.y.un.destino.diferentes"));
             }
 
-            if (tipoServicio.getValue() == null
-                    || categoria.getValue() == null) {
-                throw new IllegalArgumentException(
-                        t("mapa.elegi.tipo.de.servicio.y.categoria"));
+            if (tipoServicio.getValue() == null) {
+                tipoServicio.setValue(TipoServicio.PASAJEROS);
             }
 
+            TipoServicio tipo = tipoServicio.getValue();
             var sistema = aplicacion.sesion.sistema;
 
-            var servicios = sistema.consultarServicios(
-                    tipoServicio.getValue(),
-                    categoria.getValue());
+            List<Servicio> servicios;
+            if (categoria.getValue() != null) {
+                servicios = sistema.consultarServicios(tipo, categoria.getValue());
+            } else {
+                servicios = sistema.getServicios().stream()
+                        .filter(s -> s.getTipoServicio() == tipo)
+                        .sorted(java.util.Comparator.comparing(Servicio::getCategoriaVehiculo))
+                        .toList();
+            }
 
             opciones.setCellFactory(lista -> new ListCell<Servicio>() {
 
@@ -398,8 +487,9 @@ public class MapaController {
                     setText(String.format(
                             aplicacion.locale(),
                             t("mapa.s.s.2f.km.1f.min.2f"),
-                            aplicacion.etiqueta(servicio.getCategoriaVehiculo()),
+                            aplicacion.nombreServicio(servicio),
                             aplicacion.etiqueta(servicio.getTipoVehiculo()),
+                            aplicacion.etiqueta(servicio.getCategoriaVehiculo()),
                             km,
                             minutos,
                             precio));

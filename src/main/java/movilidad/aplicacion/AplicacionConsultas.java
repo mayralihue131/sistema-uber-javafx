@@ -14,7 +14,10 @@ import movilidad.dao.txt.CargaParametros;
 import movilidad.dao.DAOFactory;
 import movilidad.dao.DAOLoader;
 import movilidad.dao.bd.BdDAOFactory;
+import movilidad.dao.bd.ConexionBD;
 import movilidad.dao.bd.UsuarioDaoBd;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import movilidad.dao.dto.ServicioDTO;
 import movilidad.dao.dto.UsuarioDTO;
 import movilidad.dao.dto.VehiculoDTO;
@@ -252,6 +255,24 @@ public class AplicacionConsultas {
                 }
                 if (activo != null) {
                     aplicacion.registrarConductor(u, dto.getLicenciaConducir(), activo);
+                    // Cargar vehículos adicionales asociados al conductor en BD
+                    try (PreparedStatement psOtros = ConexionBD.obtenerConexion().prepareStatement(
+                            "SELECT patente FROM conductor_vehiculo WHERE email = ? AND patente <> ?")) {
+                        psOtros.setString(1, dto.getEmail());
+                        psOtros.setString(2, activo.getPatente());
+                        try (ResultSet rsOtros = psOtros.executeQuery()) {
+                            while (rsOtros.next()) {
+                                String patOtro = rsOtros.getString("patente");
+                                for (Vehiculo v : vehiculos) {
+                                    if (v.getPatente().equalsIgnoreCase(patOtro)) {
+                                        aplicacion.agregarVehiculo(u, v);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    } catch (Exception ignored) {}
+
                     aplicacion.definirCategoriaAceptada(u, CategoriaVehiculo.ESTANDAR);
                     aplicacion.cambiarRolActivo(u, RolUsuario.CONDUCTOR);
                     aplicacion.ponerDisponible(u);

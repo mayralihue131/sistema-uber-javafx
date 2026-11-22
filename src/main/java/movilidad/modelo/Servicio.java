@@ -82,6 +82,19 @@ public class Servicio {
 	}
 
 	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Servicio servicio = (Servicio) o;
+		return nombre != null && nombre.equalsIgnoreCase(servicio.nombre);
+	}
+
+	@Override
+	public int hashCode() {
+		return nombre == null ? 0 : nombre.toLowerCase(java.util.Locale.ROOT).hashCode();
+	}
+
+	@Override
 	public String toString() {
 		return "Servicio [nombre=" + nombre + ", tarifaBase=" + tarifaBase + ", precioKm=" + precioKm
 				+ ", precioMinuto=" + precioMinuto + ", tipoVehiculo=" + tipoVehiculo + ", categoriaVehiculo="

@@ -11,6 +11,7 @@ import java.util.ResourceBundle;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -20,6 +21,9 @@ import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import movilidad.modelo.Servicio;
@@ -45,6 +49,7 @@ public class AplicacionUberFX extends Application {
     private Stage ventana;
     private UberController controlador;
     private BorderPane pantallaPrincipal;
+    private String pantallaActual = "Inicio.fxml";
 
     private PlanificadorRutas planificadorRutas;
     private ServicioRutasViaje servicioRutas;
@@ -120,11 +125,39 @@ public class AplicacionUberFX extends Application {
         return ubicacionesConductores;
     }
 
+    /**
+     * Cambia la ciudad activa del sistema, liberando los recursos de ruteo previos
+     * y reiniciando las ubicaciones de los conductores para la nueva ciudad.
+     *
+     * @param nuevaCiudad nombre de la nueva ciudad seleccionada
+     */
+    public synchronized void cambiarCiudad(String nuevaCiudad) {
+        if (nuevaCiudad == null || nuevaCiudad.isBlank()) {
+            return;
+        }
+        if (nuevaCiudad.equalsIgnoreCase(FabricaGraphHopper.getCiudadActiva())) {
+            return;
+        }
+
+        if (planificadorRutas != null) {
+            try {
+                planificadorRutas.close();
+            } catch (Exception ignored) {
+            }
+            planificadorRutas = null;
+            servicioRutas = null;
+        }
+
+        FabricaGraphHopper.setCiudadActiva(nuevaCiudad);
+        ubicacionesConductores.limpiar();
+    }
+
     public void mostrar(String archivo) throws IOException {
         mostrar(archivo, "");
     }
 
     private void mostrar(String archivo, String correoEscrito) throws IOException {
+        this.pantallaActual = archivo;
         URL recurso = getClass().getResource("/ui/javafx/view/" + archivo);
 
         if (recurso == null) {
@@ -195,6 +228,31 @@ public class AplicacionUberFX extends Application {
         botonNo = new ButtonType(texto("dialog.no"), ButtonType.NO.getButtonData());
     }
 
+    /**
+     * Cambia dinámicamente el idioma de la aplicación (español / inglés) en caliente,
+     * actualizando los bundles, el título de la ventana, la barra de navegación
+     * y refrescando la pantalla activa.
+     *
+     * @param codigo código del idioma ("es" o "en")
+     */
+    public void cambiarIdioma(String codigo) {
+        if (codigo == null || codigo.equals(idioma.getLanguage())) {
+            return;
+        }
+        try {
+            aplicarIdioma(codigo);
+            ventana.setTitle(texto("app.titulo"));
+            if (pantallaPrincipal != null) {
+                pantallaPrincipal = crearPantallaPrincipal();
+            }
+            mostrar(pantallaActual != null ? pantallaActual : "Inicio.fxml");
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR,
+                    texto("error.idioma") + " " + mensajeError(e),
+                    botonAceptar()).showAndWait();
+        }
+    }
+
     private void configurarSelector(ComboBox<String> selector, TextField correo) {
         selector.getItems().setAll("Español", "English");
         selector.getSelectionModel().select(esIngles() ? 1 : 0);
@@ -247,7 +305,11 @@ public class AplicacionUberFX extends Application {
         if (valor == null) {
             return "";
         }
-        return esIngles() ? texto("valor." + valor.name()) : valor.toString();
+        String clave = "valor." + valor.name();
+        if (mensajes != null && mensajes.containsKey(clave)) {
+            return texto(clave);
+        }
+        return valor.name().replace('_', ' ');
     }
 
     @SafeVarargs
@@ -263,13 +325,19 @@ public class AplicacionUberFX extends Application {
         opcion.setConverter(new StringConverter<T>() {
             @Override
             public String toString(T valor) {
+                if (valor == null) {
+                    return texto("vista.todas.las.categorias");
+                }
                 return etiqueta(valor);
             }
 
             @Override
             public T fromString(String texto) {
+                if (texto == null || texto.equals(texto("vista.todas.las.categorias"))) {
+                    return null;
+                }
                 return opcion.getItems().stream()
-                        .filter(valor -> etiqueta(valor).equals(texto))
+                        .filter(valor -> valor != null && etiqueta(valor).equals(texto))
                         .findFirst().orElse(null);
             }
         });
@@ -356,9 +424,28 @@ public class AplicacionUberFX extends Application {
                 opcionMenu("vista.panel.conductor", "PanelConductor.fxml")
         );
 
+        ComboBox<String> selectorIdioma = new ComboBox<>();
+        selectorIdioma.getItems().setAll("Español", "English");
+        selectorIdioma.setValue(esIngles() ? "English" : "Español");
+        selectorIdioma.setOnAction(e -> {
+            String sel = selectorIdioma.getValue();
+            if (sel != null) {
+                String nuevoCodigo = sel.equals("English") ? "en" : "es";
+                if (!nuevoCodigo.equals(idioma.getLanguage())) {
+                    cambiarIdioma(nuevoCodigo);
+                }
+            }
+        });
+
+        Region espaciador = new Region();
+        HBox.setHgrow(espaciador, Priority.ALWAYS);
+
+        HBox barra = new HBox(12, menu, espaciador, selectorIdioma);
+        barra.setAlignment(Pos.CENTER_LEFT);
+        barra.setPadding(new Insets(10, 16, 10, 16));
+
         BorderPane panel = new BorderPane();
-        panel.setTop(menu);
-        BorderPane.setMargin(menu, new Insets(10));
+        panel.setTop(barra);
         return panel;
     }
 

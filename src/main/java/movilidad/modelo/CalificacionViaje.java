@@ -17,4 +17,9 @@ public enum CalificacionViaje {
     public int getValorNumerico() {
         return this.valorNumerico;
     }
+
+    @Override
+    public String toString() {
+        return name().replace('_', ' ');
+    }
 }

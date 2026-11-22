@@ -21,6 +21,13 @@ public final class UbicacionesConductores {
         new HashMap<>();
 
     /**
+     * Limpia la caché de posiciones de conductores (útil al cambiar de ciudad).
+     */
+    public synchronized void limpiar() {
+        ubicaciones.clear();
+    }
+
+    /**
      * Obtiene o genera la ubicación del conductor para el tipo de vehículo especificado.
      *
      * @param correo       correo identificador del conductor

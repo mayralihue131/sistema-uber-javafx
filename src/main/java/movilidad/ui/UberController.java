@@ -95,6 +95,8 @@ public final class UberController {
     @FXML
     private TextField correoRegistro;
     @FXML
+    private ComboBox<String> selectorCiudad;
+    @FXML
     private ComboBox<Lugar> origenLugar;
     @FXML
     private ComboBox<Lugar> destinoLugar;
@@ -124,6 +126,8 @@ public final class UberController {
     private ComboBox<CategoriaVehiculo> categoria;
     @FXML
     private ComboBox<CategoriaVehiculo> categoriaMinima;
+    @FXML
+    private Label detalleVehiculoActivo;
     @FXML
     private ComboBox<CategoriaVehiculo> categoriaVehiculo;
     @FXML
@@ -219,14 +223,10 @@ public final class UberController {
                 Viaje v = s().viaje();
                 if (v != null && v.estadoActual() == EstadoViaje.ACEPTADO) {
                     if (mensaje != null) {
-                        mensaje.setText(app.locale().getLanguage().equals("en")
-                                ? "Driver arrived at pickup. Ready to start ride."
-                                : "El conductor llegó al origen. Ya podés iniciar el traslado.");
+                        mensaje.setText(t("control.conductor.llego.al.origen"));
                     }
                     try {
-                        String aviso = app.locale().getLanguage().equals("en")
-                                ? "Driver at pickup · Ready to start"
-                                : "Conductor en el origen · Listo para iniciar";
+                        String aviso = t("control.conductor.en.el.origen");
                         mapaWeb.getEngine().executeScript(
                                 "if (window.fijarAviso) window.fijarAviso(" + formatearTextoJs(aviso) + ");"
                         );
@@ -458,8 +458,22 @@ public final class UberController {
 
     private void prepararSolicitud() {
         cargarFiltros();
-        origenLugar.getItems().setAll(lugares);
-        destinoLugar.getItems().setAll(lugares);
+        if (selectorCiudad != null) {
+            selectorCiudad.getItems().setAll(FabricaGraphHopper.getCiudadesDisponibles());
+            selectorCiudad.setValue(FabricaGraphHopper.getCiudadActiva());
+            selectorCiudad.valueProperty().addListener((o, a, nuevo) -> {
+                if (nuevo != null && !nuevo.equalsIgnoreCase(FabricaGraphHopper.getCiudadActiva())) {
+                    app.cambiarCiudad(nuevo);
+                    List<Lugar> nuevosLugares = lugaresTraducidos();
+                    origenLugar.getItems().setAll(nuevosLugares);
+                    destinoLugar.getItems().setAll(nuevosLugares);
+                    limpiar();
+                }
+            });
+        }
+        List<Lugar> actuales = lugaresTraducidos();
+        origenLugar.getItems().setAll(actuales);
+        destinoLugar.getItems().setAll(actuales);
         cambiarModo();
         btnConfirmar.setDisable(true);
         opciones.getSelectionModel().selectedItemProperty().addListener((o,a,b)->btnConfirmar.setDisable(b == null));
@@ -645,19 +659,61 @@ public final class UberController {
     }
 
     private void prepararPanel() {
-        categoriaMinima.getItems().setAll(CategoriaVehiculo.values());
+        if (categoriaMinima != null) {
+            categoriaMinima.getItems().setAll(CategoriaVehiculo.values());
+        }
         vehiculoActivo.setConverter(new StringConverter<Vehiculo>() {
             public String toString(Vehiculo v) {
-                return v == null ? "" : v.getModelo() + " · " + v.getPatente();
+                if (v == null) return "";
+                String cat = v.getCategoriaVehiculo() != null ? app.etiqueta(v.getCategoriaVehiculo()) : "";
+                String tipo = v.getTipoVehiculo() != null ? app.etiqueta(v.getTipoVehiculo()) : "";
+                return v.getModelo() + " [" + v.getPatente() + "] · " + tipo + " " + cat;
             }
 
             public Vehiculo fromString(String x) {
                 return null;
             }
         });
-        configurarViajes(solicitudes);
+        vehiculoActivo.valueProperty().addListener((obs, anterior, actual) -> actualizarDetalleVehiculo(actual));
+        configurarSolicitudesConductor(solicitudes);
         configurarViajes(viajesConductor);
         actualizarPanel();
+    }
+
+    private void actualizarDetalleVehiculo(Vehiculo v) {
+        if (detalleVehiculoActivo != null) {
+            if (v != null) {
+                String tipo = app.etiqueta(v.getTipoVehiculo());
+                String cat = v.getCategoriaVehiculo() != null ? app.etiqueta(v.getCategoriaVehiculo()) : "";
+                detalleVehiculoActivo.setText(t("vista.tipo") + ": " + tipo + " · "
+                        + t("vista.categoria") + ": " + cat + " · "
+                        + t("vista.capacidad.de.pasajeros") + ": " + v.getCapacidadPasajeros());
+            } else {
+                detalleVehiculoActivo.setText("");
+            }
+        }
+    }
+
+    private void configurarSolicitudesConductor(ListView<Viaje> lista) {
+        celdas(lista,
+            v -> {
+                String serv = app.nombreServicio(v.getServicio());
+                String cat = v.getServicio().getCategoriaVehiculo() != null
+                        ? " [" + app.etiqueta(v.getServicio().getCategoriaVehiculo()) + "]"
+                        : "";
+                String tipo = v.getServicio().getTipoServicio() != null
+                        ? " · " + app.etiqueta(v.getServicio().getTipoServicio())
+                        : "";
+                return serv + cat + tipo;
+            },
+            v -> {
+                String cliente = t("control.cliente") + (v.getCliente() != null ? v.getCliente().getNombre() : "");
+                String fechaHora = v.getRegistroViaje() != null && !v.getRegistroViaje().isEmpty()
+                        ? fecha(v.getRegistroViaje().get(0).getFechaHora())
+                        : "";
+                return cliente + " · " + fechaHora + " · #" + v.getId().toString().substring(0, 8);
+            }
+        );
     }
 
     @FXML
@@ -666,11 +722,17 @@ public final class UberController {
             Usuario u = s().usuario();
             boolean conductor = u.getConductor() != null;
             vehiculoActivo.setDisable(!conductor || ocupado(u));
-            categoriaMinima.setDisable(!conductor || ocupado(u));
+            if (categoriaMinima != null) {
+                categoriaMinima.setDisable(!conductor || ocupado(u));
+            }
             if (conductor) {
                 vehiculoActivo.getItems().setAll(u.getConductor().getVehiculos());
-                vehiculoActivo.setValue(u.getConductor().getVehiculoActivo());
-                categoriaMinima.setValue(u.getConductor().getCategoriaVehiculoActivo());
+                Vehiculo vActivo = u.getConductor().getVehiculoActivo();
+                vehiculoActivo.setValue(vActivo);
+                actualizarDetalleVehiculo(vActivo);
+                if (categoriaMinima != null) {
+                    categoriaMinima.setValue(u.getConductor().getCategoriaVehiculoActivo());
+                }
             }
             ayudaConductor.setText(conductor ? t("control.tu.vehiculo.debe.ofrecer.el.tipo.de") : t("control.todavia.no.sos.conductor.toca.agregar.vehiculo"));
             refrescarListasConductor();
@@ -701,12 +763,15 @@ public final class UberController {
         intentar(() -> {
             exigirConductor();
             Vehiculo v = vehiculoActivo.getValue();
-            if (v == null || categoriaMinima.getValue() == null) throw new IllegalArgumentException(t("control.selecciona.vehiculo.y.categoria.minima"));
-            if (categoriaMinima.getValue().getValorNumerico() > v.getCategoriaVehiculo().getValorNumerico()) throw new IllegalArgumentException(t("control.la.categoria.minima.supera.la.del.vehiculo"));
+            if (v == null) {
+                throw new IllegalArgumentException(t("control.selecciona.un.vehiculo"));
+            }
             s().ejecutar("ACTIVO", s().correo, v.getPatente());
-            s().ejecutar("CATEGORIA", s().correo, categoriaMinima.getValue().name());
+            if (v.getCategoriaVehiculo() != null) {
+                s().ejecutar("CATEGORIA", s().correo, v.getCategoriaVehiculo().name());
+            }
             actualizarPanel();
-            mensaje.setText(t("control.vehiculo.y.categoria.actualizados"));
+            mensaje.setText(t("control.vehiculo.actualizado"));
         });
     }
 
@@ -811,8 +876,8 @@ public final class UberController {
         datosServicio.setText(app.nombreServicio(servicio) + " · " + app.etiqueta(servicio.getTipoServicio()) + " · " + app.etiqueta(servicio.getCategoriaVehiculo()) + String.format(app.locale(), t("control.2f.km.1f.min.estimados"), km, min));
         precioViaje.setText(String.format(app.locale(), t("control.2f.precio.estimado"), servicio.calcularCosto(km, min)));
         datosParticipantes.setText(t("control.cliente") + v.getCliente().getNombre() + t("control.nconductor") + (v.getConductor() == null ? t("control.pendiente.de.aceptacion") : v.getConductor().getNombre() + " · " + v.getVehiculo().getModelo() + " · " + v.getVehiculo().getPatente()));
-        visible(btnIniciar, conductor && e == EstadoViaje.ACEPTADO);
-        if (conductor && e == EstadoViaje.ACEPTADO) {
+        visible(btnIniciar, (conductor || cliente) && e == EstadoViaje.ACEPTADO);
+        if ((conductor || cliente) && e == EstadoViaje.ACEPTADO) {
             btnIniciar.setDisable(!conductorEnOrigen);
             if (!conductorEnOrigen) {
                 btnIniciar.setText(t("control.conductor.en.camino.al.origen"));
@@ -820,12 +885,12 @@ public final class UberController {
                 btnIniciar.setText(t("vista.iniciar.traslado"));
             }
         }
-        visible(btnFinalizar, conductor && e == EstadoViaje.INICIADO);
+        visible(btnFinalizar, (conductor || cliente) && e == EstadoViaje.INICIADO);
         visible(bloqueCancelar, e == EstadoViaje.SOLICITADO || e == EstadoViaje.ACEPTADO || e == EstadoViaje.INICIADO);
         kmRecorridos.setDisable(e == EstadoViaje.SOLICITADO || conductor);
         visible(bloqueCalificar, e == EstadoViaje.FINALIZADO);
         CalificacionViaje propia = cliente ? v.getCalificacionConductor() : v.getCalificacionCliente();
-        miCalificacion.setText(propia == null || propia == CalificacionViaje.NO_CALIFICADO ? t("control.todavia.no.calificaste") : t("control.tu.evaluacion.guardada") + (app.locale().getLanguage().equals("en") ? app.etiqueta(propia) : propia.name().replace('_', ' ')));
+        miCalificacion.setText(propia == null || propia == CalificacionViaje.NO_CALIFICADO ? t("control.todavia.no.calificaste") : t("control.tu.evaluacion.guardada") + app.etiqueta(propia));
         List<String> registros = v.getRegistroViaje().stream().map(r -> fecha(r.getFechaHora()) + " · " + estadoTexto(r.getEstadoViaje())).toList();
         if (!historial.getItems().equals(registros)) historial.getItems().setAll(registros);
         actualizarMapaDetalle();
@@ -983,7 +1048,11 @@ public final class UberController {
 
     private void accionViaje(String accion) {
         intentar(() -> {
-            s().ejecutar(accion, s().correo, s().viajeSeleccionado.toString());
+            Viaje v = s().viaje();
+            String correoEjecutor = (v != null && v.getConductor() != null)
+                    ? v.getConductor().getEmail()
+                    : s().correo;
+            s().ejecutar(accion, correoEjecutor, s().viajeSeleccionado.toString());
             pintarDetalle();
             mensaje.setText(t("control.estado.actualizado.y.guardado"));
         });
@@ -994,9 +1063,7 @@ public final class UberController {
         Viaje v = s().viaje();
         if (v != null && v.estadoActual() == EstadoViaje.ACEPTADO && !conductorEnOrigen) {
             if (mensaje != null) {
-                mensaje.setText(app.locale().getLanguage().equals("en")
-                        ? "The driver is still on the way to the pickup location."
-                        : "El conductor todavía está en camino al punto de origen.");
+                mensaje.setText(t("control.conductor.todavia.en.camino"));
             }
             return;
         }

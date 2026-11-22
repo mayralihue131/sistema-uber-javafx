@@ -65,7 +65,7 @@ public class BufferViajes {
             System.out.println("[BUFFER] Nuevo viaje en espera: Viaje #"
                     + viaje.getId().toString().substring(0, 8)
                     + " (" + servicioNombre + ") | Pendientes: " + colaViajes.size());
-            noVacio.signal();
+            noVacio.signalAll();
         } finally {
             lock.unlock();
         }

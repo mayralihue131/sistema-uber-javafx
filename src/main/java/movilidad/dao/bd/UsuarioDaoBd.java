@@ -26,10 +26,14 @@ public class UsuarioDaoBd implements UsuarioDAO {
         List<UsuarioDTO> lista = new ArrayList<>();
 
         String sql = """
-                SELECT u.nombre, u.telefono, u.email, u.licencia_conducir, MIN(cv.patente) AS patente_activo
+                SELECT u.nombre, u.telefono, u.email, u.licencia_conducir,
+                       (SELECT cv.patente
+                        FROM conductor_vehiculo cv
+                        JOIN vehiculo v ON v.patente = cv.patente
+                        WHERE cv.email = u.email
+                        ORDER BY v.tipo_vehiculo ASC, v.categoria_vehiculo DESC, cv.patente ASC
+                        LIMIT 1) AS patente_activo
                 FROM usuario u
-                LEFT JOIN conductor_vehiculo cv ON cv.email = u.email
-                GROUP BY u.nombre, u.telefono, u.email, u.licencia_conducir
                 ORDER BY u.nombre
                 """;
 

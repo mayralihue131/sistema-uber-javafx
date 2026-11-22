@@ -8,6 +8,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -21,28 +22,135 @@ import com.graphhopper.util.GHUtility;
  *
  * <p>Carga la cartografía local OpenStreetMap (archivo {@code .osm}), configura los perfiles
  * de vehículo para automóvil ({@code car}) y motocicleta ({@code motorcycle}), y genera o
- * recupera la caché de ruteo en disco.
+ * recupera la caché de ruteo en disco según la ciudad seleccionada.
  */
 public final class FabricaGraphHopper {
 
+    private static final List<String> CIUDADES_DISPONIBLES = List.of("Puerto Madryn", "Trelew");
+
+    private static String ciudadActiva;
     private static Properties parametrosMapa;
 
     private FabricaGraphHopper() {
     }
 
-    public static synchronized String parametroMapa(String clave) {
-        if (parametrosMapa == null) {
-            String ciudad = cargar("/config/mapas.properties")
-                    .getProperty("ciudad", "Puerto Madryn").trim().toLowerCase(Locale.ROOT);
-            String perfil = switch (ciudad) {
-                case "puerto madryn", "madryn" -> "/config/madryn.properties";
-                case "trelew" -> "/config/trelew.properties";
-                default -> throw new IllegalStateException(
-                        "En mapas.properties elegí ciudad=Puerto Madryn o ciudad=Trelew.");
-            };
-            parametrosMapa = cargar(perfil);
+    /**
+     * Retorna la lista inmutable de nombres de ciudades disponibles para su selección,
+     * leída dinámicamente de {@code /config/mapa.properties} o con fallback a las predeterminadas.
+     */
+    public static List<String> getCiudadesDisponibles() {
+        Properties config = cargarOpcional("/config/mapa.properties");
+        if (config != null) {
+            String lista = config.getProperty("ciudades");
+            if (lista != null && !lista.isBlank()) {
+                List<String> items = new java.util.ArrayList<>();
+                for (String c : lista.split(",")) {
+                    String limpia = c.trim();
+                    if (!limpia.isEmpty()) {
+                        items.add(limpia);
+                    }
+                }
+                if (!items.isEmpty()) {
+                    return List.copyOf(items);
+                }
+            }
         }
+        return List.of("Puerto Madryn", "Trelew");
+    }
+
+    /**
+     * Retorna el nombre canónico de la ciudad actualmente activa.
+     */
+    public static synchronized String getCiudadActiva() {
+        asegurarCargado();
+        return ciudadActiva;
+    }
+
+    /**
+     * Establece dinámicamente la ciudad activa, recargando sus parámetros cartográficos.
+     *
+     * @param ciudad nombre de la ciudad (por ej. "Puerto Madryn" o "Trelew")
+     */
+    public static synchronized void setCiudadActiva(String ciudad) {
+        if (ciudad == null || ciudad.isBlank()) {
+            throw new IllegalArgumentException("El nombre de la ciudad no puede ser vacío.");
+        }
+        String normalizada = ciudad.trim();
+        String perfil = resolverPerfil(normalizada);
+        parametrosMapa = cargar(perfil);
+        ciudadActiva = parametrosMapa.getProperty("nombre", normalizada);
+    }
+
+    /**
+     * Reinicia el estado interno en memoria para volver a leer desde archivo de configuración.
+     */
+    public static synchronized void reiniciar() {
+        ciudadActiva = null;
+        parametrosMapa = null;
+    }
+
+    public static synchronized String parametroMapa(String clave) {
+        asegurarCargado();
         return parametrosMapa.getProperty(clave, "");
+    }
+
+    private static void asegurarCargado() {
+        if (parametrosMapa == null) {
+            String ciudad = (ciudadActiva != null && !ciudadActiva.isBlank())
+                    ? ciudadActiva
+                    : resolverCiudadInicial();
+            setCiudadActiva(ciudad);
+        }
+    }
+
+    /**
+     * Determina la ciudad inicial leyendo {@code /config/mapa.properties}
+     * (con valor por defecto "Puerto Madryn").
+     */
+    private static String resolverCiudadInicial() {
+        Properties config = cargarOpcional("/config/mapa.properties");
+        if (config != null && config.getProperty("ciudad") != null && !config.getProperty("ciudad").isBlank()) {
+            return config.getProperty("ciudad").trim();
+        }
+        return "Puerto Madryn";
+    }
+
+    private static String resolverPerfil(String ciudad) {
+        String normalizada = ciudad.trim().toLowerCase(Locale.ROOT);
+        String claveProp = normalizada.replace(" ", "_");
+
+        // 1. Probar mapeo explícito en mapa.properties (ej. perfil.puerto_madryn=/config/madryn.properties)
+        Properties config = cargarOpcional("/config/mapa.properties");
+        if (config != null) {
+            String perfilMapeado = config.getProperty("perfil." + claveProp);
+            if (perfilMapeado == null || perfilMapeado.isBlank()) {
+                perfilMapeado = config.getProperty("perfil." + normalizada);
+            }
+            if (perfilMapeado != null && !perfilMapeado.isBlank()) {
+                return perfilMapeado.trim();
+            }
+        }
+
+        // 2. Mapeos tradicionales conocidos
+        if (normalizada.equals("puerto madryn") || normalizada.equals("madryn")) {
+            return "/config/madryn.properties";
+        }
+        if (normalizada.equals("trelew")) {
+            return "/config/trelew.properties";
+        }
+
+        // 3. Probar si existe directamente /config/<slug>.properties
+        String rutaDirecta = "/config/" + claveProp + ".properties";
+        try (InputStream in = FabricaGraphHopper.class.getResourceAsStream(rutaDirecta)) {
+            if (in != null) {
+                return rutaDirecta;
+            }
+        } catch (Exception ignored) {
+        }
+
+        throw new IllegalStateException(
+                "Ciudad no reconocida: '" + ciudad + "'. Verificá que exista en src/main/resources/config/ "
+                        + "o esté configurada en mapa.properties. Opciones: " + getCiudadesDisponibles());
     }
 
     public static PuntoRuta centroMapa() {
@@ -65,7 +173,7 @@ public final class FabricaGraphHopper {
                 && longitud >= zona[1] && longitud <= zona[3];
     }
 
-    static double[] zonaConductores() {
+    public static double[] zonaConductores() {
         String clave = parametroMapa("conductores").isEmpty() ? "limites" : "conductores";
         return limites(clave);
     }
@@ -99,6 +207,19 @@ public final class FabricaGraphHopper {
             throw new IllegalStateException("Falta '" + clave + "' para la ciudad activa en el archivo de la ciudad");
         }
         return valor;
+    }
+
+    private static Properties cargarOpcional(String ruta) {
+        try (InputStream entrada = FabricaGraphHopper.class.getResourceAsStream(ruta)) {
+            if (entrada == null) {
+                return null;
+            }
+            Properties propiedades = new Properties();
+            propiedades.load(new InputStreamReader(entrada, StandardCharsets.UTF_8));
+            return propiedades;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private static Properties cargar(String ruta) {

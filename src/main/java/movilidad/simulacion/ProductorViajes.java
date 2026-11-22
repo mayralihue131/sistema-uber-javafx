@@ -23,6 +23,7 @@ public class ProductorViajes implements Runnable {
     private final BufferViajes buffer;
     private final int maxViajesAGenerar;
     private final int intervaloMs;
+    private final List<Usuario> conductoresActivos;
     private final Random random;
 
     /**
@@ -35,12 +36,20 @@ public class ProductorViajes implements Runnable {
      * @throws IllegalArgumentException si el sistema o el búfer son nulos
      */
     public ProductorViajes(MovilidadDigital sistema, BufferViajes buffer, int maxViajesAGenerar, int intervaloMs) {
+        this(sistema, buffer, maxViajesAGenerar, intervaloMs, null);
+    }
+
+    /**
+     * Construye un nuevo productor de solicitudes asociado a los conductores activos de la simulación.
+     */
+    public ProductorViajes(MovilidadDigital sistema, BufferViajes buffer, int maxViajesAGenerar, int intervaloMs, List<Usuario> conductoresActivos) {
         if (sistema == null) throw new IllegalArgumentException("El sistema no puede ser nulo.");
         if (buffer == null) throw new IllegalArgumentException("El buffer no puede ser nulo.");
         this.sistema = sistema;
         this.buffer = buffer;
         this.maxViajesAGenerar = maxViajesAGenerar;
         this.intervaloMs = intervaloMs;
+        this.conductoresActivos = (conductoresActivos != null) ? List.copyOf(conductoresActivos) : null;
         this.random = new Random();
     }
 
@@ -82,8 +91,15 @@ public class ProductorViajes implements Runnable {
             return clientes.get(random.nextInt(clientes.size()));
         }
 
-        // Si todos los clientes están en viaje, se crea un nuevo cliente para la simulación
-        Usuario nuevo = new Usuario("Pasajero Sim " + indice, "+54911000" + indice, "pasajero" + indice + "@sim.com");
+        // Si todos los clientes están en viaje, se crea un nuevo cliente asegurando email único
+        long ts = System.currentTimeMillis();
+        String email = "pasajero_sim_" + ts + "_" + indice + "@sim.com";
+        while (sistema.buscarUsuarioPorMail(email) != null) {
+            ts++;
+            email = "pasajero_sim_" + ts + "_" + indice + "@sim.com";
+        }
+
+        Usuario nuevo = new Usuario("Pasajero Sim " + indice, "+54911000" + indice, email);
         sistema.agregarUsuario(nuevo);
         return nuevo;
     }
@@ -93,7 +109,28 @@ public class ProductorViajes implements Runnable {
         if (servicios.isEmpty()) {
             throw new IllegalStateException("No hay servicios configurados en el sistema.");
         }
-        return servicios.get(random.nextInt(servicios.size()));
+
+        // Filtrar a servicios que puedan ser atendidos por conductores activos en la simulación
+        List<Usuario> poolConductores = (conductoresActivos != null && !conductoresActivos.isEmpty())
+                ? conductoresActivos
+                : sistema.getUsuarios().stream()
+                        .filter(u -> u.getConductor() != null && u.getConductor().getEstadoConductor() == movilidad.modelo.EstadoConductor.DISPONIBLE)
+                        .toList();
+
+        List<Servicio> viables = servicios.stream()
+                .filter(s -> poolConductores.stream().anyMatch(u -> {
+                    movilidad.modelo.Conductor c = u.getConductor();
+                    if (c == null || c.getVehiculoActivo() == null) return false;
+                    movilidad.modelo.Vehiculo v = c.getVehiculoActivo();
+                    return v.getTipoVehiculo() == s.getTipoVehiculo()
+                            && v.getTipoServicios().contains(s.getTipoServicio())
+                            && v.getCategoriaVehiculo() != null
+                            && v.getCategoriaVehiculo().getValorNumerico() >= s.getCategoriaVehiculo().getValorNumerico();
+                }))
+                .toList();
+
+        List<Servicio> seleccionables = viables.isEmpty() ? servicios : viables;
+        return seleccionables.get(random.nextInt(seleccionables.size()));
     }
 
     private Ubicacion generarUbicacionAleatoria() {

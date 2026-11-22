@@ -39,6 +39,12 @@
 
             <HBox spacing="12">
                 <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="0">
+                    <Label text="%vista.ciudad"/>
+                    <ComboBox fx:id="selectorCiudad" maxWidth="Infinity"
+                              promptText="%vista.selecciona.ciudad"/>
+                </VBox>
+
+                <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="0">
                     <Label text="%vista.tipo.de.servicio"/>
                     <ComboBox fx:id="tipoServicio" maxWidth="Infinity"
                               promptText="%vista.pasajeros.o.envios"/>
@@ -47,7 +53,7 @@
                 <VBox spacing="4" HBox.hgrow="ALWAYS" minWidth="0">
                     <Label text="%vista.categoria"/>
                     <ComboBox fx:id="categoria" maxWidth="Infinity"
-                              promptText="%vista.elegi.una.categoria"/>
+                              promptText="%vista.todas.las.categorias"/>
                 </VBox>
             </HBox>
 

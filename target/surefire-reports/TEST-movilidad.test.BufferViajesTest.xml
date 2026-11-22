@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="movilidad.test.BufferViajesTest" time="4.135" tests="10" errors="0" skipped="0" failures="0">
+  <properties>
+    <property name="java.specification.version" value="21"/>
+    <property name="sun.cpu.isalist" value="amd64"/>
+    <property name="sun.jnu.encoding" value="Cp1252"/>
+    <property name="java.class.path" value="G:\Universidad\2026\POO\ISFPP\sistema-uber-javafx\target\test-classes;G:\Universidad\2026\POO\ISFPP\sistema-uber-javafx\target\classes;C:\Users\crist\.m2\repository\com\graphhopper\graphhopper-core\9.1\graphhopper-core-9.1.jar;C:\Users\crist\.m2\repository\com\graphhopper\graphhopper-web-api\9.1\graphhopper-web-api-9.1.jar;C:\Users\crist\.m2\repository\com\carrotsearch\hppc\0.8.1\hppc-0.8.1.jar;C:\Users\crist\.m2\repository\org\codehaus\janino\janino\3.1.9\janino-3.1.9.jar;C:\Users\crist\.m2\repository\org\codehaus\janino\commons-compiler\3.1.9\commons-compiler-3.1.9.jar;C:\Users\crist\.m2\repository\org\locationtech\jts\jts-core\1.19.0\jts-core-1.19.0.jar;C:\Users\crist\.m2\repository\com\fasterxml\jackson\core\jackson-core\2.13.5\jackson-core-2.13.5.jar;C:\Users\crist\.m2\repository\com\fasterxml\jackson\core\jackson-databind\2.13.5\jackson-databind-2.13.5.jar;C:\Users\crist\.m2\repository\com\fasterxml\jackson\core\jackson-annotations\2.13.5\jackson-annotations-2.13.5.jar;C:\Users\crist\.m2\repository\com\graphhopper\external\jackson-datatype-jts\2.14\jackson-datatype-jts-2.14.jar;C:\Users\crist\.m2\repository\com\fasterxml\jackson\dataformat\jackson-dataformat-xml\2.13.5\jackson-dataformat-xml-2.13.5.jar;C:\Users\crist\.m2\repository\org\codehaus\woodstox\stax2-api\4.2.1\stax2-api-4.2.1.jar;C:\Users\crist\.m2\repository\com\fasterxml\woodstox\woodstox-core\6.4.0\woodstox-core-6.4.0.jar;C:\Users\crist\.m2\repository\org\apache\xmlgraphics\xmlgraphics-commons\2.7\xmlgraphics-commons-2.7.jar;C:\Users\crist\.m2\repository\commons-io\commons-io\1.3.1\commons-io-1.3.1.jar;C:\Users\crist\.m2\repository\de\westnordost\osm-legal-default-speeds-jvm\1.4\osm-legal-default-speeds-jvm-1.4.jar;C:\Users\crist\.m2\repository\org\jetbrains\kotlin\kotlin-stdlib\1.6.20\kotlin-stdlib-1.6.20.jar;C:\Users\crist\.m2\repository\org\jetbrains\kotlin\kotlin-stdlib-common\1.6.20\kotlin-stdlib-common-1.6.20.jar;C:\Users\crist\.m2\repository\org\jetbrains\annotations\13.0\annotations-13.0.jar;C:\Users\crist\.m2\repository\org\openstreetmap\osmosis\osmosis-osm-binary\0.48.3\osmosis-osm-binary-0.48.3.jar;C:\Users\crist\.m2\repository\com\google\protobuf\protobuf-java\3.12.2\protobuf-java-3.12.2.jar;C:\Users\crist\.m2\repository\org\slf4j\slf4j-api\1.7.36\slf4j-api-1.7.36.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-web\21.0.12\javafx-web-21.0.12.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-web\21.0.12\javafx-web-21.0.12-win.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-media\21.0.12\javafx-media-21.0.12.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-media\21.0.12\javafx-media-21.0.12-win.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-controls\21.0.12\javafx-controls-21.0.12.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-controls\21.0.12\javafx-controls-21.0.12-win.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-graphics\21.0.12\javafx-graphics-21.0.12.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-graphics\21.0.12\javafx-graphics-21.0.12-win.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-base\21.0.12\javafx-base-21.0.12.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-base\21.0.12\javafx-base-21.0.12-win.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-fxml\21.0.12\javafx-fxml-21.0.12.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-fxml\21.0.12\javafx-fxml-21.0.12-win.jar;C:\Users\crist\.m2\repository\org\junit\jupiter\junit-jupiter\5.11.4\junit-jupiter-5.11.4.jar;C:\Users\crist\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.11.4\junit-jupiter-api-5.11.4.jar;C:\Users\crist\.m2\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;C:\Users\crist\.m2\repository\org\junit\platform\junit-platform-commons\1.11.4\junit-platform-commons-1.11.4.jar;C:\Users\crist\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\crist\.m2\repository\org\junit\jupiter\junit-jupiter-params\5.11.4\junit-jupiter-params-5.11.4.jar;C:\Users\crist\.m2\repository\org\junit\jupiter\junit-jupiter-engine\5.11.4\junit-jupiter-engine-5.11.4.jar;C:\Users\crist\.m2\repository\org\junit\platform\junit-platform-engine\1.11.4\junit-platform-engine-1.11.4.jar;C:\Users\crist\.m2\repository\org\postgresql\postgresql\42.7.3\postgresql-42.7.3.jar;C:\Users\crist\.m2\repository\org\checkerframework\checker-qual\3.42.0\checker-qual-3.42.0.jar;"/>
+    <property name="java.vm.vendor" value="Eclipse Adoptium"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="user.variant" value=""/>
+    <property name="java.vendor.url" value="https://adoptium.net/"/>
+    <property name="user.timezone" value="America/Buenos_Aires"/>
+    <property name="os.name" value="Windows 11"/>
+    <property name="java.vm.specification.version" value="21"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="US"/>
+    <property name="sun.boot.library.path" value="C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin"/>
+    <property name="sun.java.command" value="C:\Users\crist\AppData\Local\Temp\surefire17206583683779633622\surefirebooter-20261122000335162_3.jar C:\Users\crist\AppData\Local\Temp\surefire17206583683779633622 2026-11-22T00-03-35_023-jvmRun1 surefire-20261122000335162_1tmp surefire_0-20261122000335162_2tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="surefire.test.class.path" value="G:\Universidad\2026\POO\ISFPP\sistema-uber-javafx\target\test-classes;G:\Universidad\2026\POO\ISFPP\sistema-uber-javafx\target\classes;C:\Users\crist\.m2\repository\com\graphhopper\graphhopper-core\9.1\graphhopper-core-9.1.jar;C:\Users\crist\.m2\repository\com\graphhopper\graphhopper-web-api\9.1\graphhopper-web-api-9.1.jar;C:\Users\crist\.m2\repository\com\carrotsearch\hppc\0.8.1\hppc-0.8.1.jar;C:\Users\crist\.m2\repository\org\codehaus\janino\janino\3.1.9\janino-3.1.9.jar;C:\Users\crist\.m2\repository\org\codehaus\janino\commons-compiler\3.1.9\commons-compiler-3.1.9.jar;C:\Users\crist\.m2\repository\org\locationtech\jts\jts-core\1.19.0\jts-core-1.19.0.jar;C:\Users\crist\.m2\repository\com\fasterxml\jackson\core\jackson-core\2.13.5\jackson-core-2.13.5.jar;C:\Users\crist\.m2\repository\com\fasterxml\jackson\core\jackson-databind\2.13.5\jackson-databind-2.13.5.jar;C:\Users\crist\.m2\repository\com\fasterxml\jackson\core\jackson-annotations\2.13.5\jackson-annotations-2.13.5.jar;C:\Users\crist\.m2\repository\com\graphhopper\external\jackson-datatype-jts\2.14\jackson-datatype-jts-2.14.jar;C:\Users\crist\.m2\repository\com\fasterxml\jackson\dataformat\jackson-dataformat-xml\2.13.5\jackson-dataformat-xml-2.13.5.jar;C:\Users\crist\.m2\repository\org\codehaus\woodstox\stax2-api\4.2.1\stax2-api-4.2.1.jar;C:\Users\crist\.m2\repository\com\fasterxml\woodstox\woodstox-core\6.4.0\woodstox-core-6.4.0.jar;C:\Users\crist\.m2\repository\org\apache\xmlgraphics\xmlgraphics-commons\2.7\xmlgraphics-commons-2.7.jar;C:\Users\crist\.m2\repository\commons-io\commons-io\1.3.1\commons-io-1.3.1.jar;C:\Users\crist\.m2\repository\de\westnordost\osm-legal-default-speeds-jvm\1.4\osm-legal-default-speeds-jvm-1.4.jar;C:\Users\crist\.m2\repository\org\jetbrains\kotlin\kotlin-stdlib\1.6.20\kotlin-stdlib-1.6.20.jar;C:\Users\crist\.m2\repository\org\jetbrains\kotlin\kotlin-stdlib-common\1.6.20\kotlin-stdlib-common-1.6.20.jar;C:\Users\crist\.m2\repository\org\jetbrains\annotations\13.0\annotations-13.0.jar;C:\Users\crist\.m2\repository\org\openstreetmap\osmosis\osmosis-osm-binary\0.48.3\osmosis-osm-binary-0.48.3.jar;C:\Users\crist\.m2\repository\com\google\protobuf\protobuf-java\3.12.2\protobuf-java-3.12.2.jar;C:\Users\crist\.m2\repository\org\slf4j\slf4j-api\1.7.36\slf4j-api-1.7.36.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-web\21.0.12\javafx-web-21.0.12.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-web\21.0.12\javafx-web-21.0.12-win.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-media\21.0.12\javafx-media-21.0.12.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-media\21.0.12\javafx-media-21.0.12-win.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-controls\21.0.12\javafx-controls-21.0.12.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-controls\21.0.12\javafx-controls-21.0.12-win.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-graphics\21.0.12\javafx-graphics-21.0.12.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-graphics\21.0.12\javafx-graphics-21.0.12-win.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-base\21.0.12\javafx-base-21.0.12.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-base\21.0.12\javafx-base-21.0.12-win.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-fxml\21.0.12\javafx-fxml-21.0.12.jar;C:\Users\crist\.m2\repository\org\openjfx\javafx-fxml\21.0.12\javafx-fxml-21.0.12-win.jar;C:\Users\crist\.m2\repository\org\junit\jupiter\junit-jupiter\5.11.4\junit-jupiter-5.11.4.jar;C:\Users\crist\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.11.4\junit-jupiter-api-5.11.4.jar;C:\Users\crist\.m2\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;C:\Users\crist\.m2\repository\org\junit\platform\junit-platform-commons\1.11.4\junit-platform-commons-1.11.4.jar;C:\Users\crist\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\crist\.m2\repository\org\junit\jupiter\junit-jupiter-params\5.11.4\junit-jupiter-params-5.11.4.jar;C:\Users\crist\.m2\repository\org\junit\jupiter\junit-jupiter-engine\5.11.4\junit-jupiter-engine-5.11.4.jar;C:\Users\crist\.m2\repository\org\junit\platform\junit-platform-engine\1.11.4\junit-platform-engine-1.11.4.jar;C:\Users\crist\.m2\repository\org\postgresql\postgresql\42.7.3\postgresql-42.7.3.jar;C:\Users\crist\.m2\repository\org\checkerframework\checker-qual\3.42.0\checker-qual-3.42.0.jar;"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="C:\Users\crist"/>
+    <property name="user.language" value="en"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2026-08-18"/>
+    <property name="java.home" value="C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot"/>
+    <property name="file.separator" value="\"/>
+    <property name="basedir" value="G:\Universidad\2026\POO\ISFPP\sistema-uber-javafx"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="surefire.real.class.path" value="C:\Users\crist\AppData\Local\Temp\surefire17206583683779633622\surefirebooter-20261122000335162_3.jar"/>
+    <property name="user.script" value=""/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="java.runtime.version" value="21.0.12.1+1-LTS"/>
+    <property name="user.name" value="crist"/>
+    <property name="stdout.encoding" value="Cp1252"/>
+    <property name="path.separator" value=";"/>
+    <property name="os.version" value="10.0"/>
+    <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
+    <property name="java.vendor.version" value="Temurin-21.0.12.1+1"/>
+    <property name="localRepository" value="C:\Users\crist\.m2\repository"/>
+    <property name="java.vendor.url.bug" value="https://github.com/adoptium/adoptium-support/issues"/>
+    <property name="java.io.tmpdir" value="C:\Users\crist\AppData\Local\Temp\"/>
+    <property name="java.version" value="21.0.12.1"/>
+    <property name="user.dir" value="G:\Universidad\2026\POO\ISFPP\sistema-uber-javafx"/>
+    <property name="os.arch" value="amd64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="sun.os.patch.level" value=""/>
+    <property name="native.encoding" value="Cp1252"/>
+    <property name="java.library.path" value="C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\Users\crist\AppData\Local\Temp\maven\apache-maven-3.9.6\bin;C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin;C:/Users/crist/.gemini/antigravity/bin;C:\Program Files\Eclipse Adoptium\jdk-21.0.12.101-hotspot\bin;C:\Program Files (x86)\Razer Chroma SDK\bin;C:\Program Files\Razer Chroma SDK\bin;C:\Program Files (x86)\Razer\ChromaBroadcast\bin;C:\Program Files\Razer\ChromaBroadcast\bin;C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\intel64\compiler;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\NVIDIA Corporation\NVIDIA app\NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Windows\system32\config\systemprofile\AppData\Local\Microsoft\WindowsApps;C:\Users\crist\AppData\Local\Microsoft\WindowsApps;C:\Users\crist\AppData\Local\Programs\Microsoft VS Code\bin;C:\Program Files\dotnet\;C:\Program Files (x86)\dotnet\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Git\cmd;C:\Program Files\nodejs\;C:\Users\crist\.cargo\bin;C:\Users\crist\AppData\Local\Microsoft\WindowsApps;C:\Users\crist\AppData\Local\Programs\Microsoft VS Code\bin;C:\msys64\ucrt64\bin;C:\msys64\mingw64\bin;C:\msys64\ucrt64\bin;C:\Users\crist\AppData\Local\Programs\Antigravity IDE\bin;C:\Users\crist\AppData\Local\Programs\Microsoft VS Code\bin\copilot-shim;C:\Users\crist\AppData\Roaming\npm;."/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="stderr.encoding" value="Cp1252"/>
+    <property name="java.vendor" value="Eclipse Adoptium"/>
+    <property name="java.vm.version" value="21.0.12.1+1-LTS"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="java.class.version" value="65.0"/>
+  </properties>
+  <testcase name="testSolicitarMotoApareceEnPerfilConductorConBD" classname="movilidad.test.BufferViajesTest" time="0.271">
+    <system-out><![CDATA[[DATOS] Origen activo: BdDAOFactory
+[DATOS] Datos cargados desde PostgreSQL.
+]]></system-out>
+  </testcase>
+  <testcase name="testConfiguracionSimulador" classname="movilidad.test.BufferViajesTest" time="0.055">
+    <system-out><![CDATA[[DATOS] Origen activo: BdDAOFactory
+[DATOS] Datos cargados desde PostgreSQL.
+]]></system-out>
+  </testcase>
+  <testcase name="testSolicitarMotoApareceEnPerfilConductor" classname="movilidad.test.BufferViajesTest" time="0.001"/>
+  <testcase name="testLimpiarTestRowsEnBD" classname="movilidad.test.BufferViajesTest" time="0.014">
+    <system-out><![CDATA[=== CONDUCTOR_VEHICULO EN BD ===
+CV: alicia.garcia@email.com -> AI567RS
+CV: ana.martinez@email.com -> AA321QW
+CV: ana.martinez@email.com -> AB456DE
+CV: cristian@email.com -> A0011
+CV: cristian@email.com -> AB000
+CV: cristian@email.com -> AB004
+CV: dibu@email.com -> CO2022PA
+CV: diego.sanchez@email.com -> AC789FG
+CV: gabriela.flores@email.com -> AF678LM
+CV: gonzalo.perez@email.com -> 012JKL
+CV: gonzalo.perez@email.com -> 345MNO
+CV: juan.perez@email.com -> 123ABC
+CV: juan.perez@email.com -> AD012HI
+CV: juan.perez@email.com -> AD123BC
+CV: manuel.rios@email.com -> 789GHI
+CV: mayralihue131@gmail.com -> AB001
+CV: mayralihue131@gmail.com -> AB2313X
+CV: mayralihue131@gmail.com -> AF001
+CV: mayralihue131@gmail.com -> AF9192
+CV: paula.vazquez@email.com -> 456DEF
+CV: resek@gmail.com -> AF001-X
+CV: ricardo.silva@email.com -> AE345JK
+CV: ricardo.silva@email.com -> AJ890TU
+CV: victoria.martinez@email.com -> AG901NO
+CV: victoria.martinez@email.com -> AH234PQ
+CV: yamil@email.com -> AI567RT
+]]></system-out>
+  </testcase>
+  <testcase name="testSimulacionHoraPicoAltaDemanda" classname="movilidad.test.BufferViajesTest" time="3.23">
+    <system-out><![CDATA[[DATOS] Origen activo: BdDAOFactory
+[DATOS] Datos cargados desde PostgreSQL.
+=== INICIANDO SIMULACIÓN UBER (CON MODELO REAL) ===
+Parámetros: Duración=3s | Conductores Requeridos=2 | Max Viajes=10 | Búfer=3 | Cadencia=60ms
+
+=======================================================
+=== PASO 1: CARGA DE CONDUCTORES DISPONIBLES       ===
+=======================================================
+Total de conductores disponibles cargados: 2
+ [1] Alicia Garcia        | Lic: B1-D1      | Vehículo: Nissan Versa    [AI567RS] AUTO/PREMIUM  | Estado: DISPONIBLE
+ [2] Gonzalo Perez        | Lic: B1-A13     | Vehículo: Zanella Custom  [012JKL ] MOTO/ESTANDAR | Estado: DISPONIBLE
+=======================================================
+
+=== PASO 2: CONECTANDO CONDUCTORES AL MONITOR DE VIAJES ===
+Conductores en línea y atentos a solicitudes en el búfer.
+
+=== PASO 3: INICIANDO PRODUCTOR DE SOLICITUDES ===
+[BUFFER] Nuevo viaje en espera: Viaje #295c54dd (Premium) | Pendientes: 1
+[CONDUCTOR - Alicia Garcia] Aceptó: Viaje #295c54dd (Premium)
+[BUFFER] Nuevo viaje en espera: Viaje #73a6cb91 (Mototaxi) | Pendientes: 1
+[CONDUCTOR - Gonzalo Perez] Aceptó: Viaje #73a6cb91 (Mototaxi)
+[BUFFER] Nuevo viaje en espera: Viaje #93ddbe9e (Premium) | Pendientes: 1
+[CONDUCTOR - Gonzalo Perez] Iniciado traslado de: Carlos Rodriguez
+[BUFFER] Nuevo viaje en espera: Viaje #78922a01 (Premium) | Pendientes: 2
+[CONDUCTOR - Alicia Garcia] Iniciado traslado de: Martin Morales
+[BUFFER] Nuevo viaje en espera: Viaje #04d08a9d (Mototaxi) | Pendientes: 3
+[CONDUCTOR - Alicia Garcia] Completó: Viaje #295c54dd | Total chofer: 1
+[CONDUCTOR - Alicia Garcia] Aceptó: Viaje #93ddbe9e (Premium)
+[BUFFER] Nuevo viaje en espera: Viaje #6c74559f (Estandar) | Pendientes: 3
+[CONDUCTOR - Gonzalo Perez] Completó: Viaje #73a6cb91 | Total chofer: 1
+[CONDUCTOR - Gonzalo Perez] Aceptó: Viaje #04d08a9d (Mototaxi)
+[BUFFER] Nuevo viaje en espera: Viaje #24a240a4 (Mototaxi) | Pendientes: 3
+[CONDUCTOR - Gonzalo Perez] Iniciado traslado de: Andres Romero
+[CONDUCTOR - Alicia Garcia] Iniciado traslado de: Federico Fernandez
+[CONDUCTOR - Gonzalo Perez] Completó: Viaje #04d08a9d | Total chofer: 2
+[CONDUCTOR - Gonzalo Perez] Aceptó: Viaje #24a240a4 (Mototaxi)
+[BUFFER] Nuevo viaje en espera: Viaje #9b208195 (Premium) | Pendientes: 3
+[CONDUCTOR - Alicia Garcia] Completó: Viaje #93ddbe9e | Total chofer: 2
+[BUFFER] Nuevo viaje en espera: Viaje #acf4ab8f (Confort) | Pendientes: 3
+[CONDUCTOR - Alicia Garcia] Aceptó: Viaje #78922a01 (Premium)
+[CONDUCTOR - Alicia Garcia] Iniciado traslado de: Mateo Romero
+[CONDUCTOR - Gonzalo Perez] Iniciado traslado de: Sara Diaz
+[CONDUCTOR - Gonzalo Perez] Completó: Viaje #24a240a4 | Total chofer: 3
+[CONDUCTOR - Alicia Garcia] Completó: Viaje #78922a01 | Total chofer: 3
+[BUFFER] Nuevo viaje en espera: Viaje #a8dbcadc (Premium) | Pendientes: 3
+[CONDUCTOR - Alicia Garcia] Aceptó: Viaje #6c74559f (Estandar)
+[PRODUCTOR] Finalizó la generación de viajes.
+[CONDUCTOR - Alicia Garcia] Iniciado traslado de: Daniela Gomez
+[CONDUCTOR - Alicia Garcia] Completó: Viaje #6c74559f | Total chofer: 4
+[CONDUCTOR - Alicia Garcia] Aceptó: Viaje #9b208195 (Premium)
+[CONDUCTOR - Alicia Garcia] Iniciado traslado de: Joaquin Castro
+[CONDUCTOR - Alicia Garcia] Completó: Viaje #9b208195 | Total chofer: 5
+[CONDUCTOR - Alicia Garcia] Aceptó: Viaje #acf4ab8f (Confort)
+[CONDUCTOR - Alicia Garcia] Iniciado traslado de: Lucia Garcia
+[CONDUCTOR - Alicia Garcia] Completó: Viaje #acf4ab8f | Total chofer: 6
+[CONDUCTOR - Alicia Garcia] Aceptó: Viaje #a8dbcadc (Premium)
+[CONDUCTOR - Alicia Garcia] Iniciado traslado de: Laura Gonzalez
+[CONDUCTOR - Alicia Garcia] Completó: Viaje #a8dbcadc | Total chofer: 7
+
+=== TIEMPO CUMPLIDO: DETENIENDO SIMULACIÓN ===
+[CONDUCTOR - Gonzalo Perez] Desconectado.
+[CONDUCTOR - Alicia Garcia] Desconectado.
+
+=======================================================
+=== RESUMEN Y ESTADÍSTICAS DE LA SIMULACIÓN         ===
+=======================================================
+ - Conductor Alicia Garcia         : 7 viajes completados
+ - Conductor Gonzalo Perez         : 3 viajes completados
+-------------------------------------------------------
+Total de viajes atendidos y completados : 10
+Viajes remanentes en cola del búfer     : 0
+=======================================================
+
+]]></system-out>
+  </testcase>
+  <testcase name="testCargarConductoresDisponiblesPrimero" classname="movilidad.test.BufferViajesTest" time="0.005">
+    <system-out><![CDATA[
+=======================================================
+=== PASO 1: CARGA DE CONDUCTORES DISPONIBLES       ===
+=======================================================
+Total de conductores disponibles cargados: 3
+ [1] Chofer Base          | Lic: B1         | Vehículo: Cruze           [BASE01 ] AUTO/ESTANDAR | Estado: DISPONIBLE
+ [2] Conductor Auxiliar 1 | Lic: B1-D1      | Vehículo: Fiat Cronos 1.3 [AUX117 ] AUTO/PREMIUM  | Estado: DISPONIBLE
+ [3] Conductor Auxiliar 2 | Lic: B1-D1      | Vehículo: Fiat Cronos 1.3 [AUX134 ] AUTO/PREMIUM  | Estado: DISPONIBLE
+=======================================================
+
+]]></system-out>
+  </testcase>
+  <testcase name="testCapacidadYPendientes" classname="movilidad.test.BufferViajesTest" time="0.001">
+    <system-out><![CDATA[[BUFFER] Nuevo viaje en espera: Viaje #d582c914 (Estandar) | Pendientes: 1
+[BUFFER] Nuevo viaje en espera: Viaje #e3638c71 (Estandar) | Pendientes: 2
+]]></system-out>
+  </testcase>
+  <testcase name="testDetenerBuffer" classname="movilidad.test.BufferViajesTest" time="0.001"/>
+  <testcase name="testCicloVidaCompletoConcurrente" classname="movilidad.test.BufferViajesTest" time="0.55">
+    <system-out><![CDATA[[BUFFER] Nuevo viaje en espera: Viaje #9ee735cd (Estandar) | Pendientes: 1
+[CONDUCTOR - Chofer Test] Aceptó: Viaje #9ee735cd (Estandar)
+[CONDUCTOR - Chofer Test] Iniciado traslado de: Cliente Test
+[CONDUCTOR - Chofer Test] Completó: Viaje #9ee735cd | Total chofer: 1
+[CONDUCTOR - Chofer Test] Desconectado.
+]]></system-out>
+  </testcase>
+  <testcase name="testAgregarYTomarViaje" classname="movilidad.test.BufferViajesTest" time="0.001">
+    <system-out><![CDATA[[BUFFER] Nuevo viaje en espera: Viaje #83842b05 (Estandar) | Pendientes: 1
+]]></system-out>
+  </testcase>
+</testsuite>

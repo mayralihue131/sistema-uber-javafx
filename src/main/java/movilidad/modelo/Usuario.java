@@ -90,6 +90,19 @@ public class Usuario {
 	}
 
 	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Usuario usuario = (Usuario) o;
+		return email != null && email.equalsIgnoreCase(usuario.email);
+	}
+
+	@Override
+	public int hashCode() {
+		return email == null ? 0 : email.toLowerCase(java.util.Locale.ROOT).hashCode();
+	}
+
+	@Override
 	public String toString() {
 		return "Usuario [nombre=" + nombre + ", telefono=" + telefono + ", email=" + email + ", cliente=" + cliente
 				+ ", conductor=" + conductor + ", rolActivo=" + rolActivo + "]";
