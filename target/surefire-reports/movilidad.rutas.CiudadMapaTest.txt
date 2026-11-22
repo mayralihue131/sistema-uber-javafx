@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: movilidad.rutas.CiudadMapaTest
 -------------------------------------------------------------------------------
-Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.908 s -- in movilidad.rutas.CiudadMapaTest
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.970 s -- in movilidad.rutas.CiudadMapaTest

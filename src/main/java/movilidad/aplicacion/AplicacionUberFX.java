@@ -201,9 +201,9 @@ public class AplicacionUberFX extends Application {
 
     private void cargarIdioma() throws IOException {
         Properties configuracion = new Properties();
-        try (InputStream entrada = getClass().getResourceAsStream("/application.properties")) {
+        try (InputStream entrada = getClass().getResourceAsStream("/config/config.properties")) {
             if (entrada == null) {
-                throw new IOException("No se encontró application.properties");
+                throw new IOException("No se encontró config/config.properties");
             }
             configuracion.load(entrada);
         }

@@ -7,7 +7,7 @@ import java.util.Properties;
 
 /**
  * Utilidad encargada de leer y disponibilizar los parámetros globales de la aplicación
- * configurados en {@code config.properties} y {@code application.properties}.
+ * configurados en {@code config.properties}.
  */
 public class CargaParametros {
 
@@ -55,18 +55,18 @@ public class CargaParametros {
         Properties prop = new Properties();
 
         try (InputStream input = CargaParametros.class
-                .getResourceAsStream("/application.properties")) {
+                .getResourceAsStream("/config/config.properties")) {
 
             if (input == null) {
                 throw new IllegalStateException(
-                        "No se encontró application.properties");
+                        "No se encontró config/config.properties");
             }
 
             prop.load(input);
 
         } catch (IOException e) {
             throw new IllegalStateException(
-                    "No se pudo leer application.properties", e);
+                    "No se pudo leer config/config.properties", e);
         }
 
         return prop.getProperty("app.ui", "javafx")

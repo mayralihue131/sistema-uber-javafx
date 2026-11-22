@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: movilidad.test.BufferViajesTest
 -------------------------------------------------------------------------------
-Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.135 s -- in movilidad.test.BufferViajesTest
+Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.024 s -- in movilidad.test.BufferViajesTest

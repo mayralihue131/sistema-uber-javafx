@@ -1,0 +1,21 @@
+# Maven
+target/
+*.jar
+*.war
+*.ear
+
+# Archivos comprimidos y backups
+*.zip
+*.tar.gz
+*.rar
+
+# Eclipse / IDEs
+.classpath
+.project
+.settings/
+.idea/
+*.iml
+.vscode/
+
+# Dumpstreams y reportes
+*.dumpstream

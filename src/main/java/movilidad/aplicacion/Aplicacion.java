@@ -6,8 +6,11 @@ import movilidad.ui.UILoader;
 /**
  * Punto de entrada principal polimórfico de la aplicación.
  *
- * <p>Lee la configuración de {@code application.properties} (clave {@code app.ui}) a través
- * de {@link UILoader} para instanciar e iniciar dinámicamente la interfaz gráfica JavaFX
+ * <p>
+ * Lee la configuración de {@code config.properties} (clave {@code app.ui}) a
+ * través
+ * de {@link UILoader} para instanciar e iniciar dinámicamente la interfaz
+ * gráfica JavaFX
  * o la interfaz de consola de comandos (CLI).
  */
 public class Aplicacion {

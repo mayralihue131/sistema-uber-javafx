@@ -3,7 +3,7 @@ package movilidad.ui;
 import movilidad.dao.txt.CargaParametros;
 
 /**
- * Fábrica sencilla que lee {@code app.ui} de {@code application.properties}
+ * Fábrica sencilla que lee {@code app.ui} de {@code config.properties}
  * e instancia el motor de interfaz adecuado ({@link Interfaz} para CLI o {@link JavaFXUserInterface} para GUI).
  */
 public final class UILoader {
